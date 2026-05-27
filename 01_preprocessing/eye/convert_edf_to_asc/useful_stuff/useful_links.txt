@@ -1,0 +1,5 @@
+An Introduction to EyeLink Data (EDF Files):
+	https://www.sr-research.com/support/thread-7675.html
+
+EyeLink Software for Linux:
+	https://www.sr-research.com/support/docs.php?topic=linuxsoftware
