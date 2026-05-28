@@ -43,7 +43,7 @@ from utils import compute_ncsnr
 # Input arguments
 # =============================================================================
 parser = argparse.ArgumentParser()
-parser.add_argument('--sub', default=6, type=int)
+parser.add_argument('--sub', default=5, type=int)
 parser.add_argument('--tot_sessions', default=8, type=int)
 parser.add_argument('--tmin', default=-.2, type=float)
 parser.add_argument('--tmax', default=3.5, type=float)
@@ -73,7 +73,7 @@ beh_response = []
 beh_correctness = []
 
 for s in range(args.tot_sessions):
-    epoched_data, stimulus_order, ch_names, times, info, beh_r, beh_c = \
+    epoched_data, stimulus_order, ch_names, times, beh_r, beh_c = \
         epoch_eeg(args, s)
     stimulus_presentation_order.append(stimulus_order)
     beh_response.append(beh_r)
@@ -107,15 +107,13 @@ data_dict = {
     'times': times,
     'ncsnr': ncsnr,
     'noise_ceiling': noise_ceiling,
-    'info': info,
     'beh': {
         'response': beh_response,
         'correctness': beh_correctness
     }
 }
 
-save_dir = os.path.join(args.project_dir, 'dataset', 'preprocessed_data',
-    'eeg')
+save_dir = os.path.join(args.project_dir, 'dataset', 'derivatives', 'eeg')
 os.makedirs(save_dir, exist_ok=True)
 
 np.save(os.path.join(save_dir, f'preprocessed_eeg_sub-{args.sub:02}.npy'),

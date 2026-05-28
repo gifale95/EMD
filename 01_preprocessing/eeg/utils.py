@@ -19,8 +19,6 @@ def epoch_eeg(args, session):
         EEG channel names.
     times : float
         EEG time points.
-    info : Info
-        EEG data info.
     beh_ground_truth : int
         Ground truth behavioral responses.
     beh_response : int
@@ -34,7 +32,7 @@ def epoch_eeg(args, session):
     from scipy import io
     import mne
 
-    ### Load the stimuli presentation order ###
+    ### Load the stimulus presentation order ###
     stim_order = io.loadmat(os.path.join(args.project_dir, 'dataset',
         'source_data', f'sub-{args.sub:02}', f'ses-{session+1:02}',
         f'stim_order_sub-{args.sub:02}_sess-{session+1:02}.mat'))
@@ -44,6 +42,9 @@ def epoch_eeg(args, session):
     # Subject 1, session 3, run 10, trial 1
     if args.sub == 1 and (session+1) == 3:
         stim_order = np.delete(stim_order, 594)
+    # Subject 5, session 7, run 16, trials 65-66
+    elif args.sub == 5 and (session+1) == 7:
+        stim_order = np.delete(stim_order, np.arange(1054, 1056))
 
     ### Load the EEG trigger numbers ###
     eeg_triggers = np.zeros(len(stim_order), dtype=int)
@@ -108,8 +109,8 @@ def epoch_eeg(args, session):
             epochs.resample(args.sfreq)
         ch_names = epochs.info['ch_names']
         times = epochs.times
-        info = epochs.info
         # Store the epoched data
+        events = epochs.events
         if f == 0:
             epoched_data = epochs.get_data()
             all_events_num = events[:,2]
@@ -120,15 +121,10 @@ def epoch_eeg(args, session):
 
     ### Match the EEG triggers with stimulus presentation order ###
     if not all(all_events_num == eeg_triggers):
-        # Missing EEG data:
-        # Subject 1, session 3, run 10, trial 1
-        if args.sub == 1 and (session+1) == 3:
-            pass
-        else:
-            raise Exception('EEG events do not match with stimulus presentation order!')
+        raise Exception('EEG events do not match with stimulus presentation order!')
 
     ### Output ###
-    return epoched_data, stim_order, ch_names, times, info, beh_response, \
+    return epoched_data, stim_order, ch_names, times, beh_response, \
         beh_correctness
 
 
@@ -176,6 +172,9 @@ def mvnn(args, epoched_data, stim_order, session):
             # Missing EEG data:
             # Subject 1, session 3, run 10, trial 1
             if args.sub == 1 and (session+1) == 3:
+                pass
+            # Subject 5, session 7, run 16, trials 65-66
+            elif args.sub == 5 and (session+1) == 7:
                 pass
             else:
                 raise Exception('Not all data conditions have 3 repetitions!')

@@ -2,8 +2,8 @@
 #SBATCH --mail-user=giffordale95@zedat.fu-berlin.de
 #SBATCH --job-name=EMD-01_preprocessing-eeg_preprocessing
 #SBATCH --mail-type=end
-#SBATCH --mem=20000
-#SBATCH --time=20:00:00
+#SBATCH --mem=30000
+#SBATCH --time=01:00:00
 #SBATCH --qos=extended
 
 # Creating the parameters combinations
