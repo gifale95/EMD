@@ -1,0 +1,2 @@
+This alternative preprocessing led to lower pairwise decoding results.
+We therefore chose the original (MVNN) preprocessing.
