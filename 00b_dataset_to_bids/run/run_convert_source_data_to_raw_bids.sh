@@ -3,7 +3,7 @@
 #SBATCH --job-name=EMD-convert_source_data_to_raw_bids
 #SBATCH --mail-type=end
 #SBATCH --mem=5000
-#SBATCH --time=01:00:00
+#SBATCH --time=02:00:00
 #SBATCH --qos=extended
 
 # Creating the parameters combinations

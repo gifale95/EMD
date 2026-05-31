@@ -1,10 +1,10 @@
 """Preprocess the raw EEG data: filtering, epoching, frequency downsampling,
-baseline correction, multivariate noise normalization (MVNN), and NCSNR
-calculation.
+baseline correction. Additionally, the code computes the NCSNR and noise
+ceiling on the EEG responses for the test videos.
 
 Parameters
 ----------
-sub : int
+subject : int
     Used subject.
 tot_sessions : int
     Total EEG recording sessions.
@@ -22,10 +22,6 @@ lowpass : float
     Lowpass filter frequency.
 highpass : float
     Highpass filter frequency.
-mvnn : str
-    Whether to compute the MVNN covariace matrices for each epoch time point
-    ('time'), baseline time point ('baseline'), epoch/repetition ('epochs').
-    If 'none', MVNN is not applied.
 project_dir : str
     Directory of the project folder.
 
@@ -34,8 +30,9 @@ project_dir : str
 import argparse
 import os
 import numpy as np
-from utils import epoch_eeg
-from utils import mvnn
+import h5py
+
+from utils import preprocess_eeg
 from utils import compute_ncsnr
 
 
@@ -43,7 +40,7 @@ from utils import compute_ncsnr
 # Input arguments
 # =============================================================================
 parser = argparse.ArgumentParser()
-parser.add_argument('--sub', default=1, type=int)
+parser.add_argument('--subject', default=1, type=int)
 parser.add_argument('--tot_sessions', default=8, type=int)
 parser.add_argument('--tmin', default=-.2, type=float)
 parser.add_argument('--tmax', default=3.5, type=float)
@@ -52,11 +49,9 @@ parser.add_argument('--baseline', default=(-.2, 0), type=tuple)
 parser.add_argument('--sfreq', default=500, type=int)
 parser.add_argument('--lowpass', default=40, type=float)
 parser.add_argument('--highpass', default=0.1, type=float)
-parser.add_argument('--mvnn', default='none', type=str)
 parser.add_argument('--project_dir', default='/scratch/giffordale95/projects/eeg_moments_dataset', type=str)
 args, unknown = parser.parse_known_args()
 
-# Printing the arguments
 print('\n\n\n>>> Preprocess the raw EEG data <<<')
 print('\nInput arguments:')
 for key, val in vars(args).items():
@@ -64,57 +59,57 @@ for key, val in vars(args).items():
 
 
 # =============================================================================
-# Filter, epoch, downsample and baseline correct the EEG data
+# Filter, epoch, baseline correct, and downsample the EEG data
 # =============================================================================
 # This step is applied independently to the data of each session
 preprocessed_eeg = []
-stimulus_presentation_order = []
-beh_response = []
-beh_correctness = []
+stimulus_id_list = []
+stimulus_id = {}
+run_number = {}
+trial_number = {}
 
-for s in range(args.tot_sessions):
-    epoched_data, stimulus_order, ch_names, times, beh_r, beh_c = \
-        epoch_eeg(args, s)
-    stimulus_presentation_order.append(stimulus_order)
-    beh_response.append(beh_r)
-    beh_correctness.append(beh_c)
-    del beh_r, beh_c
-
-
-# =============================================================================
-# Multivariate noise normalization
-# =============================================================================
-    # MVNN is applied independently to the data of each session
-    preprocessed_eeg.append(mvnn(args, epoched_data, stimulus_order, s))
-    del epoched_data, stimulus_order
+for ses in range(1, args.tot_sessions+1):
+    eeg, stim_id, run_num, trial_num, ch_names, times = \
+        preprocess_eeg(args, ses)
+    preprocessed_eeg.append(eeg)
+    stimulus_id_list.append(stim_id)
+    stimulus_id[f'ses-{ses:02}'] = stim_id
+    run_number[f'ses-{ses:02}'] = run_num
+    trial_number[f'ses-{ses:02}'] = trial_num
+    del eeg, stim_id, run_num, trial_num
 
 
 # =============================================================================
 # Compute the NCSNR and noise ceiling using the test data split
 # =============================================================================
-ncsnr, noise_ceiling = compute_ncsnr(preprocessed_eeg,
-    stimulus_presentation_order)
+ncsnr, noise_ceiling = compute_ncsnr(preprocessed_eeg, stimulus_id_list)
 
 
 # =============================================================================
-# Save the preprocessed EEG data
+# Save the preprocessed EEG data and metadata
 # =============================================================================
-data_dict = {
+# Save directory
+save_dir = os.path.join(args.project_dir, 'derivatives', 'eeg',
+    f'sub-{args.subject:02}')
+os.makedirs(save_dir, exist_ok=True)
+
+# Save the EEG metadata
+del args.project_dir
+metadata = {
     'args': args,
-    'eeg': preprocessed_eeg,
-    'stimulus_presentation_order': stimulus_presentation_order,
+    'stimulus_id': stimulus_id,
+    'run_number': run_number,
+    'trial_number': trial_number,
     'ch_names': ch_names,
     'times': times,
     'ncsnr': ncsnr,
-    'noise_ceiling': noise_ceiling,
-    'beh': {
-        'response': beh_response,
-        'correctness': beh_correctness
-    }
+    'noise_ceiling': noise_ceiling
 }
+file_name = f'sub-{args.subject:02}_eeg_metadata.npy'
+np.save(os.path.join(save_dir, file_name), metadata)
 
-save_dir = os.path.join(args.project_dir, 'dataset', 'derivatives', 'eeg')
-os.makedirs(save_dir, exist_ok=True)
-
-np.save(os.path.join(save_dir, f'preprocessed_eeg_sub-{args.sub:02}.npy'),
-    data_dict)
+# Save the preprocessed EEG data of each session
+for ses, session_data in enumerate(preprocessed_eeg):
+    file_name = f'sub-{args.subject:02}_ses-{ses+1:02}_preprocessed_eeg.h5'
+    with h5py.File(os.path.join(save_dir, file_name), 'w') as f:
+        f.create_dataset('eeg', data=session_data, dtype=np.float32)

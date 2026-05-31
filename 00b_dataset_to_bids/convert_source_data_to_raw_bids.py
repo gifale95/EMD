@@ -36,7 +36,6 @@ parser.add_argument('--n_runs', default=16, type=int)
 parser.add_argument('--dataset_dir', default='/scratch/giffordale95/projects/eeg_moments_dataset/', type=str)
 args, unknown = parser.parse_known_args()
 
-# Printing the arguments
 print('\n\n\n>>> Dataset source to raw BIDS <<<')
 print('\nInput arguments:')
 for key, val in vars(args).items():
@@ -144,6 +143,10 @@ events_json = {
         "Description": "Duration of the video (measured from onset) in seconds.",
         "Units": "seconds"
     },
+    "trial_num": {
+        "LongName": "Trial Number",
+        "Description": "Number of each trial within a run, in the range [1, 66]."
+    },
     "stim_id": {
         "LongName": "Stimulus ID",
         "Description": "Index indicating the number ID of the presented video.",
@@ -243,6 +246,10 @@ events_json = {
             "blink": "Blink event",
             "stimulus": "Stimulus (video) presentation event"
         }
+    },
+    "trial_num": {
+        "LongName": "Trial Number",
+        "Description": "Number of each trial within a run, in the range [1, 66]."
     },
     "stim_id": {
         "LongName": "Stimulus ID",
@@ -372,11 +379,16 @@ for ses in range(1, args.n_sessions+1):
             if event_number != stim_num:
                 raise ValueError(f"The event number in the .vmrk file ({event_number}) does not match the stimulus presentation order in the stim_order_run ({stim_num[i]}).")
 
+        # Get the trial numbers
+        trial_nums = np.arange(1, len(stim_order_run)+1)
+        if sub == 1 and ses == 3 and run == 10:
+            trial_nums += 1
+
         # Load the behavioral results
         beh_file = os.path.join(eeg_dir_old, f'run-{run:03d}.mat')
         beh = io.loadmat(beh_file)['data']
-        task_trial = np.asarray(beh[0][0][7]['task_trial'][0], dtype=int)
-        correctness = np.asarray(beh[0][0][7]['correctness'][0], dtype=float)
+        task_trial = np.array([elem.item() for elem in beh[0][0][7]['task_trial'][0]], dtype=int)
+        correctness = np.array([elem.item() for elem in beh[0][0][7]['correctness'][0]], dtype=float)
         # Remove missing EEG data:
         # Subject 1, session 3, run 10, trial 1
         if sub == 1 and ses == 3 and run == 10:
@@ -392,18 +404,19 @@ for ses in range(1, args.n_sessions+1):
             raise ValueError(f"The length of correctness ({len(correctness)}) does not match the expected number of stimulus presentations ({len(stim_order_run)}).")
 
         # Add the events to the *_events.tsv file
-        events_tsv = [["onset", "duration", "stim_id", "stim_file", "is_task", "correct"]]
+        events_tsv = [["onset", "duration", "trial_num", "stim_id", "stim_file", "is_task", "correct"]]
         for i, stim in enumerate(stim_order_run):
             correct =  "n/a" if np.isnan(correctness[i]) else correctness[i].astype(int)
             events_tsv.append(
                 [events[i][0]/1000,     # onset
                 3,                      # duration
+                trial_nums[i],          # trial_num
                 int(stim),              # stim_id
                 videos[stim-1],         # stim_file
                 task_trial[i],          # is_task
                 correct                 # correct
             ])
-        
+
         # Save the event files
         file_name_tsv = os.path.join(eeg_dir_new,
             f"sub-{sub:02d}_ses-{ses:02d}_task-video_run-{run:02d}_events.tsv")
@@ -466,17 +479,44 @@ for ses in range(1, args.n_sessions+1):
         # Load the behavioral results
         beh_file = os.path.join(eeg_dir_old, f'run-{run:03d}.mat')
         beh = io.loadmat(beh_file)['data']
-        task_trial = np.asarray(beh[0][0][7]['task_trial'][0], dtype=int)
-        correctness = np.asarray(beh[0][0][7]['correctness'][0], dtype=float)
+        task_trial = np.array([elem.item() for elem in beh[0][0][7]['task_trial'][0]], dtype=int)
+        correctness = np.array([elem.item() for elem in beh[0][0][7]['correctness'][0]], dtype=float)
         if len(task_trial) != len(stim_order_run):
             raise ValueError(f"The length of task_trial ({len(task_trial)}) does not match the expected number of stimulus presentations ({len(stim_order_run)}).")
         if len(correctness) != len(stim_order_run):
             raise ValueError(f"The length of correctness ({len(correctness)}) does not match the expected number of stimulus presentations ({len(stim_order_run)}).")
 
+        # Remove trials with missing eyetracking data
+        if sub == 4 and ses == 5 and run == 5:
+            tot_trials = 39
+            onset_stim = onset_stim[:tot_trials]
+            stim_order_run = stim_order_run[:tot_trials]
+            task_trial = task_trial[:tot_trials]
+            correctness = correctness[:tot_trials]
+        if sub == 4 and ses == 6 and run == 10:
+            tot_trials = 23
+            onset_stim = onset_stim[:tot_trials]
+            stim_order_run = stim_order_run[:tot_trials]
+            task_trial = task_trial[:tot_trials]
+            correctness = correctness[:tot_trials]
+        if sub == 4 and ses == 6 and run == 12:
+            tot_trials = 33
+            onset_stim = onset_stim[:tot_trials]
+            stim_order_run = stim_order_run[:tot_trials]
+            task_trial = task_trial[:tot_trials]
+            correctness = correctness[:tot_trials]
+        if sub == 5 and ses == 6 and run == 11:
+            tot_trials = 50
+            onset_stim = onset_stim[:tot_trials]
+            stim_order_run = stim_order_run[:tot_trials]
+            task_trial = task_trial[:tot_trials]
+            correctness = correctness[:tot_trials]
+
         # Create the blink events
         onset = []
         duration = []
         event_type = []
+        trial_nums = []
         stim_id = []
         stim_file = []
         is_task = []
@@ -485,6 +525,7 @@ for ses in range(1, args.n_sessions+1):
             onset.append(onset_blink[i])
             duration.append(duration_blink[i])
             event_type.append("blink")
+            trial_nums.append("n/a")
             stim_id.append("n/a")
             stim_file.append("n/a")
             is_task.append("n/a")
@@ -494,6 +535,7 @@ for ses in range(1, args.n_sessions+1):
             onset.append(onset_stim[i])
             duration.append(3)
             event_type.append("stimulus")
+            trial_nums.append(i+1)
             stim_id.append(stim_order_run[i])
             stim_file.append(videos[stim_order_run[i]-1])
             is_task.append(task_trial[i])
@@ -502,12 +544,13 @@ for ses in range(1, args.n_sessions+1):
         idx = np.argsort(onset)
 
         # Add the events to the *_recording-eye1_physioevents.tsv.gz file
-        events_tsv = [["onset", "duration", "event_type", "stim_id", "stim_file", "is_task", "correct"]]
+        events_tsv = [["onset", "duration", "event_type", "trial_num", "stim_id", "stim_file", "is_task", "correct"]]
         for i in idx:
             events_tsv.append([
                 onset[i],       # onset
                 duration[i],    # duration
                 event_type[i],  # event_type
+                trial_nums[i],  # trial_num
                 stim_id[i],     # stim_id
                 stim_file[i],   # stim_file
                 is_task[i],     # is_task
