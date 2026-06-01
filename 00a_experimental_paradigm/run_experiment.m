@@ -43,8 +43,8 @@ save_dir = '../EMD/00a_experimental_paradigm/behavioral_results';
 addpath(utils_dir);
 
 % Screen info
-dist_from_screen = 600;
-screen_width = 475;
+dist_from_screen = 600; % millimeters
+screen_width = 475; % millimeters
 
 % Screen window number for PTB 'OpenWindow' function
 screenWin = 0; % 0

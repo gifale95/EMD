@@ -10,10 +10,10 @@ tmin : float
     Start time of the epochs in seconds, relative to stimulus onset.
 tmax : float
     End time of the epochs in seconds, relative to stimulus onset.
-mean_centering : str
-    Whether to mean center the eye-tracking data using the Nms prior to video
-    onset ['baseline'], the entire epoch ['epoch'], or to not center the data
-    al all ['none'].
+baseline_correction : str
+    Whether to baseline correct the pupil data using the baseline prior to
+    video onset ['baseline'], the entire epoch ['epoch'], or to not correct the
+    data at all ['none'].
 sfreq : int
     Downsampling frequency.
 project_dir : str
@@ -33,11 +33,11 @@ from utils import preprocess_eyetracking
 # Input arguments
 # =============================================================================
 parser = argparse.ArgumentParser()
-parser.add_argument('--subject', default=1, type=int)
+parser.add_argument('--subject', default=6, type=int)
 parser.add_argument('--tot_sessions', default=8, type=int)
 parser.add_argument('--tmin', default=-.1, type=float)
 parser.add_argument('--tmax', default=3.5, type=float)
-parser.add_argument('--mean_centering', default='baseline', type=str)
+parser.add_argument('--baseline_correction', default='baseline', type=str)
 parser.add_argument('--sfreq', default=500, type=int)
 parser.add_argument('--project_dir', default='/scratch/giffordale95/projects/eeg_moments_dataset', type=str)
 args, unknown = parser.parse_known_args()
