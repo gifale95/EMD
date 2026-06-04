@@ -1,111 +1,0 @@
-SLURM_ARRAY_JOB_ID: 1
-subject: 2
-
-
-
->>> Preprocess the raw eye-tracking data <<<
-
-Input arguments:
-subject          2
-tot_sessions     8
-tmin             -0.1
-tmax             3.5
-baseline_correction baseline
-sfreq            500
-project_dir      /scratch/giffordale95/projects/eeg_moments_dataset
-  0%|          | 0/16 [00:00<?, ?it/s]  6%|▋         | 1/16 [00:01<00:15,  1.01s/it] 12%|█▎        | 2/16 [00:02<00:17,  1.26s/it]/home/giffordale95/projects/eeg_moments_dataset/github/EMD/00c_preprocessing/eyetracking/utils.py:148: RuntimeWarning: Mean of empty slice
-  mean = np.nanmean(epochs[e,2,idx_start:idx_end])
- 19%|█▉        | 3/16 [00:03<00:14,  1.10s/it]/home/giffordale95/projects/eeg_moments_dataset/github/EMD/00c_preprocessing/eyetracking/utils.py:148: RuntimeWarning: Mean of empty slice
-  mean = np.nanmean(epochs[e,2,idx_start:idx_end])
- 25%|██▌       | 4/16 [00:04<00:12,  1.05s/it]/home/giffordale95/projects/eeg_moments_dataset/github/EMD/00c_preprocessing/eyetracking/utils.py:148: RuntimeWarning: Mean of empty slice
-  mean = np.nanmean(epochs[e,2,idx_start:idx_end])
- 31%|███▏      | 5/16 [00:05<00:10,  1.02it/s]/home/giffordale95/projects/eeg_moments_dataset/github/EMD/00c_preprocessing/eyetracking/utils.py:148: RuntimeWarning: Mean of empty slice
-  mean = np.nanmean(epochs[e,2,idx_start:idx_end])
- 38%|███▊      | 6/16 [00:06<00:09,  1.01it/s]/home/giffordale95/projects/eeg_moments_dataset/github/EMD/00c_preprocessing/eyetracking/utils.py:148: RuntimeWarning: Mean of empty slice
-  mean = np.nanmean(epochs[e,2,idx_start:idx_end])
- 44%|████▍     | 7/16 [00:07<00:10,  1.20s/it]/home/giffordale95/projects/eeg_moments_dataset/github/EMD/00c_preprocessing/eyetracking/utils.py:148: RuntimeWarning: Mean of empty slice
-  mean = np.nanmean(epochs[e,2,idx_start:idx_end])
- 50%|█████     | 8/16 [00:09<00:09,  1.20s/it]/home/giffordale95/projects/eeg_moments_dataset/github/EMD/00c_preprocessing/eyetracking/utils.py:148: RuntimeWarning: Mean of empty slice
-  mean = np.nanmean(epochs[e,2,idx_start:idx_end])
- 56%|█████▋    | 9/16 [00:09<00:07,  1.09s/it]/home/giffordale95/projects/eeg_moments_dataset/github/EMD/00c_preprocessing/eyetracking/utils.py:148: RuntimeWarning: Mean of empty slice
-  mean = np.nanmean(epochs[e,2,idx_start:idx_end])
- 62%|██████▎   | 10/16 [00:10<00:06,  1.08s/it]/home/giffordale95/projects/eeg_moments_dataset/github/EMD/00c_preprocessing/eyetracking/utils.py:148: RuntimeWarning: Mean of empty slice
-  mean = np.nanmean(epochs[e,2,idx_start:idx_end])
- 69%|██████▉   | 11/16 [00:11<00:05,  1.02s/it]/home/giffordale95/projects/eeg_moments_dataset/github/EMD/00c_preprocessing/eyetracking/utils.py:148: RuntimeWarning: Mean of empty slice
-  mean = np.nanmean(epochs[e,2,idx_start:idx_end])
- 75%|███████▌  | 12/16 [00:12<00:04,  1.02s/it]/home/giffordale95/projects/eeg_moments_dataset/github/EMD/00c_preprocessing/eyetracking/utils.py:148: RuntimeWarning: Mean of empty slice
-  mean = np.nanmean(epochs[e,2,idx_start:idx_end])
- 81%|████████▏ | 13/16 [00:14<00:03,  1.23s/it]/home/giffordale95/projects/eeg_moments_dataset/github/EMD/00c_preprocessing/eyetracking/utils.py:148: RuntimeWarning: Mean of empty slice
-  mean = np.nanmean(epochs[e,2,idx_start:idx_end])
- 88%|████████▊ | 14/16 [00:16<00:02,  1.33s/it]/home/giffordale95/projects/eeg_moments_dataset/github/EMD/00c_preprocessing/eyetracking/utils.py:148: RuntimeWarning: Mean of empty slice
-  mean = np.nanmean(epochs[e,2,idx_start:idx_end])
- 94%|█████████▍| 15/16 [00:17<00:01,  1.28s/it]/home/giffordale95/projects/eeg_moments_dataset/github/EMD/00c_preprocessing/eyetracking/utils.py:148: RuntimeWarning: Mean of empty slice
-  mean = np.nanmean(epochs[e,2,idx_start:idx_end])
-100%|██████████| 16/16 [00:18<00:00,  1.17s/it]100%|██████████| 16/16 [00:18<00:00,  1.14s/it]
-  0%|          | 0/16 [00:00<?, ?it/s]  6%|▋         | 1/16 [00:01<00:17,  1.19s/it]/home/giffordale95/projects/eeg_moments_dataset/github/EMD/00c_preprocessing/eyetracking/utils.py:148: RuntimeWarning: Mean of empty slice
-  mean = np.nanmean(epochs[e,2,idx_start:idx_end])
- 12%|█▎        | 2/16 [00:02<00:15,  1.13s/it]/home/giffordale95/projects/eeg_moments_dataset/github/EMD/00c_preprocessing/eyetracking/utils.py:148: RuntimeWarning: Mean of empty slice
-  mean = np.nanmean(epochs[e,2,idx_start:idx_end])
- 19%|█▉        | 3/16 [00:03<00:13,  1.04s/it]/home/giffordale95/projects/eeg_moments_dataset/github/EMD/00c_preprocessing/eyetracking/utils.py:148: RuntimeWarning: Mean of empty slice
-  mean = np.nanmean(epochs[e,2,idx_start:idx_end])
- 25%|██▌       | 4/16 [00:06<00:21,  1.81s/it]/home/giffordale95/projects/eeg_moments_dataset/github/EMD/00c_preprocessing/eyetracking/utils.py:148: RuntimeWarning: Mean of empty slice
-  mean = np.nanmean(epochs[e,2,idx_start:idx_end])
- 31%|███▏      | 5/16 [00:07<00:16,  1.52s/it]/home/giffordale95/projects/eeg_moments_dataset/github/EMD/00c_preprocessing/eyetracking/utils.py:148: RuntimeWarning: Mean of empty slice
-  mean = np.nanmean(epochs[e,2,idx_start:idx_end])
- 38%|███▊      | 6/16 [00:08<00:12,  1.29s/it]/home/giffordale95/projects/eeg_moments_dataset/github/EMD/00c_preprocessing/eyetracking/utils.py:148: RuntimeWarning: Mean of empty slice
-  mean = np.nanmean(epochs[e,2,idx_start:idx_end])
- 44%|████▍     | 7/16 [00:09<00:11,  1.29s/it]/home/giffordale95/projects/eeg_moments_dataset/github/EMD/00c_preprocessing/eyetracking/utils.py:148: RuntimeWarning: Mean of empty slice
-  mean = np.nanmean(epochs[e,2,idx_start:idx_end])
- 50%|█████     | 8/16 [00:10<00:09,  1.16s/it]/home/giffordale95/projects/eeg_moments_dataset/github/EMD/00c_preprocessing/eyetracking/utils.py:148: RuntimeWarning: Mean of empty slice
-  mean = np.nanmean(epochs[e,2,idx_start:idx_end])
- 56%|█████▋    | 9/16 [00:11<00:07,  1.06s/it]/home/giffordale95/projects/eeg_moments_dataset/github/EMD/00c_preprocessing/eyetracking/utils.py:148: RuntimeWarning: Mean of empty slice
-  mean = np.nanmean(epochs[e,2,idx_start:idx_end])
- 62%|██████▎   | 10/16 [00:11<00:06,  1.01s/it]/home/giffordale95/projects/eeg_moments_dataset/github/EMD/00c_preprocessing/eyetracking/utils.py:148: RuntimeWarning: Mean of empty slice
-  mean = np.nanmean(epochs[e,2,idx_start:idx_end])
- 69%|██████▉   | 11/16 [00:12<00:04,  1.05it/s]/home/giffordale95/projects/eeg_moments_dataset/github/EMD/00c_preprocessing/eyetracking/utils.py:148: RuntimeWarning: Mean of empty slice
-  mean = np.nanmean(epochs[e,2,idx_start:idx_end])
- 75%|███████▌  | 12/16 [00:13<00:03,  1.09it/s]/home/giffordale95/projects/eeg_moments_dataset/github/EMD/00c_preprocessing/eyetracking/utils.py:148: RuntimeWarning: Mean of empty slice
-  mean = np.nanmean(epochs[e,2,idx_start:idx_end])
- 81%|████████▏ | 13/16 [00:14<00:02,  1.10it/s]/home/giffordale95/projects/eeg_moments_dataset/github/EMD/00c_preprocessing/eyetracking/utils.py:148: RuntimeWarning: Mean of empty slice
-  mean = np.nanmean(epochs[e,2,idx_start:idx_end])
- 88%|████████▊ | 14/16 [00:15<00:01,  1.11it/s]/home/giffordale95/projects/eeg_moments_dataset/github/EMD/00c_preprocessing/eyetracking/utils.py:148: RuntimeWarning: Mean of empty slice
-  mean = np.nanmean(epochs[e,2,idx_start:idx_end])
- 94%|█████████▍| 15/16 [00:16<00:00,  1.09it/s]/home/giffordale95/projects/eeg_moments_dataset/github/EMD/00c_preprocessing/eyetracking/utils.py:148: RuntimeWarning: Mean of empty slice
-  mean = np.nanmean(epochs[e,2,idx_start:idx_end])
-100%|██████████| 16/16 [00:17<00:00,  1.13it/s]100%|██████████| 16/16 [00:17<00:00,  1.07s/it]
-  0%|          | 0/16 [00:00<?, ?it/s]  6%|▋         | 1/16 [00:01<00:17,  1.19s/it] 12%|█▎        | 2/16 [00:02<00:14,  1.02s/it] 19%|█▉        | 3/16 [00:03<00:12,  1.00it/s]/home/giffordale95/projects/eeg_moments_dataset/github/EMD/00c_preprocessing/eyetracking/utils.py:148: RuntimeWarning: Mean of empty slice
-  mean = np.nanmean(epochs[e,2,idx_start:idx_end])
- 25%|██▌       | 4/16 [00:03<00:11,  1.07it/s] 31%|███▏      | 5/16 [00:04<00:10,  1.10it/s] 38%|███▊      | 6/16 [00:05<00:08,  1.15it/s] 44%|████▍     | 7/16 [00:06<00:07,  1.16it/s] 50%|█████     | 8/16 [00:07<00:06,  1.16it/s] 56%|█████▋    | 9/16 [00:08<00:06,  1.09it/s] 62%|██████▎   | 10/16 [00:09<00:05,  1.11it/s] 69%|██████▉   | 11/16 [00:10<00:05,  1.03s/it] 75%|███████▌  | 12/16 [00:11<00:04,  1.15s/it] 81%|████████▏ | 13/16 [00:12<00:03,  1.05s/it] 88%|████████▊ | 14/16 [00:14<00:02,  1.13s/it] 94%|█████████▍| 15/16 [00:14<00:01,  1.03s/it]100%|██████████| 16/16 [00:15<00:00,  1.02it/s]100%|██████████| 16/16 [00:15<00:00,  1.02it/s]
-  0%|          | 0/16 [00:00<?, ?it/s]  6%|▋         | 1/16 [00:00<00:14,  1.00it/s] 12%|█▎        | 2/16 [00:01<00:12,  1.11it/s] 19%|█▉        | 3/16 [00:02<00:11,  1.09it/s] 25%|██▌       | 4/16 [00:03<00:10,  1.11it/s] 31%|███▏      | 5/16 [00:04<00:09,  1.13it/s] 38%|███▊      | 6/16 [00:05<00:08,  1.18it/s] 44%|████▍     | 7/16 [00:06<00:07,  1.15it/s] 50%|█████     | 8/16 [00:07<00:06,  1.17it/s] 56%|█████▋    | 9/16 [00:07<00:05,  1.20it/s] 62%|██████▎   | 10/16 [00:08<00:05,  1.13it/s] 69%|██████▉   | 11/16 [00:09<00:04,  1.14it/s] 75%|███████▌  | 12/16 [00:11<00:04,  1.07s/it] 81%|████████▏ | 13/16 [00:12<00:03,  1.01s/it] 88%|████████▊ | 14/16 [00:13<00:02,  1.03s/it] 94%|█████████▍| 15/16 [00:14<00:01,  1.07s/it]100%|██████████| 16/16 [00:15<00:00,  1.01s/it]100%|██████████| 16/16 [00:15<00:00,  1.06it/s]
-  0%|          | 0/16 [00:00<?, ?it/s]  6%|▋         | 1/16 [00:00<00:13,  1.15it/s] 12%|█▎        | 2/16 [00:01<00:11,  1.21it/s] 19%|█▉        | 3/16 [00:02<00:11,  1.11it/s] 25%|██▌       | 4/16 [00:03<00:10,  1.17it/s] 31%|███▏      | 5/16 [00:04<00:11,  1.04s/it]/home/giffordale95/projects/eeg_moments_dataset/github/EMD/00c_preprocessing/eyetracking/utils.py:148: RuntimeWarning: Mean of empty slice
-  mean = np.nanmean(epochs[e,2,idx_start:idx_end])
- 38%|███▊      | 6/16 [00:05<00:10,  1.09s/it] 44%|████▍     | 7/16 [00:07<00:09,  1.09s/it]/home/giffordale95/projects/eeg_moments_dataset/github/EMD/00c_preprocessing/eyetracking/utils.py:148: RuntimeWarning: Mean of empty slice
-  mean = np.nanmean(epochs[e,2,idx_start:idx_end])
- 50%|█████     | 8/16 [00:07<00:08,  1.04s/it]/home/giffordale95/projects/eeg_moments_dataset/github/EMD/00c_preprocessing/eyetracking/utils.py:148: RuntimeWarning: Mean of empty slice
-  mean = np.nanmean(epochs[e,2,idx_start:idx_end])
- 56%|█████▋    | 9/16 [00:08<00:06,  1.00it/s] 62%|██████▎   | 10/16 [00:09<00:05,  1.03it/s] 69%|██████▉   | 11/16 [00:11<00:05,  1.06s/it] 75%|███████▌  | 12/16 [00:11<00:03,  1.01it/s] 81%|████████▏ | 13/16 [00:12<00:02,  1.05it/s] 88%|████████▊ | 14/16 [00:13<00:01,  1.04it/s] 94%|█████████▍| 15/16 [00:14<00:00,  1.09it/s]100%|██████████| 16/16 [00:15<00:00,  1.10it/s]100%|██████████| 16/16 [00:15<00:00,  1.03it/s]
-  0%|          | 0/16 [00:00<?, ?it/s]  6%|▋         | 1/16 [00:00<00:12,  1.19it/s] 12%|█▎        | 2/16 [00:01<00:12,  1.17it/s]/home/giffordale95/projects/eeg_moments_dataset/github/EMD/00c_preprocessing/eyetracking/utils.py:148: RuntimeWarning: Mean of empty slice
-  mean = np.nanmean(epochs[e,2,idx_start:idx_end])
- 19%|█▉        | 3/16 [00:02<00:11,  1.10it/s]/home/giffordale95/projects/eeg_moments_dataset/github/EMD/00c_preprocessing/eyetracking/utils.py:148: RuntimeWarning: Mean of empty slice
-  mean = np.nanmean(epochs[e,2,idx_start:idx_end])
- 25%|██▌       | 4/16 [00:03<00:10,  1.14it/s] 31%|███▏      | 5/16 [00:04<00:09,  1.13it/s] 38%|███▊      | 6/16 [00:05<00:09,  1.05it/s] 44%|████▍     | 7/16 [00:06<00:08,  1.04it/s] 50%|█████     | 8/16 [00:07<00:08,  1.06s/it] 56%|█████▋    | 9/16 [00:08<00:06,  1.02it/s] 62%|██████▎   | 10/16 [00:09<00:05,  1.08it/s] 69%|██████▉   | 11/16 [00:10<00:04,  1.02it/s] 75%|███████▌  | 12/16 [00:11<00:03,  1.01it/s] 81%|████████▏ | 13/16 [00:12<00:02,  1.02it/s]/home/giffordale95/projects/eeg_moments_dataset/github/EMD/00c_preprocessing/eyetracking/utils.py:148: RuntimeWarning: Mean of empty slice
-  mean = np.nanmean(epochs[e,2,idx_start:idx_end])
- 88%|████████▊ | 14/16 [00:13<00:02,  1.02s/it] 94%|█████████▍| 15/16 [00:14<00:00,  1.02it/s]100%|██████████| 16/16 [00:15<00:00,  1.07it/s]100%|██████████| 16/16 [00:15<00:00,  1.05it/s]
-  0%|          | 0/16 [00:00<?, ?it/s]  6%|▋         | 1/16 [00:00<00:12,  1.19it/s] 12%|█▎        | 2/16 [00:01<00:11,  1.26it/s]/home/giffordale95/projects/eeg_moments_dataset/github/EMD/00c_preprocessing/eyetracking/utils.py:148: RuntimeWarning: Mean of empty slice
-  mean = np.nanmean(epochs[e,2,idx_start:idx_end])
- 19%|█▉        | 3/16 [00:02<00:10,  1.19it/s] 25%|██▌       | 4/16 [00:03<00:09,  1.24it/s] 31%|███▏      | 5/16 [00:04<00:08,  1.27it/s] 38%|███▊      | 6/16 [00:04<00:07,  1.28it/s]/home/giffordale95/projects/eeg_moments_dataset/github/EMD/00c_preprocessing/eyetracking/utils.py:148: RuntimeWarning: Mean of empty slice
-  mean = np.nanmean(epochs[e,2,idx_start:idx_end])
- 44%|████▍     | 7/16 [00:05<00:08,  1.10it/s] 50%|█████     | 8/16 [00:06<00:06,  1.15it/s]/home/giffordale95/projects/eeg_moments_dataset/github/EMD/00c_preprocessing/eyetracking/utils.py:148: RuntimeWarning: Mean of empty slice
-  mean = np.nanmean(epochs[e,2,idx_start:idx_end])
- 56%|█████▋    | 9/16 [00:07<00:06,  1.16it/s] 62%|██████▎   | 10/16 [00:08<00:05,  1.18it/s] 69%|██████▉   | 11/16 [00:09<00:04,  1.20it/s] 75%|███████▌  | 12/16 [00:10<00:03,  1.07it/s] 81%|████████▏ | 13/16 [00:11<00:02,  1.01it/s]/home/giffordale95/projects/eeg_moments_dataset/github/EMD/00c_preprocessing/eyetracking/utils.py:148: RuntimeWarning: Mean of empty slice
-  mean = np.nanmean(epochs[e,2,idx_start:idx_end])
- 88%|████████▊ | 14/16 [00:12<00:01,  1.06it/s] 94%|█████████▍| 15/16 [00:13<00:00,  1.02it/s]100%|██████████| 16/16 [00:14<00:00,  1.05s/it]100%|██████████| 16/16 [00:14<00:00,  1.10it/s]
-  0%|          | 0/16 [00:00<?, ?it/s]/home/giffordale95/projects/eeg_moments_dataset/github/EMD/00c_preprocessing/eyetracking/utils.py:148: RuntimeWarning: Mean of empty slice
-  mean = np.nanmean(epochs[e,2,idx_start:idx_end])
-  6%|▋         | 1/16 [00:00<00:12,  1.21it/s]/home/giffordale95/projects/eeg_moments_dataset/github/EMD/00c_preprocessing/eyetracking/utils.py:148: RuntimeWarning: Mean of empty slice
-  mean = np.nanmean(epochs[e,2,idx_start:idx_end])
- 12%|█▎        | 2/16 [00:01<00:12,  1.12it/s] 19%|█▉        | 3/16 [00:02<00:13,  1.02s/it]/home/giffordale95/projects/eeg_moments_dataset/github/EMD/00c_preprocessing/eyetracking/utils.py:148: RuntimeWarning: Mean of empty slice
-  mean = np.nanmean(epochs[e,2,idx_start:idx_end])
- 25%|██▌       | 4/16 [00:03<00:11,  1.08it/s] 31%|███▏      | 5/16 [00:04<00:10,  1.10it/s] 38%|███▊      | 6/16 [00:05<00:08,  1.15it/s] 44%|████▍     | 7/16 [00:06<00:09,  1.02s/it] 50%|█████     | 8/16 [00:07<00:07,  1.01it/s] 56%|█████▋    | 9/16 [00:08<00:06,  1.03it/s] 62%|██████▎   | 10/16 [00:09<00:05,  1.06it/s] 69%|██████▉   | 11/16 [00:10<00:05,  1.04s/it] 75%|███████▌  | 12/16 [00:11<00:03,  1.05it/s] 81%|████████▏ | 13/16 [00:12<00:02,  1.08it/s] 88%|████████▊ | 14/16 [00:13<00:01,  1.11it/s]/home/giffordale95/projects/eeg_moments_dataset/github/EMD/00c_preprocessing/eyetracking/utils.py:148: RuntimeWarning: Mean of empty slice
-  mean = np.nanmean(epochs[e,2,idx_start:idx_end])
- 94%|█████████▍| 15/16 [00:13<00:00,  1.15it/s]100%|██████████| 16/16 [00:14<00:00,  1.19it/s]100%|██████████| 16/16 [00:14<00:00,  1.09it/s]

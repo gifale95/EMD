@@ -153,9 +153,11 @@ def preprocess_eyetracking(args, session):
                 else:
                     epochs[e,2] = epochs[e,2] - mean
 
-        ### Exclude samples deviating more than 1.5° from central fixation ###
+        ### Exclude samples deviating more than 4° from central fixation ###
+        # Samples with gaze coordinates deviating more than 4° indicate eye
+        # movements beyond the stimulus boundaries.
         # Excise data 20 ms before and 20 ms after each occurrence
-        cutoff = 1.5 # degrees from central fixation
+        cutoff = 4 # degrees from central fixation
         pad = 0.02 # seconds
         for e in range(len(epochs)):
             euclDist = np.sqrt(np.power(epochs[e,0], 2) + \
@@ -182,14 +184,24 @@ def preprocess_eyetracking(args, session):
             epochs = epochs[:,:,idx]
             times = times[idx]
 
-        ### Reject epochs with NaNs during the video presentation period ###
+        ### Ensure that missing values are equal for gaze and pupil data ###
+        for e in range(len(epochs)):
+            idx_nan = np.isnan(epochs[e]).any(axis=(0))
+            epochs[e,:,idx_nan] = np.nan
+
+        ### Reject epochs with less than 75% valid samples ###
+        # Epochs with less than 75% valid samples (i.e., samples with
+        # non-NaN values) during the video presentation interval are discarded.
         # This effectively rejects trials with eye blinks, loss of tracking
         # during stimulus presentation, excessive eye movements during stimulus
         # presentation, or trials with no available data points during the
         # baseline period (for baseline correction).
+        threshold = 0.75
         t_start = np.where(times == 0)[0][0]
         t_end = np.where(times == 3)[0][0]
-        idx_bad = np.where(np.isnan(epochs[:,:,t_start:t_end]).any(axis=(1,2)))[0]
+        idx_non_nan = ~np.isnan(epochs[:,:,t_start:t_end]).any(axis=(1))
+        perc_good = np.sum(idx_non_nan, 1) / epochs[:,:,t_start:t_end].shape[2]
+        idx_bad = np.where(perc_good < threshold)[0]
         epochs = np.delete(epochs, idx_bad, axis=0)
         stim_id = np.delete(stim_id, idx_bad)
         trial_run = np.full_like(stim_id, f+1)

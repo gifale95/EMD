@@ -1,7 +1,7 @@
 def preprocess_eeg(args, session):
-    """Load the raw EEG data and perform filtering, epoching, rejection and
-    interpolation of bad epochs/channels, baseline correction, and frequency
-    downsampling.
+    """Load the raw EEG data and perform filtering, eyeblink removal, epoching,
+    rejection and interpolation of bad epochs/channels, baseline correction,
+    and frequency downsampling.
 
     Parameters
     ----------
@@ -31,6 +31,7 @@ def preprocess_eeg(args, session):
     import numpy as np
     from glob import glob
     import mne
+    from mne.preprocessing import ICA
     import pandas as pd
     from autoreject import AutoReject
 
@@ -53,6 +54,21 @@ def preprocess_eeg(args, session):
         # Filter the data
         if args.highpass != None and args.lowpass != None:
             raw = raw.copy().filter(l_freq=args.highpass, h_freq=args.lowpass)
+
+        ### Automatic ICA eyeblink removal ###
+        # Fit on highpass-filtered copy
+        raw_for_ica = raw.copy().filter(l_freq=1.0, h_freq=None)
+        ica = ICA(n_components=20, random_state=20200220, method='fastica',
+            max_iter='auto')
+        ica.fit(raw_for_ica)
+        del raw_for_ica
+        # Find blink components (use a frontal EEG channel as a proxy for
+        # blinks)
+        eog_indices, eog_scores = ica.find_bads_eog(raw, ch_name='Fp1')
+        ica.exclude = eog_indices
+        print(f"Excluding ICA components: {eog_indices}")
+        # Apply the ICA solution to the raw data
+        raw = ica.apply(raw)
 
         ### Epoch the EEG ###
         # Get the event samples info
