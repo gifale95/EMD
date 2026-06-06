@@ -62,7 +62,7 @@ mask = (times >= 0) & (times <= 3)
 eye_video = eye[:,:,mask]
 
 # Compute the 2D histograms of gaze position
-max_vis_deg = 5 # degrees of visual angle from the center of the screen
+max_vis_deg = 2.5 # degrees of visual angle from the center of the screen
 points_per_degree = 20
 deg_per_point = 1 / points_per_degree # resolution of: 1 / 20 = 0.05° (~2 pixels)
 size_heatmaps = int(max_vis_deg * points_per_degree * 2)
@@ -74,7 +74,9 @@ for v in tqdm(range(eye_video.shape[0])):
                 (eye_video[v,0,t] / deg_per_point)))
             y_coord = int(np.round((size_heatmaps / 2) + \
                 (eye_video[v,1,t] / deg_per_point)))
-            gaze_heatmap[x_coord,y_coord] += 1
+            # Only store gazes that fall within the image boundaries
+            if x_coord < gaze_heatmap.shape[0] and y_coord < gaze_heatmap.shape[1]:
+                gaze_heatmap[x_coord,y_coord] += 1
 
 
 # =============================================================================

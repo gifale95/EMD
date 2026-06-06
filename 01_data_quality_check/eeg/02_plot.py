@@ -166,16 +166,6 @@ matplotlib.use("svg")
 plt.rcParams["text.usetex"] = False
 plt.rcParams['svg.fonttype'] = 'none'
 
-# Plot colors
-colors = [
-    (140/255, 90/255, 200/255),
-    (125/255, 100/255, 210/255),
-    (110/255, 115/255, 220/255),
-    (95/255, 130/255, 225/255),
-    (80/255, 145/255, 230/255),
-    (65/255, 160/255, 235/255)
-]
-
 
 # =============================================================================
 # Plot the ERPs
@@ -295,7 +285,7 @@ for s, sub in enumerate(args.subjects):
 
     # Plot the stimulus onset/offset and decoding chance dashed lines
     axs[s].plot([0, 0], [100, -100], 'k--', [3, 3], [100, -100], 'k--',
-        [-10, 10], [50, -50], 'k--', linewidth=2, alpha=.25,
+        [-10, 10], [50, 50], 'k--', linewidth=2, alpha=.25,
         label='_nolegend_')
 
     # Plot the decoding results of each subject and channel group
@@ -317,9 +307,9 @@ for s, sub in enumerate(args.subjects):
     # y-axis parameters
     axs[s].set_ylabel("Decoding accuracy (%)", fontsize=fontsize)
     yticks = [50, 60, 70, 80, 90, 100]
-    ylabels = [0, 20, 40, 60, 80, 100]
+    ylabels = [50, 60, 70, 80, 90, 100]
     axs[s].set_yticks(ticks=yticks, labels=ylabels)
-    axs[s].set_ylim(bottom=45, top=100)
+    axs[s].set_ylim(bottom=45, top=80)
 
     # Legend
     if s == 0:

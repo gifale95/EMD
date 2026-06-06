@@ -5,8 +5,6 @@ Parameters
 ----------
 subjects : list
     List of used subjects.
-channels : list
-    List of all channel types used for decoding.
 project_dir : str
     Directory of the project folder.
 
@@ -14,8 +12,6 @@ project_dir : str
 
 import argparse
 import os
-import h5py
-from tqdm import tqdm
 import numpy as np
 import matplotlib
 from matplotlib import pyplot as plt
@@ -27,46 +23,73 @@ import csv
 # =============================================================================
 parser = argparse.ArgumentParser()
 parser.add_argument('--subjects', default=[1, 2, 3, 4, 5, 6], type=list)
-parser.add_argument('--channels', default=['O', 'P', 'T', 'C', 'F'], type=list)
 parser.add_argument('--project_dir', default='/scratch/giffordale95/projects/eeg_moments_dataset', type=str)
 args, unknown = parser.parse_known_args()
 
 
 # =============================================================================
-# Plot save directory # !!!
+# Plot save directory
 # =============================================================================
 save_dir = os.path.join(args.project_dir, 'results', 'data_quality_check',
-    'eeg', 'plots')
+    'eyetracking', 'plots')
 os.makedirs(save_dir, exist_ok=True)
 
 
 # =============================================================================
-# Load the gaze/pupil eyetracking metrics # !!!
+# Load the trial number
 # =============================================================================
+trial_number = []
+
+for sub in args.subjects:
+    data_dir = os.path.join(args.project_dir, 'derivatives', 'eyetracking',
+        f'sub-{sub:02}', f'sub-{sub:02}_eyetracking_metadata.npy')
+    metadata = np.load(data_dir, allow_pickle=True).item()
+    trial_number.append(metadata['trial_number'])
+    times = metadata['times']
 
 
 # =============================================================================
-# Load the pairwise decoding results # !!!
+# Load the gaze/pupil eyetracking metrics
 # =============================================================================
-# Load the pairwise decoding results of all subjects and channel types
-decoding = {}
+gaze_heatmap = []
+cdf_fixations = []
+avg_pupil_size = []
+
 for s, sub in enumerate(args.subjects):
-    for c, chan in enumerate(args.channels):
-        data_dir = os.path.join(args.project_dir, 'results',
-            'data_quality_check', 'eeg', 'pairwise_decoding_rdms',
-            f'rdms_sub-{sub:02d}_channels-{chan}.npy')
-        rdms = np.load(data_dir)
-        if s == 0 and c == 0:
-            idx_tril = np.tril_indices(rdms.shape[0], k=-1)
-        decoding[(sub, chan)] = np.mean(rdms[idx_tril], 0) * 100
+    data_dir = os.path.join(args.project_dir, 'results', 'data_quality_check',
+        'eyetracking', 'gaze_pupil_metrics',
+        f'gaze_pupil_metrics_sub-{sub:02d}.npy')
+    data = np.load(data_dir, allow_pickle=True).item()
+    gaze_heatmap.append(data['gaze_heatmap'])
+    cdf_fixations.append(data['cdf_fixations'])
+    avg_pupil_size.append(data['avg_pupil_size'])
 
 
 # =============================================================================
-# Save the number of retained EEG trials # !!!
+# Load the pairwise decoding results
+# =============================================================================
+decoding_gaze = []
+decoding_pupil = []
+
+for s, sub in enumerate(args.subjects):
+    data_dir = os.path.join(args.project_dir, 'results', 'data_quality_check',
+        'eyetracking', 'pairwise_decoding_rdms')
+    gaze_file = f'gaze_rdms_sub-{sub:02d}.npy'
+    pupil_file = f'pupil_rdms_sub-{sub:02d}.npy'
+    rdms_gaze = np.load(os.path.join(data_dir, gaze_file))
+    rdms_pupil = np.load(os.path.join(data_dir, pupil_file))
+    if s == 0:
+        idx_tril = np.tril_indices(rdms_gaze.shape[0], k=-1)
+    decoding_gaze.append(np.mean(rdms_gaze[idx_tril], 0) * 100)
+    decoding_pupil.append(np.mean(rdms_pupil[idx_tril], 0) * 100)
+
+
+# =============================================================================
+# Save the number of retained eyetracking trials
 # =============================================================================
 # Get the retained trials
 n_sessions = 8
-tot_trials = np.array([8447, 8448, 8448, 8448, 8446, 8448])
+tot_trials = np.array([8448, 8448, 8448, 8345, 8432, 8448])
 retained_trials = [
     ["participant_id", "total_trials", "retained_trials",
     "percentage_retained_trials"]
@@ -124,73 +147,100 @@ colors = [
 
 
 # =============================================================================
-# Plot the 2D histograms of gaze position # !!!
+# Plot the 2D histograms of gaze position
 # =============================================================================
-fig, axs = plt.subplots(1, len(args.used_subj), sharex=True, sharey=True)
-axs = np.reshape(axs, (-1))
-for s, sub in enumerate(args.used_subj):
-    # Plot the heatmap
-    axs[s].imshow(gaze_heatmaps[s], cmap='inferno', aspect='equal')
-    # Plot the video presentation box
-    axs[s].plot([50, 150], [50, 50], 'w', [50, 150], [150, 150], 'w',
-        [50, 50], [50, 150], 'w', [150, 150], [50, 150], 'w', linewidth=8)
-    # Plot parameters
-    if s == 0:
-        axs[s].set_ylabel('Y°', fontsize=30)
-    axs[s].set_xlabel('X°', fontsize=30)
-    xticks = [0, 20, 40, 60, 80, 100, 120, 140, 160, 180, 199]
-    xlabels = [-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5]
-    plt.xticks(ticks=xticks, labels=xlabels)
-    yticks = [0, 20, 40, 60, 80, 100, 120, 140, 160, 180, 199]
-    ylabels = [5, 4, 3, 2, 1, 0, -1, -2, -3, -4, -5]
-    plt.yticks(ticks=yticks, labels=ylabels)
-    title = 'Sub-' + format(sub)
-    axs[s].set_title(title, fontsize=30)
+matplotlib.rcParams['axes.spines.left'] = False
+matplotlib.rcParams['axes.spines.bottom'] = False
 
-
-# =============================================================================
-# Plot the ERPs
-# =============================================================================
 # Create the figure
-fig, axs = plt.subplots(6, 1, sharex=True, sharey=False, figsize=(20, 30))
+fig, axs = plt.subplots(2, 3, sharex=True, sharey=True, figsize=(15, 10))
 axs = np.reshape(axs, (-1))
 
 # Loop across subjects
 for s, sub in enumerate(args.subjects):
 
-    # # Plot the stimulus onset and offset dashed lines
-    axs[s].plot([0, 0], [100, -100], 'k--', [3, 3], [100, -100], 'k--', 
-        linewidth=2, alpha=.25, label='_nolegend_')
-
-    # Plot the ERPs of each subject
-    axs[s].plot(times, np.transpose(erps[s]), color='k', linewidth=1,
-        alpha=0.2)
+    # Plot the 2D histograms
+    axs[s].imshow(gaze_heatmap[s]['gaze_heatmap'], cmap='hot', aspect='equal')
 
     # Plot title
     axs[s].set_title(f'Participant {sub}', fontsize=fontsize)
 
     # x-axis parameters
-    if s == len(args.subjects)-1:
-        axs[s].set_xlabel('Time (s)', fontsize=fontsize)
-        xticks = [0, .5, 1, 1.5, 2, 2.5, 3, 3.498]
-        xlabels = [0, .5, 1, 1.5, 2, 2.5, 3, 3.5]
+    if s in [3, 4, 5]:
+        axs[s].set_xlabel('X°', fontsize=fontsize)
+        xticks = np.array([0, int(len(gaze_heatmap[s]['gaze_heatmap'])/2),
+            len(gaze_heatmap[s]['gaze_heatmap'])-1])
+        xlabels = np.array([-gaze_heatmap[s]['max_vis_deg'], 0,
+            gaze_heatmap[s]['max_vis_deg']])
         axs[s].set_xticks(ticks=xticks, labels=xlabels)
-        axs[s].set_xlim(left=min(times), right=max(times))
 
     # y-axis parameters
-    axs[s].set_ylabel("Voltage (µV)", fontsize=fontsize)
-    ymin = np.nanmin(erps[s]) - abs((np.nanmin(erps[s])) * .1)
-    ymax = np.nanmax(erps[s]) + abs((np.nanmax(erps[s])) * .1)
-    axs[s].set_ylim(bottom=ymin, top=ymax)
+    if s in [0, 3]:
+        axs[s].set_ylabel('Y°', fontsize=fontsize)
+        yticks = np.array([0, int(len(gaze_heatmap[s]['gaze_heatmap'])/2),
+            len(gaze_heatmap[s]['gaze_heatmap'])-1])
+        ylabels = np.array([gaze_heatmap[s]['max_vis_deg'], 0,
+            -gaze_heatmap[s]['max_vis_deg']])
+        axs[s].set_yticks(ticks=yticks, labels=ylabels)
 
 # Save the figure
-file_name = os.path.join(save_dir, 'eeg_erps.svg')
+file_name = os.path.join(save_dir, 'gaze_heatmaps.svg')
 fig.savefig(file_name, bbox_inches='tight', transparent=True, format='svg')
 plt.close()
 
 
 # =============================================================================
-# Plot the noise ceiling
+# Plot the percentage of fixations as a function of visual angle
+# =============================================================================
+matplotlib.rcParams['axes.spines.left'] = True
+matplotlib.rcParams['axes.spines.bottom'] = True
+
+# Plot colors
+def sample_cmap(N):
+    cmap = plt.cm.get_cmap('inferno')
+    values = np.linspace(0, 1, N+2)
+    colors = cmap(values)[1:-1]
+    return colors
+colors = sample_cmap(len(cdf_fixations))
+
+# Create the figure
+fig = plt.figure(figsize=(7.5, 7.5))
+
+# Plot the 1° threshold dashed line
+plt.plot([1, 1], [0, 100], 'k--', linewidth=2, alpha=.25, label='_nolegend_')
+
+# Plot the percentage of fixations as a function of visual angle
+for s, sub in enumerate(args.subjects):
+    visual_angles = cdf_fixations[s]['visual_angles']
+    cdf_fix = cdf_fixations[s]['cdf_fixations'] * 100
+    plt.plot(visual_angles, cdf_fix, color=colors[s], linewidth=2, alpha=1,
+        label=f'Participant {sub}')
+
+# x-axis parameters
+plt.xlabel('Threshold', fontsize=fontsize)
+xticks = [0, 0.5, 1, 1.5, 2]
+xlabels = [0, 0.5, 1, 1.5, 2]
+plt.xticks(ticks=xticks, labels=xlabels)
+plt.xlim(left=min(visual_angles), right=max(visual_angles))
+
+# y-axis parameters
+plt.ylabel("Below threshold (%)", fontsize=fontsize)
+yticks = [0, 20, 40, 60, 80, 100]
+ylabels = [0, 20, 40, 60, 80, 100]
+plt.yticks(ticks=yticks, labels=ylabels)
+plt.ylim(bottom=0, top=100)
+
+# Legend
+plt.legend(loc=0, ncol=1, fontsize=fontsize, frameon=False)
+
+# Save the figure
+file_name = os.path.join(save_dir, 'cdf_fixations.svg')
+fig.savefig(file_name, bbox_inches='tight', transparent=True, format='svg')
+plt.close()
+
+
+# =============================================================================
+# Plot the trial-average pupil size across the epoch time
 # =============================================================================
 # Plot colors
 def sample_cmap(N):
@@ -198,50 +248,39 @@ def sample_cmap(N):
     values = np.linspace(0, 1, N+2)
     colors = cmap(values)[1:-1]
     return colors
-colors = sample_cmap(len(idx_ch))
+colors = sample_cmap(len(avg_pupil_size))
 
 # Create the figure
-fig, axs = plt.subplots(6, 1, sharex=True, sharey=True, figsize=(20, 30))
-axs = np.reshape(axs, (-1))
+fig = plt.figure(figsize=(7.5, 7.5))
 
-# Loop across subjects
+# Plot the stimulus onset and offset dashed lines
+# plt.plot([0, 0], [100, -100], 'k--', [3, 3], [100, -100], 'k--', 
+#     linewidth=2, alpha=.25, label='_nolegend_')
+
+# Plot the trial-average pupil size across the epoch time
 for s, sub in enumerate(args.subjects):
+    plt.plot(times, avg_pupil_size[s], color=colors[s], linewidth=2, alpha=1,
+        label=f'Participant {sub}')
 
-    # Plot the stimulus onset and offset dashed lines
-    axs[s].plot([0, 0], [100, -100], 'k--', [3, 3], [100, -100], 'k--', 
-        linewidth=2, alpha=.25, label='_nolegend_')
+# x-axis parameters
+plt.xlabel('Time (s)', fontsize=fontsize)
+xticks = [0, 0.5, 1, 1.5, 2]
+xlabels = [0, 0.5, 1, 1.5, 2]
+# plt.xticks(ticks=xticks, labels=xlabels)
+plt.xlim(left=min(times), right=max(times))
 
-    # Plot the noise ceiling of each subject and channel group
-    for c in range(len(idx_ch)):
-        nc = np.nanmean(noise_ceiling[s][idx_ch[c]], 0)
-        axs[s].plot(times, nc, color=colors[c], linewidth=2, alpha=1,
-            label=channel_type_names[c])
+# y-axis parameters
+plt.ylabel("Pupil size (a.u.)", fontsize=fontsize)
+# yticks = [0, 20, 40, 60, 80, 100]
+# ylabels = [0, 20, 40, 60, 80, 100]
+# plt.yticks(ticks=yticks, labels=ylabels)
+# plt.ylim(bottom=0, top=100)
 
-    # Plot title
-    axs[s].set_title(f'Participant {sub}', fontsize=fontsize)
-
-    # x-axis parameters
-    if s == len(args.subjects)-1:
-        axs[s].set_xlabel('Time (s)', fontsize=fontsize)
-        xticks = [0, .5, 1, 1.5, 2, 2.5, 3, 3.498]
-        xlabels = [0, .5, 1, 1.5, 2, 2.5, 3, 3.5]
-        axs[s].set_xticks(ticks=xticks, labels=xlabels)
-        axs[s].set_xlim(left=min(times), right=max(times))
-
-    # y-axis parameters
-    axs[s].set_ylabel("Noise ceiling (%)", fontsize=fontsize)
-    yticks = [0, 20, 40, 60, 80, 100]
-    ylabels = [0, 20, 40, 60, 80, 100]
-    axs[s].set_yticks(ticks=yticks, labels=ylabels)
-    axs[s].set_ylim(bottom=0, top=90)
-
-    # Legend
-    if s == 0:
-        axs[s].legend(loc=0, ncol=len(idx_ch), fontsize=fontsize,
-            frameon=False)
+# Legend
+plt.legend(loc=0, ncol=1, fontsize=fontsize, frameon=False)
 
 # Save the figure
-file_name = os.path.join(save_dir, 'noise_ceiling.svg')
+file_name = os.path.join(save_dir, 'pupil_size.svg')
 fig.savefig(file_name, bbox_inches='tight', transparent=True, format='svg')
 plt.close()
 
@@ -250,12 +289,13 @@ plt.close()
 # Plot the pairwise decoding results
 # =============================================================================
 # Plot colors
-def sample_cmap(N):
-    cmap = plt.cm.get_cmap('inferno')
-    values = np.linspace(0, 1, N+2)
-    colors = cmap(values)[1:-1]
-    return colors
-colors = sample_cmap(len(channel_type_names))
+colors = [
+    (103/255, 78/255, 167/255),
+    (166/255, 77/255, 121/255),
+    (105/255, 105/255, 105/255),
+    (169/255, 169/255, 169/255),
+    (90/255, 130/255, 200/255)
+]
 
 # Create the figure
 fig, axs = plt.subplots(6, 1, sharex=True, sharey=True, figsize=(20, 30))
@@ -269,10 +309,11 @@ for s, sub in enumerate(args.subjects):
         [-10, 10], [50, -50], 'k--', linewidth=2, alpha=.25,
         label='_nolegend_')
 
-    # Plot the decoding results of each subject and channel group
-    for c, chan in enumerate(args.channels):
-        axs[s].plot(times, decoding[(sub, chan)], color=colors[c], linewidth=2,
-            alpha=1, label=channel_type_names[c])
+    # Plot the decoding results of each subject
+    axs[s].plot(times, decoding_gaze[0], color=colors[0], linewidth=2,
+        alpha=1, label='Gaze')
+    axs[s].plot(times, decoding_pupil[0], color=colors[1], linewidth=2,
+        alpha=1, label='Pupil')
 
     # Plot title
     axs[s].set_title(f'Participant {sub}', fontsize=fontsize)

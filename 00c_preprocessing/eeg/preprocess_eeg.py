@@ -1,7 +1,7 @@
-"""Preprocess the raw EEG data: filtering, epoching, bad epoch/channel
-rejection and interpolation, baseline correction, and frequency downsampling.
-Additionally, the code computes the NCSNR and noise ceiling on the EEG
-responses for the test videos.
+"""Preprocess the raw EEG data: filtering, eyeblink removal, epoching, bad
+epoch/channel rejection and interpolation, baseline correction, and frequency
+downsampling. Additionally, the code computes the NCSNR and noise ceiling on
+the EEG responses for the test videos.
 
 Parameters
 ----------
@@ -90,7 +90,7 @@ ncsnr, noise_ceiling = compute_ncsnr(preprocessed_eeg, stimulus_id_list)
 # Save the preprocessed EEG data and metadata
 # =============================================================================
 # Save directory
-save_dir = os.path.join(args.project_dir, 'derivatives', 'eeg',
+save_dir = os.path.join(args.project_dir, 'derivatives', 'eeg_eyeblink_removal',
     f'sub-{args.subject:02}')
 os.makedirs(save_dir, exist_ok=True)
 
