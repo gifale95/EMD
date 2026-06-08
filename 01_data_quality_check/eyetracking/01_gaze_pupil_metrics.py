@@ -97,7 +97,7 @@ cdf_fixations = np.array([(euclDist <= va).mean() for va in visual_angles])
 # =============================================================================
 # Trial-average pupil size across time
 # =============================================================================
-avg_pupil_size = np.nanmean(eye[:,2,:], 0)
+avg_pupil_size = np.nanmean(eye[:,2], 0)
 
 
 # =============================================================================

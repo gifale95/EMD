@@ -1,5 +1,5 @@
-"""Run a pairwise decoding analysis on the eyetracking data for the 102 test
-videos.
+"""Run a pairwise decoding analysis on the eyetracking pupil size data for the
+102 test videos.
 
 Parameters
 ----------
@@ -14,7 +14,6 @@ import argparse
 import os
 import numpy as np
 import h5py
-from scipy.stats import zscore
 from tqdm import tqdm
 from sklearn.utils import resample
 from sklearn.svm import SVC
@@ -39,7 +38,7 @@ np.random.seed(seed)
 
 
 # =============================================================================
-# Load the eyetracking data for the 102 test videos
+# Load the eyetracking pupil size data for the 102 test videos
 # =============================================================================
 # Load the stimulus IDs
 data_dir = os.path.join(args.project_dir, 'derivatives', 'eyetracking',
@@ -49,22 +48,20 @@ metadata = np.load(os.path.join(data_dir, file_name), allow_pickle=True).item()
 stimulus_id = metadata['stimulus_id']
 
 # Load the eyetracking data
-eye = []
+pupil = []
 stimulus_id_test = []
 n_sessions = 8
 # Loop across eyetracking recording sessions
 for ses in range(1, n_sessions+1):
-    # Load the eyetracking data
+    # Load the eyetracking pupil size data
     file_name = f'sub-{args.subject:02}_ses-{ses:02}_preprocessed_eyetracking.h5'
-    eye_ses = h5py.File(os.path.join(data_dir, file_name), 'r')['eyetracking'][:]
-    # Z-score the eyetracking data at each session
-    eye_ses = zscore(eye_ses, axis=0, nan_policy='omit')
+    pupil_ses = h5py.File(os.path.join(data_dir, file_name), 'r')['eyetracking'][:,2]
     # Select the data for the test videos
     idx = np.where(stimulus_id[f'ses-{ses:02}'] > 1000)[0]
-    eye.append(eye_ses[idx])
+    pupil.append(pupil_ses[idx])
     stimulus_id_test.append(stimulus_id[f'ses-{ses:02}'][idx])
-    del eye_ses, idx
-eye = np.concatenate(eye, 0)
+    del pupil_ses, idx
+pupil = np.concatenate(pupil, 0)
 stimulus_id_test = np.concatenate(stimulus_id_test, 0)
 
 
@@ -73,8 +70,8 @@ stimulus_id_test = np.concatenate(stimulus_id_test, 0)
 # =============================================================================
 video_conditions = np.unique(stimulus_id_test)
 n_pseudo_trl = 4
-eye_pseudo = np.zeros((len(video_conditions), n_pseudo_trl, eye.shape[1],
-    eye.shape[2]), dtype=np.float32)
+pupil_pseudo = np.zeros((len(video_conditions), n_pseudo_trl, pupil.shape[1]),
+    dtype=np.float32)
 
 for v, video in enumerate(video_conditions):
     idx = resample(np.where(stimulus_id_test == video)[0], replace=False)
@@ -82,11 +79,11 @@ for v, video in enumerate(video_conditions):
     for p in range(n_pseudo_trl):
         idx_start = p * n_trl_per_pseudo
         idx_end = idx_start + n_trl_per_pseudo
-        eye_pseudo[v,p] = np.nanmean(eye[idx[idx_start:idx_end]], 0)
-del eye
+        pupil_pseudo[v,p] = np.nanmean(pupil[idx[idx_start:idx_end]], 0)
+del pupil
 
 # Set NaN values to 0
-eye_pseudo = np.nan_to_num(eye_pseudo, nan=0)
+pupil_pseudo = np.nan_to_num(pupil_pseudo, nan=0)
 
 
 # =============================================================================
@@ -94,9 +91,8 @@ eye_pseudo = np.nan_to_num(eye_pseudo, nan=0)
 # =============================================================================
 # RDMs array of shape:
 # (Video conditions × Video conditions × Time points)
-rdms_gaze = np.zeros((len(video_conditions), len(video_conditions),
-    eye_pseudo.shape[3]), dtype=np.float32)
-rdms_pupil = np.zeros((rdms_gaze.shape), dtype=np.float32)
+rdms = np.zeros((len(video_conditions), len(video_conditions),
+    pupil_pseudo.shape[2]), dtype=np.float32)
 
 # SVM target vectors
 y_train = np.zeros(((n_pseudo_trl-1)*2))
@@ -104,45 +100,37 @@ y_train[int(len(y_train)/2):] = 1
 y_test = np.asarray((0, 1))
 
 # Loop over eyetracking time points and video conditions
-for t in tqdm(range(eye_pseudo.shape[3])):
+for t in tqdm(range(pupil_pseudo.shape[2])):
     for v1 in range(len(video_conditions)):
         for v2 in range(v1):
 
             # Select the video condition data
-            eye_cond_1 = eye_pseudo[v1,:,:,t]
-            eye_cond_2 = eye_pseudo[v2,:,:,t]
+            pupil_cond_1 = pupil_pseudo[v1,:,t]
+            pupil_cond_2 = pupil_pseudo[v2,:,t]
 
             # Empty scores array
-            scores_gaze = np.zeros(n_pseudo_trl, dtype=np.float32)
-            scores_pupil = np.zeros(n_pseudo_trl, dtype=np.float32)
+            scores = np.zeros(n_pseudo_trl, dtype=np.float32)
 
             # Loop across pseudo-trials
             for p in range(n_pseudo_trl):
 
                 # Define the train/test partitions
-                X_train = np.append(np.delete(eye_cond_1, p, 0),
-                    np.delete(eye_cond_2, p, 0), 0)
-                X_test = np.append(np.expand_dims(eye_cond_1[p], 0),
-                    np.expand_dims(eye_cond_2[p], 0), 0)
+                X_train = np.expand_dims(np.append(np.delete(pupil_cond_1, p),
+                    np.delete(pupil_cond_2, p)), -1)
+                X_test = np.expand_dims(np.append(
+                    pupil_cond_1[p], pupil_cond_2[p]), -1)
 
                 # Train the classifier
                 dec_svm_gaze = SVC(kernel='linear')
-                dec_svm_pupil = SVC(kernel='linear')
-                dec_svm_gaze.fit(X_train[:,:2], y_train)
-                dec_svm_pupil.fit(np.reshape(X_train[:,2], (-1, 1)), y_train)
+                dec_svm_gaze.fit(X_train, y_train)
 
                 # Test the classifier
-                y_pred_gaze = dec_svm_gaze.predict(X_test[:,:2])
-                y_pred_pupil = dec_svm_pupil.predict(
-                    np.reshape(X_test[:,2], (-1, 1)))
-                scores_gaze[p] = sum(y_pred_gaze == y_test) / len(y_test)
-                scores_pupil[p] = sum(y_pred_pupil == y_test) / len(y_test)
+                y_pred = dec_svm_gaze.predict(X_test)
+                scores[p] = sum(y_pred == y_test) / len(y_test)
 
             # Store the accuracy
-            rdms_gaze[v1,v2,t] = np.mean(scores_gaze)
-            rdms_gaze[v2,v1,t] = rdms_gaze[v1,v2,t]
-            rdms_pupil[v1,v2,t] = np.mean(scores_pupil)
-            rdms_pupil[v2,v1,t] = rdms_pupil[v1,v2,t]
+            rdms[v1,v2,t] = np.mean(scores)
+            rdms[v2,v1,t] = rdms[v1,v2,t]
 
 
 # =============================================================================
@@ -152,8 +140,6 @@ save_dir = os.path.join(args.project_dir, 'results', 'data_quality_check',
     'eyetracking', 'pairwise_decoding_rdms')
 os.makedirs(save_dir, exist_ok=True)
 
-file_name_gaze = f'gaze_rdms_sub-{args.subject:02d}.npy'
-file_name_pupil = f'pupil_rdms_sub-{args.subject:02d}.npy'
+file_name = f'pupil_rdms_sub-{args.subject:02d}.npy'
 
-np.save(os.path.join(save_dir, file_name_gaze), rdms_gaze)
-np.save(os.path.join(save_dir, file_name_pupil), rdms_pupil)
+np.save(os.path.join(save_dir, file_name), rdms)

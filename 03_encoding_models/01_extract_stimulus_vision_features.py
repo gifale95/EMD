@@ -28,6 +28,7 @@ from torchvision.models.feature_extraction import create_feature_extractor
 from tqdm import tqdm
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
+from scipy.linalg import eigh
 
 
 # =============================================================================
@@ -276,6 +277,41 @@ del features
 
 
 # =============================================================================
+# PCA functions
+# =============================================================================
+def fit_pca_float32(X_train):
+    """Fit PCA in sample space on float32 data.
+    Assumes X_train is already z-scored so no centering needed."""
+
+    # Covariance in sample space: (n_samples, n_samples)
+    cov = (X_train @ X_train.T) / (X_train.shape[0] - 1)     # (1102, 1102), float32
+
+    # Eigen-decomposition — eigh returns ascending order
+    eigenvalues, eigenvectors = eigh(cov)
+
+    # Reverse to descending order
+    eigenvalues  = eigenvalues[::-1]
+    eigenvectors = eigenvectors[:, ::-1]
+
+    # Clip tiny negative eigenvalues caused by float32 numerical noise
+    eigenvalues = np.maximum(eigenvalues, 0)
+
+    # Principal axes in feature space: (n_features, n_samples)
+    principal_axes = X_train.T @ eigenvectors                  # (n_features, n_samples)
+    principal_axes /= np.linalg.norm(principal_axes, axis=0)   # normalize → V
+
+    # Explained variance ratio (after clipping)
+    explained_variance_ratio = eigenvalues / eigenvalues.sum()
+
+    return principal_axes, explained_variance_ratio
+
+
+def transform_pca_float32(X, principal_axes, n_components):
+    """Project data onto the top n_components principal axes."""
+    return X @ principal_axes[:, :n_components]               # (n_samples, n_components)
+
+
+# =============================================================================
 # Downsample the vision features using PCA
 # =============================================================================
 # Z-score the features
@@ -284,18 +320,33 @@ scaler.fit(features_train)
 features_train = scaler.transform(features_train)
 features_test = scaler.transform(features_test)
 
-# Downsample the features with PCA
-pca = PCA(random_state=20200220)
-pca.fit(features_train)
-features_train = pca.transform(features_train)
-features_test = pca.transform(features_test)
+# Fit the PCA on the train data
+principal_axes, explained_variance_ratio = fit_pca_float32(features_train)
 
-# Only retain the N principal components that explain 95% of the variance
-explained_variance_ratio = pca.explained_variance_ratio_
+# Find the number of components explaining 95% variance
 cumulative_explained_variance = np.cumsum(explained_variance_ratio)
 n_components_95 = np.where(cumulative_explained_variance >= 0.95)[0][0] + 1
-features_train = features_train[:,:n_components_95]
-features_test = features_test[:,:n_components_95]
+print(f"Components explaining 95% variance: {n_components_95}")
+
+# Transform train and test
+features_train = transform_pca_float32(features_train, principal_axes,
+    n_components_95)
+features_test  = transform_pca_float32(features_test,  principal_axes,
+    n_components_95)
+
+# # Downsample the features with PCA # !!! OLD DELETE
+# pca = PCA(n_components=0.95, svd_solver="covariance_eigh",
+#     random_state=20200220)
+# pca.fit(features_train)
+# features_train = pca.transform(features_train)
+# features_test = pca.transform(features_test)
+
+# # Only retain the N principal components that explain 95% of the variance # !!! OLD DELETE
+# explained_variance_ratio = pca.explained_variance_ratio_
+# cumulative_explained_variance = np.cumsum(explained_variance_ratio)
+# n_components_95 = np.where(cumulative_explained_variance >= 0.95)[0][0] + 1
+# features_train = features_train[:,:n_components_95]
+# features_test = features_test[:,:n_components_95]
 
 
 # =============================================================================

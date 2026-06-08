@@ -68,19 +68,15 @@ for s, sub in enumerate(args.subjects):
 # =============================================================================
 # Load the pairwise decoding results
 # =============================================================================
-decoding_gaze = []
 decoding_pupil = []
 
 for s, sub in enumerate(args.subjects):
     data_dir = os.path.join(args.project_dir, 'results', 'data_quality_check',
         'eyetracking', 'pairwise_decoding_rdms')
-    gaze_file = f'gaze_rdms_sub-{sub:02d}.npy'
     pupil_file = f'pupil_rdms_sub-{sub:02d}.npy'
-    rdms_gaze = np.load(os.path.join(data_dir, gaze_file))
     rdms_pupil = np.load(os.path.join(data_dir, pupil_file))
     if s == 0:
-        idx_tril = np.tril_indices(rdms_gaze.shape[0], k=-1)
-    decoding_gaze.append(np.mean(rdms_gaze[idx_tril], 0) * 100)
+        idx_tril = np.tril_indices(rdms_pupil.shape[0], k=-1)
     decoding_pupil.append(np.mean(rdms_pupil[idx_tril], 0) * 100)
 
 
@@ -276,7 +272,7 @@ plt.close()
 
 
 # =============================================================================
-# Plot the pairwise decoding results
+# Plot the pairwise decoding results # !!! PLOT ALL SUBJECTS ON SAME PLOT !!!!!!!!!!!!!!!!
 # =============================================================================
 # Plot colors
 colors = [(139/255, 0/255, 0/255), (0/255, 0/255, 0/255)]

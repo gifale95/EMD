@@ -2,7 +2,7 @@
 #SBATCH --mail-user=giffordale95@zedat.fu-berlin.de
 #SBATCH --job-name=EMD-03_encoding_models-01_extract_stimulus_vision_features
 #SBATCH --mail-type=end
-#SBATCH --mem=500000
+#SBATCH --mem=200000
 #SBATCH --time=20:00:00
 #SBATCH --qos=extended
 

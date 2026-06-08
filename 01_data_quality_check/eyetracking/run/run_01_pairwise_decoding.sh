@@ -3,7 +3,7 @@
 #SBATCH --job-name=EMD-01_data_quality_check-eyetracking-01_pairwise_decoding
 #SBATCH --mail-type=end
 #SBATCH --mem=500
-#SBATCH --time=20:00:00
+#SBATCH --time=15:00:00
 #SBATCH --qos=extended
 
 # Creating the parameters combinations
