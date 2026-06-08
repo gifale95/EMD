@@ -107,12 +107,13 @@ for s, sub in enumerate(args.subjects):
 
     # y-axis parameters
     if s in [0, 3]:
+        plot_times = np.array([0, 1, 2, 3])
         axs[s].set_ylabel("Time (s)", fontsize=fontsize)
         yticks = np.array([np.where(times == t)[0][0] for t in plot_times])
         axs[s].set_yticks(ticks=yticks, labels=plot_times)
         # axs[s].set_ylim(bottom=min(yticks), top=max(yticks))
 
 # Save the figure
-file_name = os.path.join(save_dir, 'ct_correlation.svg')
+file_name = os.path.join(save_dir, 'eeg_ct_correlation.svg')
 fig.savefig(file_name, bbox_inches='tight', transparent=True, format='svg')
 plt.close()

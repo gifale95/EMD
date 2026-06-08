@@ -86,16 +86,16 @@ eeg_train = np.reshape(eeg_train, (len(eeg_train), -1))
 
 
 # =============================================================================
-# Load the stimulus features
+# Load the train stimulus features
 # =============================================================================
 # Load the stimulus features
 if args.modality == 'vision':
     model = 's3d'
 elif args.modality == 'language':
     model = 'all-mpnet-base-v2'
-features_dir = os.path.join(args.project_dir, 'results', 'stimulus_features',
+feature_dir = os.path.join(args.project_dir, 'results', 'stimulus_features',
     f'{args.modality}_features', model, f'{args.modality}_features_train.npy')
-features_train = np.load(features_dir)
+features_train = np.load(feature_dir)
 
 # If training encoding models with the language features, create one sample
 # for each of the 6 captions per video
