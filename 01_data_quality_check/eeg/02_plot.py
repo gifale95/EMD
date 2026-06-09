@@ -101,12 +101,11 @@ for s, sub in enumerate(args.subjects):
 # =============================================================================
 # EEG channel selection
 # =============================================================================
-channel_types = ['O', 'P', 'T', 'C', 'F']
 channel_type_names = ['Occipital', 'Parietal', 'Temporal', 'Central',
     'Frontal']
 
 idx_ch = []
-for ch_type in channel_types:
+for ch_type in args.channels:
     idx = []
     for c, chan in enumerate(ch_names):
         if ch_type in chan:

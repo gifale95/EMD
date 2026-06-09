@@ -1,17 +1,17 @@
 #!/bin/bash
 #SBATCH --mail-user=giffordale95@zedat.fu-berlin.de
-#SBATCH --job-name=EMD-03_encoding_models-04_stats
+#SBATCH --job-name=MODELS_ZITONG-00_extract_visual_features
 #SBATCH --mail-type=end
-#SBATCH --mem=20000
-#SBATCH --time=00:10:00
+#SBATCH --mem=200000
+#SBATCH --time=10:00:00
 #SBATCH --qos=extended
 
 # Changing to the .py script directory
-cd /home/giffordale95/projects/eeg_moments_dataset/github/EMD/03_encoding_models
+cd /home/giffordale95/projects/eeg_moments_dataset/github/EMD/ENCODING_THINGS_EEG2
 
 # Activating the Anaconda environment
 source /home/giffordale95/anaconda3/etc/profile.d/conda.sh
 conda activate berg
 
 # Running the job
-python 04_stats.py
+python 00_extract_visual_features.py

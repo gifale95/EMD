@@ -11,12 +11,9 @@ project_dir : str
 
 import argparse
 import os
-import h5py
-from tqdm import tqdm
 import numpy as np
 import matplotlib
 from matplotlib import pyplot as plt
-import csv
 
 
 # =============================================================================
@@ -31,67 +28,33 @@ args, unknown = parser.parse_known_args()
 # =============================================================================
 # Plot save directory
 # =============================================================================
-save_dir = os.path.join(args.project_dir, 'results', 'data_quality_check',
-    'eeg', 'plots')
+save_dir = os.path.join(args.project_dir, 'results', 'encoding_models',
+    'plots')
 os.makedirs(save_dir, exist_ok=True)
 
 
 # =============================================================================
-# Load the EEG data, and average it into the ERPs
+# Load the EEG channels and time points
 # =============================================================================
-sessions = 8
-
-erps = []
-for sub in tqdm(args.subjects):
-    data_dir = os.path.join(args.project_dir, 'derivatives', 'eeg',
-        f'sub-{sub:02}')
-    data_ses = []
-    for ses in range(1, sessions+1):
-        data_dir_ses = os.path.join(data_dir,
-            f'sub-{sub:02}_ses-{ses:02}_preprocessed_eeg.h5')
-        data_ses.append(np.mean(h5py.File(data_dir_ses, 'r')['eeg'][:], 0))
-    erps.append(np.mean(np.asarray(data_ses), 0))
-    del data_ses
-erps = np.asarray(erps)
-
-# Convert the ERPs from volts to microvolts
-erps = erps * 1e6
+data_dir = os.path.join(args.project_dir, 'derivatives', 'eeg',
+    f'sub-{args.subjects[0]:02}', f'sub-{args.subjects[0]:02}_eeg_metadata.npy')
+metadata = np.load(data_dir, allow_pickle=True).item()
+times = metadata['times']
+ch_names = metadata['ch_names']
 
 
 # =============================================================================
-# Load the NCSNR and noise ceiling
+# Load the partial correlation results
 # =============================================================================
-ncsnr = []
-noise_ceiling = []
-trial_number = []
+data_dir = os.path.join(args.project_dir, 'results', 'encoding_models',
+    'stats', 'stats.npy')
+data = np.load(data_dir, allow_pickle=True).item()
+partial_correlation = data['partial_correlation']
+ci = data['ci']
 
-for sub in args.subjects:
-    data_dir = os.path.join(args.project_dir, 'derivatives', 'eeg',
-        f'sub-{sub:02}', f'sub-{sub:02}_eeg_metadata.npy')
-    metadata = np.load(data_dir, allow_pickle=True).item()
-    ncsnr.append(metadata['ncsnr'])
-    noise_ceiling.append(metadata['noise_ceiling'])
-    trial_number.append(metadata['trial_number'])
-    times = metadata['times']
-    ch_names = metadata['ch_names']
-ncsnr = np.asarray(ncsnr)
-noise_ceiling = np.asarray(noise_ceiling)
-
-
-# =============================================================================
-# Load the pairwise decoding results
-# =============================================================================
-# Load the pairwise decoding results of all subjects and channel types
-decoding = {}
-for s, sub in enumerate(args.subjects):
-    for c, chan in enumerate(args.channels):
-        data_dir = os.path.join(args.project_dir, 'results',
-            'data_quality_check', 'eeg', 'pairwise_decoding_rdms',
-            f'rdms_sub-{sub:02d}_channels-{chan}.npy')
-        rdms = np.load(data_dir)
-        if s == 0 and c == 0:
-            idx_tril = np.tril_indices(rdms.shape[0], k=-1)
-        decoding[(sub, chan)] = np.mean(rdms[idx_tril], 0) * 100
+res_types = ['total_variance_vision', 'total_variance_language',
+    'unique_variance_vision', 'unique_variance_language']
+res_labels = ['Vision', 'Language', 'Vision | Language', 'Language | Vision']
 
 
 # =============================================================================
@@ -100,39 +63,6 @@ for s, sub in enumerate(args.subjects):
 channel_types = ['O', 'P', 'T', 'C', 'F']
 channel_type_names = ['Occipital', 'Parietal', 'Temporal', 'Central',
     'Frontal']
-
-idx_ch = []
-for ch_type in channel_types:
-    idx = []
-    for c, chan in enumerate(ch_names):
-        if ch_type in chan:
-            idx.append(c)
-    idx_ch.append(np.asarray(idx))
-    del idx
-
-
-# =============================================================================
-# Save the number of retained EEG trials
-# =============================================================================
-# Get the retained trials
-n_sessions = 8
-tot_trials = np.array([8447, 8448, 8448, 8448, 8446, 8448])
-retained_trials = [
-    ["participant_id", "total_trials", "retained_trials",
-    "percentage_retained_trials"]
-]
-for s, sub in enumerate(args.subjects):
-    n_trials = 0
-    for ses in range(n_sessions):
-        n_trials += len(trial_number[s][f'ses-{ses+1:02}'])
-    perc = np.round((n_trials / tot_trials[s]) * 100, 2)
-    retained_trials.append([sub, int(tot_trials[s]), n_trials, float(perc)])
-
-# Save the retained trials in a tsv file
-file_name_tsv = os.path.join(save_dir, "retained_trials.tsv")
-with open(file_name_tsv, "w", newline="") as f:
-    writer = csv.writer(f, delimiter="\t")
-    writer.writerows(retained_trials)
 
 
 # =============================================================================
@@ -162,108 +92,6 @@ matplotlib.use("svg")
 plt.rcParams["text.usetex"] = False
 plt.rcParams['svg.fonttype'] = 'none'
 
-
-# =============================================================================
-# Plot the ERPs
-# =============================================================================
-# Create the figure
-fig, axs = plt.subplots(6, 1, sharex=True, sharey=False, figsize=(20, 30))
-axs = np.reshape(axs, (-1))
-
-# Loop across subjects
-for s, sub in enumerate(args.subjects):
-
-    # # Plot the stimulus onset and offset dashed lines
-    axs[s].plot([0, 0], [100, -100], 'k--', [3, 3], [100, -100], 'k--', 
-        linewidth=2, alpha=.25, label='_nolegend_')
-
-    # Plot the ERPs of each subject
-    axs[s].plot(times, np.transpose(erps[s]), color='k', linewidth=1,
-        alpha=0.2)
-
-    # Plot title
-    axs[s].set_title(f'Participant {sub}', fontsize=fontsize)
-
-    # x-axis parameters
-    if s == len(args.subjects)-1:
-        axs[s].set_xlabel('Time (s)', fontsize=fontsize)
-        xticks = [0, .5, 1, 1.5, 2, 2.5, 3, 3.498]
-        xlabels = [0, .5, 1, 1.5, 2, 2.5, 3, 3.5]
-        axs[s].set_xticks(ticks=xticks, labels=xlabels)
-        axs[s].set_xlim(left=min(times), right=max(times))
-
-    # y-axis parameters
-    axs[s].set_ylabel("Voltage (µV)", fontsize=fontsize)
-    ymin = np.nanmin(erps[s]) - abs((np.nanmin(erps[s])) * .1)
-    ymax = np.nanmax(erps[s]) + abs((np.nanmax(erps[s])) * .1)
-    axs[s].set_ylim(bottom=ymin, top=ymax)
-
-# Save the figure
-file_name = os.path.join(save_dir, 'eeg_erps.svg')
-fig.savefig(file_name, bbox_inches='tight', transparent=True, format='svg')
-plt.close()
-
-
-# =============================================================================
-# Plot the noise ceiling
-# =============================================================================
-# Plot colors
-def sample_cmap(N):
-    cmap = plt.cm.get_cmap('inferno')
-    values = np.linspace(0, 1, N+2)
-    colors = cmap(values)[1:-1]
-    return colors
-colors = sample_cmap(len(idx_ch))
-
-# Create the figure
-fig, axs = plt.subplots(6, 1, sharex=True, sharey=True, figsize=(20, 30))
-axs = np.reshape(axs, (-1))
-
-# Loop across subjects
-for s, sub in enumerate(args.subjects):
-
-    # Plot the stimulus onset and offset dashed lines
-    axs[s].plot([0, 0], [100, -100], 'k--', [3, 3], [100, -100], 'k--', 
-        linewidth=2, alpha=.25, label='_nolegend_')
-
-    # Plot the noise ceiling of each subject and channel group
-    for c in range(len(idx_ch)):
-        nc = np.nanmean(noise_ceiling[s][idx_ch[c]], 0)
-        axs[s].plot(times, nc, color=colors[c], linewidth=2, alpha=1,
-            label=channel_type_names[c])
-
-    # Plot title
-    axs[s].set_title(f'Participant {sub}', fontsize=fontsize)
-
-    # x-axis parameters
-    if s == len(args.subjects)-1:
-        axs[s].set_xlabel('Time (s)', fontsize=fontsize)
-        xticks = [0, .5, 1, 1.5, 2, 2.5, 3, 3.498]
-        xlabels = [0, .5, 1, 1.5, 2, 2.5, 3, 3.5]
-        axs[s].set_xticks(ticks=xticks, labels=xlabels)
-        axs[s].set_xlim(left=min(times), right=max(times))
-
-    # y-axis parameters
-    axs[s].set_ylabel("Noise ceiling (%)", fontsize=fontsize)
-    yticks = [0, 20, 40, 60, 80, 100]
-    ylabels = [0, 20, 40, 60, 80, 100]
-    axs[s].set_yticks(ticks=yticks, labels=ylabels)
-    axs[s].set_ylim(bottom=0, top=90)
-
-    # Legend
-    if s == 0:
-        axs[s].legend(loc=0, ncol=len(idx_ch), fontsize=fontsize,
-            frameon=False)
-
-# Save the figure
-file_name = os.path.join(save_dir, 'noise_ceiling.svg')
-fig.savefig(file_name, bbox_inches='tight', transparent=True, format='svg')
-plt.close()
-
-
-# =============================================================================
-# Plot the pairwise decoding results
-# =============================================================================
 # Plot colors
 def sample_cmap(N):
     cmap = plt.cm.get_cmap('inferno')
@@ -272,47 +100,55 @@ def sample_cmap(N):
     return colors
 colors = sample_cmap(len(channel_type_names))
 
+
+# =============================================================================
+# Plot the partial correlation results (for each channel type)
+# =============================================================================
 # Create the figure
-fig, axs = plt.subplots(6, 1, sharex=True, sharey=True, figsize=(20, 30))
+fig, axs = plt.subplots(len(res_types), 1, sharex=True, sharey=True,
+    figsize=(20, 20))
 axs = np.reshape(axs, (-1))
 
-# Loop across subjects
-for s, sub in enumerate(args.subjects):
+# Loop across result types
+for r, res_type in enumerate(res_types):
 
-    # Plot the stimulus onset/offset and decoding chance dashed lines
-    axs[s].plot([0, 0], [100, -100], 'k--', [3, 3], [100, -100], 'k--',
-        [-10, 10], [50, 50], 'k--', linewidth=2, alpha=.25,
-        label='_nolegend_')
+    # Plot the stimulus onset/offset and correlation chance dashed lines
+    axs[r].plot([0, 0], [100, -100], 'k--', [3, 3], [100, -100], 'k--',
+        [-10, 10], [0, 0], 'k--', linewidth=2, alpha=.25, label='_nolegend_')
 
-    # Plot the decoding results of each subject and channel group
-    for c, chan in enumerate(args.channels):
-        axs[s].plot(times, decoding[(sub, chan)], color=colors[c], linewidth=2,
-            alpha=1, label=channel_type_names[c])
+    # Plot the partial correlation results of each channel group
+    for c, chan in enumerate(channel_types):
+        res = np.mean(partial_correlation[f'{res_type}_{chan}'], 0)
+        axs[r].plot(times, res, color=colors[c], linewidth=2, alpha=1,
+            label=channel_type_names[c])
+        # Plot the confidence intervals
+        axs[r].fill_between(times, ci[f'{res_type}_{chan}'][0],
+            ci[f'{res_type}_{chan}'][1], color=colors[c], alpha=.1)
 
     # Plot title
-    axs[s].set_title(f'Participant {sub}', fontsize=fontsize)
+    axs[r].set_title(res_labels[r], fontsize=fontsize)
 
     # x-axis parameters
-    if s == len(args.subjects)-1:
-        axs[s].set_xlabel('Time (s)', fontsize=fontsize)
+    if r == len(res_types)-1:
+        axs[r].set_xlabel('Time (s)', fontsize=fontsize)
         xticks = [0, .5, 1, 1.5, 2, 2.5, 3, 3.498]
         xlabels = [0, .5, 1, 1.5, 2, 2.5, 3, 3.5]
-        axs[s].set_xticks(ticks=xticks, labels=xlabels)
-        axs[s].set_xlim(left=min(times), right=max(times))
+        axs[r].set_xticks(ticks=xticks, labels=xlabels)
+        axs[r].set_xlim(left=min(times), right=max(times))
 
     # y-axis parameters
-    axs[s].set_ylabel("Decoding accuracy (%)", fontsize=fontsize)
-    yticks = [50, 60, 70, 80, 90, 100]
-    ylabels = [50, 60, 70, 80, 90, 100]
-    axs[s].set_yticks(ticks=yticks, labels=ylabels)
-    axs[s].set_ylim(bottom=45, top=80)
+    axs[r].set_ylabel("Pearson's $r$", fontsize=fontsize)
+    yticks = [0, 0.2, 0.4, 0.6]
+    ylabels = [0, 0.2, 0.4, 0.6]
+    axs[r].set_yticks(ticks=yticks, labels=ylabels)
+    axs[r].set_ylim(bottom=-0.1, top=0.5)
 
     # Legend
-    if s == 0:
-        axs[s].legend(loc=0, ncol=len(args.channels), fontsize=fontsize,
+    if r == 0:
+        axs[r].legend(loc=0, ncol=len(channel_type_names), fontsize=fontsize,
             frameon=False)
 
 # Save the figure
-file_name = os.path.join(save_dir, 'pairwise_decoding.svg')
+file_name = os.path.join(save_dir, 'partial_correlation.svg')
 fig.savefig(file_name, bbox_inches='tight', transparent=True, format='svg')
 plt.close()

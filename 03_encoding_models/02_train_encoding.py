@@ -26,7 +26,7 @@ from sklearn.linear_model import LinearRegression
 # =============================================================================
 parser = argparse.ArgumentParser()
 parser.add_argument('--subject', default=1, type=int)
-parser.add_argument('--modality', default='language', type=str)
+parser.add_argument('--modality', default='vision', type=str)
 parser.add_argument('--project_dir', default='/scratch/giffordale95/projects/eeg_moments_dataset', type=str)
 args, unknown = parser.parse_known_args()
 

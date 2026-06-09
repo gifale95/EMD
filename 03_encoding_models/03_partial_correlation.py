@@ -161,15 +161,18 @@ for f in tqdm(range(eeg_test.shape[1])):
     # Remove the linear relationship with language models from the EEG
     # responses
     reg = LinearRegression()
-    reg.fit(eeg_test_pred_language[:,f], eeg_test[:,f])
-    eeg_test_res = eeg_test[:,f] - reg.predict(eeg_test_pred_language[:,f])
+    reg.fit(np.expand_dims(eeg_test_pred_language[:,f], -1),
+        np.expand_dims(eeg_test[:,f], -1))
+    eeg_test_res = eeg_test[:,f] - \
+        np.squeeze(reg.predict(np.expand_dims(eeg_test_pred_language[:,f], -1)))
     del reg
     # Remove the linear relationship with language models from the
     # vision-model-predicted EEG responses
     reg = LinearRegression()
-    reg.fit(eeg_test_pred_language[:,f], eeg_test_pred_vision[:,f])
+    reg.fit(np.expand_dims(eeg_test_pred_language[:,f], -1),
+        np.expand_dims(eeg_test_pred_vision[:,f], -1))
     eeg_test_pred_vision_res = eeg_test_pred_vision[:,f] - \
-        reg.predict(eeg_test_pred_language[:,f])
+        np.squeeze(reg.predict(np.expand_dims(eeg_test_pred_language[:,f], -1)))
     del reg
     # Correlate the residuals to get the unique variance explained by
     # vision models
@@ -180,15 +183,18 @@ for f in tqdm(range(eeg_test.shape[1])):
     # Remove the linear relationship with vision models from the EEG
     # responses
     reg = LinearRegression()
-    reg.fit(eeg_test_pred_vision[:,f], eeg_test[:,f])
-    eeg_test_res = eeg_test[:,f] - reg.predict(eeg_test_pred_vision[:,f])
+    reg.fit(np.expand_dims(eeg_test_pred_vision[:,f], -1),
+        np.expand_dims(eeg_test[:,f], -1))
+    eeg_test_res = eeg_test[:,f] - \
+        np.squeeze(reg.predict(np.expand_dims(eeg_test_pred_vision[:,f], -1)))
     del reg
     # Remove the linear relationship with vision models from the
     # language-model-predicted EEG responses
     reg = LinearRegression()
-    reg.fit(eeg_test_pred_vision[:,f], eeg_test_pred_language[:,f])
+    reg.fit(np.expand_dims(eeg_test_pred_vision[:,f], -1),
+        np.expand_dims(eeg_test_pred_language[:,f], -1))
     eeg_test_pred_language_res = eeg_test_pred_language[:,f] - \
-        reg.predict(eeg_test_pred_vision[:,f])
+        np.squeeze(reg.predict(np.expand_dims(eeg_test_pred_vision[:,f], -1)))
     del reg
     # Correlate the residuals to get the unique variance explained by
     # language models

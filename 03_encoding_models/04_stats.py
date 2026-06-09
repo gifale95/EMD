@@ -42,6 +42,16 @@ np.random.seed(seed)
 
 
 # =============================================================================
+# Load the EEG channels and time points
+# =============================================================================
+data_dir = os.path.join(args.project_dir, 'derivatives', 'eeg',
+    f'sub-{args.subjects[0]:02}', f'sub-{args.subjects[0]:02}_eeg_metadata.npy')
+metadata = np.load(data_dir, allow_pickle=True).item()
+times = metadata['times']
+ch_names = metadata['ch_names']
+
+
+# =============================================================================
 # Load the partial correlation results for all subjects
 # =============================================================================
 total_variance_vision = []
@@ -49,7 +59,7 @@ total_variance_language = []
 unique_variance_vision = []
 unique_variance_language = []
 
-for sub in tqdm(args.subjects):
+for sub in args.subjects:
 
     file_name = f'partial_correlation_sub-{sub:02}.npy'
     results = np.load(os.path.join(args.project_dir, 'results',
@@ -62,60 +72,62 @@ for sub in tqdm(args.subjects):
     unique_variance_language.append(results['unique_variance_language'])
     del results
 
-total_variance_vision = np.array(total_variance_vision)
-total_variance_language = np.array(total_variance_language)
-unique_variance_vision = np.array(unique_variance_vision)
-unique_variance_language = np.array(unique_variance_language)
+results = {}
+results['total_variance_vision'] = np.array(total_variance_vision)
+results['total_variance_language'] = np.array(total_variance_language)
+results['unique_variance_vision'] = np.array(unique_variance_vision)
+results['unique_variance_language'] = np.array(unique_variance_language)
 
 
 # =============================================================================
-# Compute the confidence intervals # !!!
+# Average the results across EEG channel groups
 # =============================================================================
-n_chan = total_variance_vision.shape[1]
-n_time = total_variance_vision.shape[2]
-ci_total_variance_vision = np.zeros((2, n_chan, n_time), dtype=np.float32)
-ci_total_variance_language = np.zeros((2, n_chan, n_time), dtype=np.float32)
-ci_unique_variance_vision = np.zeros((2, n_chan, n_time), dtype=np.float32)
-ci_unique_variance_language = np.zeros((2, n_chan, n_time), dtype=np.float32)
+channel_types = ['O', 'P', 'T', 'C', 'F']
+channel_type_names = ['Occipital', 'Parietal', 'Temporal', 'Central',
+    'Frontal']
+idx_ch = []
+for ch_type in channel_types:
+    idx = []
+    for c, chan in enumerate(ch_names):
+        if ch_type in chan:
+            idx.append(c)
+    idx_ch.append(np.asarray(idx))
+    del idx
 
-total_variance_vision_dist = np.zeros((args.n_iter, n_chan, n_time),
-    dtype=np.float32)
-total_variance_language_dist = np.zeros((args.n_iter, n_chan, n_time),
-    dtype=np.float32)
-unique_variance_vision_dist = np.zeros((args.n_iter, n_chan, n_time),
-    dtype=np.float32)
-unique_variance_language_dist = np.zeros((args.n_iter, n_chan, n_time),
-    dtype=np.float32)
+results_chan_avg = {}
+for res_type in results.keys():
+    for i, ch_type in enumerate(channel_types):
+        results_chan_avg[f'{res_type}_{ch_type}'] = np.mean(
+            results[res_type][:,idx_ch[i]], 1)
+
+
+# =============================================================================
+# Compute the confidence intervals
+# =============================================================================
+ci = {}
+for res_type in results_chan_avg.keys():
+    ci[res_type] = np.zeros((2, len(times)), dtype=np.float32)
+
+ci_dist = {}
+for res_type in results_chan_avg.keys():
+    ci_dist[res_type] = np.zeros((args.n_iter, len(times)), dtype=np.float32)
 
 for i in tqdm(range(args.n_iter)):
     idx = resample(np.arange(len(args.subjects)))
-    total_variance_vision_dist[i] = np.mean(total_variance_vision[idx], 0)
-    total_variance_language_dist[i] = np.mean(total_variance_language[idx], 0)
-    unique_variance_vision_dist[i] = np.mean(unique_variance_vision[idx], 0)
-    unique_variance_language_dist[i] = np.mean(unique_variance_language[idx], 0)
+    for res_type in results_chan_avg.keys():
+        ci_dist[res_type][i] = np.mean(results_chan_avg[res_type][idx], 0)
 
-ci_total_variance_vision[0] = np.percentile(total_variance_vision_dist, 2.5, axis=0)
-ci_total_variance_vision[1] = np.percentile(total_variance_vision_dist, 97.5, axis=0)
-ci_total_variance_language[0] = np.percentile(total_variance_language_dist, 2.5, axis=0)
-ci_total_variance_language[1] = np.percentile(total_variance_language_dist, 97.5, axis=0)
-ci_unique_variance_vision[0] = np.percentile(unique_variance_vision_dist, 2.5, axis=0)
-ci_unique_variance_vision[1] = np.percentile(unique_variance_vision_dist, 97.5, axis=0)
-ci_unique_variance_language[0] = np.percentile(unique_variance_language_dist, 2.5, axis=0)
-ci_unique_variance_language[1] = np.percentile(unique_variance_language_dist, 97.5, axis=0)
+for res_type in results_chan_avg.keys():
+    ci[res_type][0] = np.percentile(ci_dist[res_type], 2.5, axis=0)
+    ci[res_type][1] = np.percentile(ci_dist[res_type], 97.5, axis=0)
 
 
 # =============================================================================
 # Save the results
 # =============================================================================
 results = {
-    'total_variance_vision': total_variance_vision,
-    'total_variance_language': total_variance_language,
-    'unique_variance_vision': unique_variance_vision,
-    'unique_variance_language': unique_variance_language,
-    'ci_total_variance_vision': ci_total_variance_vision,
-    'ci_total_variance_language': ci_total_variance_language,
-    'ci_unique_variance_vision': ci_unique_variance_vision,
-    'ci_unique_variance_language': ci_unique_variance_language
+    'partial_correlation': results_chan_avg,
+    'ci': ci
 }
 
 save_dir = os.path.join(args.project_dir, 'results', 'encoding_models',
