@@ -2,7 +2,7 @@
 #SBATCH --mail-user=giffordale95@zedat.fu-berlin.de
 #SBATCH --job-name=EMD-01_data_quality_check-eyetracking-01_pairwise_decoding
 #SBATCH --mail-type=end
-#SBATCH --mem=500
+#SBATCH --mem=1000
 #SBATCH --time=15:00:00
 #SBATCH --qos=extended
 

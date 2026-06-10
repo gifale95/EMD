@@ -71,7 +71,7 @@ stimulus_id_test = np.concatenate(stimulus_id_test, 0)
 video_conditions = np.unique(stimulus_id_test)
 n_pseudo_trl = 4
 pupil_pseudo = np.zeros((len(video_conditions), n_pseudo_trl, pupil.shape[1]),
-    dtype=np.float32)
+    dtype=np.float64)
 
 for v, video in enumerate(video_conditions):
     idx = resample(np.where(stimulus_id_test == video)[0], replace=False)

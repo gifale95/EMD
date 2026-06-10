@@ -27,7 +27,7 @@ from torchvision import transforms as trn
 from torchvision.models.feature_extraction import create_feature_extractor
 from torchvision.models.feature_extraction import get_graph_node_names
 from sklearn.preprocessing import StandardScaler
-from sklearn.decomposition import PCA
+from scipy.linalg import eigh
 
 
 # =============================================================================
