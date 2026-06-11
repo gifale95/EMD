@@ -2,8 +2,8 @@
 #SBATCH --mail-user=giffordale95@zedat.fu-berlin.de
 #SBATCH --job-name=MODELS_ZITONG-01_train_test_encoding
 #SBATCH --mail-type=end
-#SBATCH --mem=10000
-#SBATCH --time=01:00:00
+#SBATCH --mem=5000
+#SBATCH --time=00:10:00
 #SBATCH --qos=extended
 
 # Creating the parameters combinations

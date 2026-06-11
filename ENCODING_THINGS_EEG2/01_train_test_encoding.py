@@ -24,7 +24,6 @@ berg_dir : str
 """
 
 import argparse
-import torch
 import numpy as np
 import os
 from tqdm import tqdm
@@ -46,22 +45,16 @@ print('\nInput arguments:')
 for key, val in vars(args).items():
     print('{:16} {}'.format(key, val))
 
-# Set random seed for reproducible results
-seed = 20200220 + (args.subject * 1000)
-
-# Check for GPU
-device = 'cuda' if torch.cuda.is_available() else 'cpu'
-
 
 # =============================================================================
 # Load the visual features
 # =============================================================================
-data_dir = os.path.join(args.project_dir, 'visual_features',
-    'visual_features.npy')
-data = np.load(data_dir, allow_pickle=True).item()
-fmaps_train = data['fmaps_train']
-fmaps_test = data['fmaps_test']
-del data
+data_dir = os.path.join(args.things_eeg_2_dir, 'dnn_feature_maps',
+    'pca_feature_maps', 'cornet_s', 'pretrained-True', 'layers-all')
+fmaps_train = np.load(os.path.join(data_dir, 'pca_feature_maps_training.npy'),
+    allow_pickle=True).item()['all_layers'][:,:1000]
+fmaps_test = np.load(os.path.join(data_dir, 'pca_feature_maps_test.npy'),
+    allow_pickle=True).item()['all_layers'][:,:1000]
 
 
 # =============================================================================
@@ -105,7 +98,6 @@ eeg_test_pred_img2eeg = np.load(data_dir).astype(np.float32)
 # Select time points of interest
 eeg_test = eeg_test[:,:,20:70]
 eeg_test_pred = eeg_test_pred[:,:,20:70]
-eeg_test_pred_img2eeg = eeg_test_pred_img2eeg[:,:,20:70]
 times = times[20:70]
 
 # Test the encoding models

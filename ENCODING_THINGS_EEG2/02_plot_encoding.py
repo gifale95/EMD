@@ -21,7 +21,6 @@ berg_dir : str
 """
 
 import argparse
-import torch
 import numpy as np
 import os
 import matplotlib
@@ -35,7 +34,6 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--subjects', type=list, default=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
 parser.add_argument('--project_dir', default='/scratch/giffordale95/projects/encoding_things_eeg2_zitong', type=str)
 args, unknown = parser.parse_known_args()
-
 
 
 # =============================================================================
@@ -86,8 +84,8 @@ plt.rcParams['svg.fonttype'] = 'none'
 # Plot
 # =============================================================================
 plt.figure(figsize=(10,5))
-plt.plot(times, np.mean(correlation_vitb32, 0), label='ViT-B/32', color='tab:blue')
-plt.plot(times, np.mean(correlation_img2eeg, 0), label='Image-to-EEG', color='tab:orange')
+plt.plot(times, np.mean(correlation_vitb32, (0, 1)), label='CORNet-s', color='tab:blue')
+plt.plot(times, np.mean(correlation_img2eeg, (0, 1)), label='Image-to-EEG', color='tab:orange')
 plt.xlabel('Time (ms)')
 plt.ylabel('Correlation')
 plt.legend()

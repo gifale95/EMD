@@ -1,0 +1,13 @@
+SLURM_ARRAY_JOB_ID: 6
+subject: 7
+>>> Train encoding models <<<
+
+Input arguments:
+subject          7
+things_eeg_2_dir /scratch/ccn_datasets/things_eeg_2
+project_dir      /scratch/giffordale95/projects/encoding_things_eeg2_zitong
+  0%|          | 0/50 [00:00<?, ?it/s] 10%|█         | 5/50 [00:00<00:01, 41.90it/s] 20%|██        | 10/50 [00:00<00:00, 45.75it/s] 30%|███       | 15/50 [00:00<00:00, 47.35it/s] 40%|████      | 20/50 [00:00<00:00, 48.18it/s] 50%|█████     | 25/50 [00:00<00:00, 48.34it/s] 60%|██████    | 30/50 [00:00<00:00, 48.61it/s]                                               Traceback (most recent call last):
+  File "/home/giffordale95/projects/eeg_moments_dataset/github/EMD/ENCODING_THINGS_EEG2/01_train_test_encoding.py", line 110, in <module>
+    correlation_img2eeg[c,t] = pearsonr(eeg_test[:,c,t], eeg_test_pred_img2eeg[:,c,t])[0]
+                                                         ~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+IndexError: index 30 is out of bounds for axis 2 with size 30

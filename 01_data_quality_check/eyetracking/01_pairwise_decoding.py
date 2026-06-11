@@ -71,7 +71,7 @@ stimulus_id_test = np.concatenate(stimulus_id_test, 0)
 video_conditions = np.unique(stimulus_id_test)
 n_pseudo_trl = 4
 pupil_pseudo = np.zeros((len(video_conditions), n_pseudo_trl, pupil.shape[1]),
-    dtype=np.float64)
+    dtype=np.float32)
 
 for v, video in enumerate(video_conditions):
     idx = resample(np.where(stimulus_id_test == video)[0], replace=False)
@@ -117,8 +117,10 @@ for t in tqdm(range(pupil_pseudo.shape[2])):
                 # Define the train/test partitions
                 X_train = np.expand_dims(np.append(np.delete(pupil_cond_1, p),
                     np.delete(pupil_cond_2, p)), -1)
-                X_test = np.expand_dims(np.append(
-                    pupil_cond_1[p], pupil_cond_2[p]), -1)
+                X_test = np.expand_dims(np.append(pupil_cond_1[p],
+                    pupil_cond_2[p]), -1)
+                X_train = np.round(X_train.astype(np.float64), 5)
+                X_test = np.round(X_test.astype(np.float64), 5)
 
                 # Train the classifier
                 dec_svm_gaze = SVC(kernel='linear')
