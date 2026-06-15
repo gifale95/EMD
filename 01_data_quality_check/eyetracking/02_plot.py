@@ -1,5 +1,6 @@
-"""Plot the EEG ERPs, noise ceiling, pairwise decoding, and save the number of
-retained EEG trials.
+"""Plot the eyetracking gaze heatmaps, percentage of fixations as a function of
+visual angle, trial-average pupil size across time.EEG ERPs, and save the
+number of retained EEG trials.
 
 Parameters
 ----------
@@ -64,20 +65,24 @@ for s, sub in enumerate(args.subjects):
     cdf_fixations.append(data['cdf_fixations'])
     avg_pupil_size.append(data['avg_pupil_size'])
 
+gaze_heatmap = np.array(gaze_heatmap)
+cdf_fixations = np.array(cdf_fixations)
+avg_pupil_size = np.array(avg_pupil_size)
+
 
 # =============================================================================
 # Load the pairwise decoding results
 # =============================================================================
-decoding_pupil = []
+# decoding_pupil = []
 
-for s, sub in enumerate(args.subjects):
-    data_dir = os.path.join(args.project_dir, 'results', 'data_quality_check',
-        'eyetracking', 'pairwise_decoding_rdms')
-    pupil_file = f'pupil_rdms_sub-{sub:02d}.npy'
-    rdms_pupil = np.load(os.path.join(data_dir, pupil_file))
-    if s == 0:
-        idx_tril = np.tril_indices(rdms_pupil.shape[0], k=-1)
-    decoding_pupil.append(np.mean(rdms_pupil[idx_tril], 0) * 100)
+# for s, sub in enumerate(args.subjects):
+#     data_dir = os.path.join(args.project_dir, 'results', 'data_quality_check',
+#         'eyetracking', 'pairwise_decoding_rdms')
+#     pupil_file = f'pupil_rdms_sub-{sub:02d}.npy'
+#     rdms_pupil = np.load(os.path.join(data_dir, pupil_file))
+#     if s == 0:
+#         idx_tril = np.tril_indices(rdms_pupil.shape[0], k=-1)
+#     decoding_pupil.append(np.mean(rdms_pupil[idx_tril], 0) * 100)
 
 
 # =============================================================================
@@ -240,8 +245,8 @@ colors = sample_cmap(len(avg_pupil_size))
 fig = plt.figure(figsize=(7.5, 7.5))
 
 # Plot the stimulus onset and offset dashed lines
-# plt.plot([0, 0], [100, -100], 'k--', [3, 3], [100, -100], 'k--', 
-#     linewidth=2, alpha=.25, label='_nolegend_')
+plt.plot([0, 0], [1000, -1000], 'k--', [3, 3], [1000, -1000], 'k--', 
+    linewidth=2, alpha=.25, label='_nolegend_')
 
 # Plot the trial-average pupil size across the epoch time
 for s, sub in enumerate(args.subjects):
@@ -260,7 +265,8 @@ plt.ylabel("Pupil size (a.u.)", fontsize=fontsize)
 # yticks = [0, 20, 40, 60, 80, 100]
 # ylabels = [0, 20, 40, 60, 80, 100]
 # plt.yticks(ticks=yticks, labels=ylabels)
-# plt.ylim(bottom=0, top=100)
+plt.ylim(bottom=min(avg_pupil_size.flatten())-10,
+    top=max(avg_pupil_size.flatten())+10)
 
 # Legend
 plt.legend(loc=0, ncol=1, fontsize=fontsize, frameon=False)
@@ -275,49 +281,49 @@ plt.close()
 # Plot the pairwise decoding results # !!! PLOT ALL SUBJECTS ON SAME PLOT !!!!!!!!!!!!!!!!
 # =============================================================================
 # Plot colors
-colors = [(139/255, 0/255, 0/255), (0/255, 0/255, 0/255)]
+# colors = [(139/255, 0/255, 0/255), (0/255, 0/255, 0/255)]
 
-# Create the figure
-fig, axs = plt.subplots(6, 1, sharex=True, sharey=True, figsize=(20, 30))
-axs = np.reshape(axs, (-1))
+# # Create the figure
+# fig, axs = plt.subplots(6, 1, sharex=True, sharey=True, figsize=(20, 30))
+# axs = np.reshape(axs, (-1))
 
-# Loop across subjects
-for s, sub in enumerate(args.subjects):
+# # Loop across subjects
+# for s, sub in enumerate(args.subjects):
 
-    # Plot the stimulus onset/offset and decoding chance dashed lines
-    axs[s].plot([0, 0], [100, -100], 'k--', [3, 3], [100, -100], 'k--',
-        [-10, 10], [50, 50], 'k--', linewidth=2, alpha=.25,
-        label='_nolegend_')
+#     # Plot the stimulus onset/offset and decoding chance dashed lines
+#     axs[s].plot([0, 0], [100, -100], 'k--', [3, 3], [100, -100], 'k--',
+#         [-10, 10], [50, 50], 'k--', linewidth=2, alpha=.25,
+#         label='_nolegend_')
 
-    # Plot the decoding results of each subject
-    axs[s].plot(times, decoding_gaze[s], color=colors[0], linewidth=2,
-        alpha=1, label='Gaze')
-    axs[s].plot(times, decoding_pupil[s], color=colors[1], linewidth=2,
-        alpha=1, label='Pupil')
+#     # Plot the decoding results of each subject
+#     axs[s].plot(times, decoding_gaze[s], color=colors[0], linewidth=2,
+#         alpha=1, label='Gaze')
+#     axs[s].plot(times, decoding_pupil[s], color=colors[1], linewidth=2,
+#         alpha=1, label='Pupil')
 
-    # Plot title
-    axs[s].set_title(f'Participant {sub}', fontsize=fontsize)
+#     # Plot title
+#     axs[s].set_title(f'Participant {sub}', fontsize=fontsize)
 
-    # x-axis parameters
-    if s == len(args.subjects)-1:
-        axs[s].set_xlabel('Time (s)', fontsize=fontsize)
-        xticks = [0, .5, 1, 1.5, 2, 2.5, 3, 3.498]
-        xlabels = [0, .5, 1, 1.5, 2, 2.5, 3, 3.5]
-        axs[s].set_xticks(ticks=xticks, labels=xlabels)
-        axs[s].set_xlim(left=min(times), right=max(times))
+#     # x-axis parameters
+#     if s == len(args.subjects)-1:
+#         axs[s].set_xlabel('Time (s)', fontsize=fontsize)
+#         xticks = [0, .5, 1, 1.5, 2, 2.5, 3, 3.498]
+#         xlabels = [0, .5, 1, 1.5, 2, 2.5, 3, 3.5]
+#         axs[s].set_xticks(ticks=xticks, labels=xlabels)
+#         axs[s].set_xlim(left=min(times), right=max(times))
 
-    # y-axis parameters
-    axs[s].set_ylabel("Decoding accuracy (%)", fontsize=fontsize)
-    yticks = [50, 60, 70, 80, 90, 100]
-    ylabels = [50, 60, 70, 80, 90, 100]
-    axs[s].set_yticks(ticks=yticks, labels=ylabels)
-    axs[s].set_ylim(bottom=45, top=80)
+#     # y-axis parameters
+#     axs[s].set_ylabel("Decoding accuracy (%)", fontsize=fontsize)
+#     yticks = [50, 60, 70, 80, 90, 100]
+#     ylabels = [50, 60, 70, 80, 90, 100]
+#     axs[s].set_yticks(ticks=yticks, labels=ylabels)
+#     axs[s].set_ylim(bottom=45, top=80)
 
-    # Legend
-    if s == 0:
-        axs[s].legend(loc=0, ncol=2, fontsize=fontsize, frameon=False)
+#     # Legend
+#     if s == 0:
+#         axs[s].legend(loc=0, ncol=2, fontsize=fontsize, frameon=False)
 
-# Save the figure
-file_name = os.path.join(save_dir, 'pairwise_decoding.svg')
-fig.savefig(file_name, bbox_inches='tight', transparent=True, format='svg')
-plt.close()
+# # Save the figure
+# file_name = os.path.join(save_dir, 'pairwise_decoding.svg')
+# fig.savefig(file_name, bbox_inches='tight', transparent=True, format='svg')
+# plt.close()
