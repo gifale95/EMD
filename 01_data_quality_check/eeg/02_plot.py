@@ -7,8 +7,8 @@ subjects : list
     List of used subjects.
 channels : list
     List of all channel types used for decoding.
-project_dir : str
-    Directory of the project folder.
+emd_dir : str
+    Directory of the EEG Moments Dataset (EMD).
 
 """
 
@@ -28,14 +28,14 @@ import csv
 parser = argparse.ArgumentParser()
 parser.add_argument('--subjects', default=[1, 2, 3, 4, 5, 6], type=list)
 parser.add_argument('--channels', default=['O', 'P', 'T', 'C', 'F'], type=list)
-parser.add_argument('--project_dir', default='/scratch/giffordale95/projects/eeg_moments_dataset', type=str)
+parser.add_argument('--emd_dir', default='/scratch/giffordale95/projects/eeg_moments_dataset', type=str)
 args, unknown = parser.parse_known_args()
 
 
 # =============================================================================
 # Plot save directory
 # =============================================================================
-save_dir = os.path.join(args.project_dir, 'results', 'data_quality_check',
+save_dir = os.path.join(args.emd_dir, 'results', 'data_quality_check',
     'eeg', 'plots')
 os.makedirs(save_dir, exist_ok=True)
 
@@ -47,7 +47,7 @@ sessions = 8
 
 erps = []
 for sub in tqdm(args.subjects):
-    data_dir = os.path.join(args.project_dir, 'derivatives', 'eeg',
+    data_dir = os.path.join(args.emd_dir, 'derivatives', 'eeg',
         f'sub-{sub:02}')
     data_ses = []
     for ses in range(1, sessions+1):
@@ -70,7 +70,7 @@ noise_ceiling = []
 trial_number = []
 
 for sub in args.subjects:
-    data_dir = os.path.join(args.project_dir, 'derivatives', 'eeg',
+    data_dir = os.path.join(args.emd_dir, 'derivatives', 'eeg',
         f'sub-{sub:02}', f'sub-{sub:02}_eeg_metadata.npy')
     metadata = np.load(data_dir, allow_pickle=True).item()
     ncsnr.append(metadata['ncsnr'])
@@ -89,7 +89,7 @@ noise_ceiling = np.asarray(noise_ceiling)
 decoding = {}
 for s, sub in enumerate(args.subjects):
     for c, chan in enumerate(args.channels):
-        data_dir = os.path.join(args.project_dir, 'results',
+        data_dir = os.path.join(args.emd_dir, 'results',
             'data_quality_check', 'eeg', 'pairwise_decoding_rdms',
             f'rdms_sub-{sub:02d}_channels-{chan}.npy')
         rdms = np.load(data_dir)

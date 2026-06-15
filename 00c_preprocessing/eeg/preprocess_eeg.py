@@ -23,8 +23,8 @@ lowpass : float
     Lowpass filter frequency.
 highpass : float
     Highpass filter frequency.
-project_dir : str
-    Directory of the project folder.
+emd_dir : str
+    Directory of the EEG Moments Dataset (EMD).
 
 """
 
@@ -50,7 +50,7 @@ parser.add_argument('--baseline', default=(-.2, 0), type=tuple)
 parser.add_argument('--sfreq', default=500, type=int)
 parser.add_argument('--lowpass', default=40, type=float)
 parser.add_argument('--highpass', default=0.1, type=float)
-parser.add_argument('--project_dir', default='/scratch/giffordale95/projects/eeg_moments_dataset', type=str)
+parser.add_argument('--emd_dir', default='/scratch/giffordale95/projects/eeg_moments_dataset', type=str)
 args, unknown = parser.parse_known_args()
 
 print('\n\n\n>>> Preprocess the raw EEG data <<<')
@@ -90,12 +90,12 @@ ncsnr, noise_ceiling = compute_ncsnr(preprocessed_eeg, stimulus_id_list)
 # Save the preprocessed EEG data and metadata
 # =============================================================================
 # Save directory
-save_dir = os.path.join(args.project_dir, 'derivatives', 'eeg_eyeblink_removal',
+save_dir = os.path.join(args.emd_dir, 'derivatives', 'eeg_eyeblink_removal',
     f'sub-{args.subject:02}')
 os.makedirs(save_dir, exist_ok=True)
 
 # Save the EEG metadata
-del args.project_dir
+del args.emd_dir
 metadata = {
     'args': args,
     'stimulus_id': stimulus_id,

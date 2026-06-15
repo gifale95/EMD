@@ -9,8 +9,8 @@ Parameters
 ----------
 model_name : str
     Name of the language model used to extract the stimulus features.
-project_dir : str
-    Directory of the project folder.
+emd_dir : str
+    Directory of the EEG Moments Dataset (EMD).
 
 """
 
@@ -29,7 +29,7 @@ from sklearn.decomposition import PCA
 # =============================================================================
 parser = argparse.ArgumentParser()
 parser.add_argument('--model_name', default='all-mpnet-base-v2', type=str)
-parser.add_argument('--project_dir', default='/scratch/giffordale95/projects/eeg_moments_dataset', type=str)
+parser.add_argument('--emd_dir', default='/scratch/giffordale95/projects/eeg_moments_dataset', type=str)
 args, unknown = parser.parse_known_args()
 
 print('>>> Extract language features <<<')
@@ -47,7 +47,7 @@ model = SentenceTransformer(f'sentence-transformers/{args.model_name}')
 # =============================================================================
 # Load the stimulus annotations
 # =============================================================================
-annotations_dir = os.path.join(args.project_dir, 'derivatives',
+annotations_dir = os.path.join(args.emd_dir, 'derivatives',
     'stimuli_metadata', 'annotations.json')
 
 annotations = json.load(open(annotations_dir))
@@ -114,7 +114,7 @@ embeddings_test = np.reshape(embeddings_test,
 # =============================================================================
 # Save the language features
 # =============================================================================
-save_dir = os.path.join(args.project_dir, 'results', 'stimulus_features',
+save_dir = os.path.join(args.emd_dir, 'results', 'stimulus_features',
     'language_features', args.model_name)
 os.makedirs(save_dir, exist_ok=True)
 

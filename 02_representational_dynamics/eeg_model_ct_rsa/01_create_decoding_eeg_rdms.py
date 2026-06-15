@@ -5,8 +5,8 @@ Parameters
 ----------
 subject : int
     Used subject.
-project_dir : str
-    Directory of the project folder.
+emd_dir : str
+    Directory of the EEG Moments Dataset (EMD).
 
 """
 
@@ -25,7 +25,7 @@ from sklearn.svm import SVC
 # =============================================================================
 parser = argparse.ArgumentParser()
 parser.add_argument('--subject', default=1, type=int)
-parser.add_argument('--project_dir', default='/scratch/giffordale95/projects/eeg_moments_dataset', type=str)
+parser.add_argument('--emd_dir', default='/scratch/giffordale95/projects/eeg_moments_dataset', type=str)
 args, unknown = parser.parse_known_args()
 
 print('>>> Decoding EEG RDMs <<<')
@@ -42,7 +42,7 @@ np.random.seed(seed)
 # Load the EEG responses for the 102 test videos
 # =============================================================================
 # Load the stimulus IDs
-data_dir = os.path.join(args.project_dir, 'derivatives', 'eeg',
+data_dir = os.path.join(args.emd_dir, 'derivatives', 'eeg',
     f'sub-{args.subject:02}')
 file_name = f'sub-{args.subject:02}_eeg_metadata.npy'
 metadata = np.load(os.path.join(data_dir, file_name), allow_pickle=True).item()
@@ -151,7 +151,7 @@ for t in tqdm(range(eeg_pseudo.shape[3])):
 # =============================================================================
 # Save the results
 # =============================================================================
-save_dir = os.path.join(args.project_dir, 'results',
+save_dir = os.path.join(args.emd_dir, 'results',
     'representational_dynamics', 'eeg_model_ct_rsa', 'eeg_rdms')
 os.makedirs(save_dir, exist_ok=True)
 

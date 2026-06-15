@@ -5,8 +5,8 @@ Parameters
 ----------
 subject : int
     Used subject.
-project_dir : str
-    Directory of the project folder.
+emd_dir : str
+    Directory of the EEG Moments Dataset (EMD).
 
 """
 
@@ -25,7 +25,7 @@ from scipy.stats import pearsonr
 # =============================================================================
 parser = argparse.ArgumentParser()
 parser.add_argument('--subject', default=1, type=int)
-parser.add_argument('--project_dir', default='/scratch/giffordale95/projects/eeg_moments_dataset', type=str)
+parser.add_argument('--emd_dir', default='/scratch/giffordale95/projects/eeg_moments_dataset', type=str)
 args, unknown = parser.parse_known_args()
 
 print('>>> Partial correlation <<<')
@@ -38,7 +38,7 @@ for key, val in vars(args).items():
 # Load the EEG responses for the 102 test videos
 # =============================================================================
 # Load the stimulus IDs
-data_dir = os.path.join(args.project_dir, 'derivatives', 'eeg',
+data_dir = os.path.join(args.emd_dir, 'derivatives', 'eeg',
     f'sub-{args.subject:02}')
 file_name = f'sub-{args.subject:02}_eeg_metadata.npy'
 metadata = np.load(os.path.join(data_dir, file_name), allow_pickle=True).item()
@@ -88,9 +88,9 @@ eeg_test = np.reshape(eeg_test, (len(eeg_test), -1))
 # Load the test stimulus features
 # =============================================================================
 # Load the stimulus features
-feature_dir_vision = os.path.join(args.project_dir, 'results',
+feature_dir_vision = os.path.join(args.emd_dir, 'results',
     'stimulus_features', 'vision_features', 's3d', 'vision_features_test.npy')
-feature_dir_language = os.path.join(args.project_dir, 'results',
+feature_dir_language = os.path.join(args.emd_dir, 'results',
     'stimulus_features', 'language_features', 'all-mpnet-base-v2',
     'language_features_test.npy')
 vision_features_test = np.load(feature_dir_vision)
@@ -101,9 +101,9 @@ language_features_test = np.load(feature_dir_language)
 # Instantiate the encoding models with the trained weights
 # =============================================================================
 # Load the trained encoding model weights
-reg_dir_vision = os.path.join(args.project_dir, 'results', 'encoding_models',
+reg_dir_vision = os.path.join(args.emd_dir, 'results', 'encoding_models',
     'model_weights', f'weights_sub-{args.subject:02}_modality_vision.npy')
-reg_dir_language = os.path.join(args.project_dir, 'results', 'encoding_models',
+reg_dir_language = os.path.join(args.emd_dir, 'results', 'encoding_models',
     'model_weights', f'weights_sub-{args.subject:02}_modality_language.npy')
 reg_param_vision = np.load(reg_dir_vision, allow_pickle=True).item()
 reg_param_language = np.load(reg_dir_language, allow_pickle=True).item()
@@ -222,7 +222,7 @@ results = {
     'unique_variance_language': unique_variance_language
 }
 
-save_dir = os.path.join(args.project_dir, 'results', 'encoding_models',
+save_dir = os.path.join(args.emd_dir, 'results', 'encoding_models',
     'partial_correlation')
 os.makedirs(save_dir, exist_ok=True)
 

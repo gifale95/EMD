@@ -16,8 +16,8 @@ baseline_correction : str
     data at all ['none'].
 sfreq : int
     Downsampling frequency.
-project_dir : str
-    Directory of the project folder.
+emd_dir : str
+    Directory of the EEG Moments Dataset (EMD).
 
 """
 
@@ -39,7 +39,7 @@ parser.add_argument('--tmin', default=-.1, type=float)
 parser.add_argument('--tmax', default=3.5, type=float)
 parser.add_argument('--baseline_correction', default='baseline', type=str)
 parser.add_argument('--sfreq', default=500, type=int)
-parser.add_argument('--project_dir', default='/scratch/giffordale95/projects/eeg_moments_dataset', type=str)
+parser.add_argument('--emd_dir', default='/scratch/giffordale95/projects/eeg_moments_dataset', type=str)
 args, unknown = parser.parse_known_args()
 
 # Printing the arguments
@@ -72,12 +72,12 @@ for ses in range(1, args.tot_sessions+1):
 # Save the preprocessed eye-tracking data
 # =============================================================================
 # Save diorectory
-save_dir = os.path.join(args.project_dir, 'derivatives', 'eyetracking',
+save_dir = os.path.join(args.emd_dir, 'derivatives', 'eyetracking',
     f'sub-{args.subject:02}')
 os.makedirs(save_dir, exist_ok=True)
 
 # Save the eyetracking metadata
-del args.project_dir
+del args.emd_dir
 metadata = {
     'args': args,
     'stimulus_id': stimulus_id,

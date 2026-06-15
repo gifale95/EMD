@@ -5,8 +5,8 @@ Parameters
 ----------
 subject : int
     Used subject.
-project_dir : str
-    Directory of the project folder.
+emd_dir : str
+    Directory of the EEG Moments Dataset (EMD).
 
 """
 
@@ -22,7 +22,7 @@ from tqdm import tqdm
 # =============================================================================
 parser = argparse.ArgumentParser()
 parser.add_argument('--subject', default=1, type=int)
-parser.add_argument('--project_dir', default='/scratch/giffordale95/projects/eeg_moments_dataset', type=str)
+parser.add_argument('--emd_dir', default='/scratch/giffordale95/projects/eeg_moments_dataset', type=str)
 args, unknown = parser.parse_known_args()
 
 print('>>> Eyetracking metrics <<<')
@@ -35,7 +35,7 @@ for key, val in vars(args).items():
 # Load the eyetracking data for all videos
 # =============================================================================
 # Loop across eyetracking recording sessions
-data_dir = os.path.join(args.project_dir, 'derivatives', 'eyetracking',
+data_dir = os.path.join(args.emd_dir, 'derivatives', 'eyetracking',
     f'sub-{args.subject:02}')
 n_sessions = 8
 eye = []
@@ -118,7 +118,7 @@ results = {
     'avg_pupil_size': avg_pupil_size
 }
 
-save_dir = os.path.join(args.project_dir, 'results', 'data_quality_check',
+save_dir = os.path.join(args.emd_dir, 'results', 'data_quality_check',
     'eyetracking', 'gaze_pupil_metrics')
 os.makedirs(save_dir, exist_ok=True)
 

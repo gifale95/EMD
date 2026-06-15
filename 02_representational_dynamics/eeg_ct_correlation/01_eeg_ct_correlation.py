@@ -7,8 +7,8 @@ subject : int
     Used subject.
 n_iter : int
     Number of iterations for the pseudo-trial creation.
-project_dir : str
-    Directory of the project folder.
+emd_dir : str
+    Directory of the EEG Moments Dataset (EMD).
 
 """
 
@@ -27,7 +27,7 @@ from sklearn.utils import resample
 parser = argparse.ArgumentParser()
 parser.add_argument('--subject', default=1, type=int)
 parser.add_argument('--n_iter', default=10000, type=int)
-parser.add_argument('--project_dir', default='/scratch/giffordale95/projects/eeg_moments_dataset', type=str)
+parser.add_argument('--emd_dir', default='/scratch/giffordale95/projects/eeg_moments_dataset', type=str)
 args, unknown = parser.parse_known_args()
 
 print('>>> Cross-temporal RSA <<<')
@@ -44,7 +44,7 @@ np.random.seed(seed)
 # Load the EEG responses for the 102 test videos
 # =============================================================================
 # Load the stimulus IDs
-data_dir = os.path.join(args.project_dir, 'derivatives', 'eeg',
+data_dir = os.path.join(args.emd_dir, 'derivatives', 'eeg',
     f'sub-{args.subject:02}')
 file_name = f'sub-{args.subject:02}_eeg_metadata.npy'
 metadata = np.load(os.path.join(data_dir, file_name), allow_pickle=True).item()
@@ -133,7 +133,7 @@ ct_corr = ct_corr / args.n_iter
 # =============================================================================
 # Save the results
 # =============================================================================
-save_dir = os.path.join(args.project_dir, 'results',
+save_dir = os.path.join(args.emd_dir, 'results',
     'representational_dynamics', 'eeg_ct_correlation', 'ct_correlation')
 os.makedirs(save_dir, exist_ok=True)
 

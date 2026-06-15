@@ -11,8 +11,8 @@ model_name : str
     Name of the vision model used to extract the stimulus features.
 batch_size : int
     Stimulus batch size for model feature extraction.
-project_dir : str
-    Directory of the project folder.
+emd_dir : str
+    Directory of the EEG Moments Dataset (EMD).
 
 """
 
@@ -37,7 +37,7 @@ from scipy.linalg import eigh
 parser = argparse.ArgumentParser()
 parser.add_argument('--model_name', default='s3d', type=str)
 parser.add_argument('--batch_size', default=4, type=int)
-parser.add_argument('--project_dir', default='/scratch/giffordale95/projects/eeg_moments_dataset', type=str)
+parser.add_argument('--emd_dir', default='/scratch/giffordale95/projects/eeg_moments_dataset', type=str)
 args, unknown = parser.parse_known_args()
 
 print('>>> Extract vision features <<<')
@@ -230,7 +230,7 @@ elif args.model_name == 'slow_r50':
 # =============================================================================
 # Create the dataset and dataloader
 # =============================================================================
-video_dir = os.path.join(args.project_dir, 'stimuli')
+video_dir = os.path.join(args.emd_dir, 'stimuli')
 
 # Create the dataset
 dataset = VideoDataset(video_dir=video_dir, num_samples=num_samples,
@@ -352,7 +352,7 @@ features_test  = transform_pca_float32(features_test,  principal_axes,
 # =============================================================================
 # Save the vision features
 # =============================================================================
-save_dir = os.path.join(args.project_dir, 'results', 'stimulus_features',
+save_dir = os.path.join(args.emd_dir, 'results', 'stimulus_features',
     'vision_features', args.model_name)
 os.makedirs(save_dir, exist_ok=True)
 

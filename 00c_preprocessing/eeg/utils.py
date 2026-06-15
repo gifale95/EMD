@@ -36,12 +36,12 @@ def preprocess_eeg(args, session):
     from autoreject import AutoReject
 
     ### Get the EEG files ###
-    eeg_files = glob(os.path.join(args.project_dir, f'sub-{args.subject:02}',
+    eeg_files = glob(os.path.join(args.emd_dir, f'sub-{args.subject:02}',
         f'ses-{session:02}', 'eeg', '*.vhdr'))
     eeg_files.sort()
 
     ### Get the event files ###
-    event_files = glob(os.path.join(args.project_dir, f'sub-{args.subject:02}',
+    event_files = glob(os.path.join(args.emd_dir, f'sub-{args.subject:02}',
         f'ses-{session:02}', 'eeg', '*events.tsv'))
     event_files.sort()
 

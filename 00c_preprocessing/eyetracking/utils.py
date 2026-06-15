@@ -31,12 +31,12 @@ def preprocess_eyetracking(args, session):
     from scipy.signal import butter, filtfilt
 
     ### Get the eyetracking files ###
-    eye_files = glob(os.path.join(args.project_dir, f'sub-{args.subject:02}',
+    eye_files = glob(os.path.join(args.emd_dir, f'sub-{args.subject:02}',
         f'ses-{session:02}', 'eeg', '*physio.tsv.gz'))
     eye_files.sort()
 
     ### Get the event files ###
-    event_files = glob(os.path.join(args.project_dir, f'sub-{args.subject:02}',
+    event_files = glob(os.path.join(args.emd_dir, f'sub-{args.subject:02}',
         f'ses-{session:02}', 'eeg', '*physioevents.tsv.gz'))
     event_files.sort()
 

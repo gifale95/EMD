@@ -4,8 +4,8 @@ Parameters
 ----------
 subjects : list
     List of used subjects.
-project_dir : str
-    Directory of the project folder.
+emd_dir : str
+    Directory of the EEG Moments Dataset (EMD).
 
 """
 
@@ -21,14 +21,14 @@ from matplotlib import pyplot as plt
 # =============================================================================
 parser = argparse.ArgumentParser()
 parser.add_argument('--subjects', default=[1, 2, 3, 4, 5, 6], type=list)
-parser.add_argument('--project_dir', default='/scratch/giffordale95/projects/eeg_moments_dataset', type=str)
+parser.add_argument('--emd_dir', default='/scratch/giffordale95/projects/eeg_moments_dataset', type=str)
 args, unknown = parser.parse_known_args()
 
 
 # =============================================================================
 # Plot save directory
 # =============================================================================
-save_dir = os.path.join(args.project_dir, 'results', 'encoding_models',
+save_dir = os.path.join(args.emd_dir, 'results', 'encoding_models',
     'plots')
 os.makedirs(save_dir, exist_ok=True)
 
@@ -36,7 +36,7 @@ os.makedirs(save_dir, exist_ok=True)
 # =============================================================================
 # Load the EEG channels and time points
 # =============================================================================
-data_dir = os.path.join(args.project_dir, 'derivatives', 'eeg',
+data_dir = os.path.join(args.emd_dir, 'derivatives', 'eeg',
     f'sub-{args.subjects[0]:02}', f'sub-{args.subjects[0]:02}_eeg_metadata.npy')
 metadata = np.load(data_dir, allow_pickle=True).item()
 times = metadata['times']
@@ -46,7 +46,7 @@ ch_names = metadata['ch_names']
 # =============================================================================
 # Load the partial correlation results
 # =============================================================================
-data_dir = os.path.join(args.project_dir, 'results', 'encoding_models',
+data_dir = os.path.join(args.emd_dir, 'results', 'encoding_models',
     'stats', 'stats.npy')
 data = np.load(data_dir, allow_pickle=True).item()
 partial_correlation = data['partial_correlation']

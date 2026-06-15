@@ -7,8 +7,8 @@ subject : int
 modality : str
     Whether to train the EEG encoding models using 'vision' or 'language'
     stimulus features.
-project_dir : str
-    Directory of the project folder.
+emd_dir : str
+    Directory of the EEG Moments Dataset (EMD).
 
 """
 
@@ -27,7 +27,7 @@ from sklearn.linear_model import LinearRegression
 parser = argparse.ArgumentParser()
 parser.add_argument('--subject', default=1, type=int)
 parser.add_argument('--modality', default='vision', type=str)
-parser.add_argument('--project_dir', default='/scratch/giffordale95/projects/eeg_moments_dataset', type=str)
+parser.add_argument('--emd_dir', default='/scratch/giffordale95/projects/eeg_moments_dataset', type=str)
 args, unknown = parser.parse_known_args()
 
 print('>>> Train encoding <<<')
@@ -40,7 +40,7 @@ for key, val in vars(args).items():
 # Load the EEG responses for the 1000 train videos
 # =============================================================================
 # Load the stimulus IDs
-data_dir = os.path.join(args.project_dir, 'derivatives', 'eeg',
+data_dir = os.path.join(args.emd_dir, 'derivatives', 'eeg',
     f'sub-{args.subject:02}')
 file_name = f'sub-{args.subject:02}_eeg_metadata.npy'
 metadata = np.load(os.path.join(data_dir, file_name), allow_pickle=True).item()
@@ -93,7 +93,7 @@ if args.modality == 'vision':
     model = 's3d'
 elif args.modality == 'language':
     model = 'all-mpnet-base-v2'
-feature_dir = os.path.join(args.project_dir, 'results', 'stimulus_features',
+feature_dir = os.path.join(args.emd_dir, 'results', 'stimulus_features',
     f'{args.modality}_features', model, f'{args.modality}_features_train.npy')
 features_train = np.load(feature_dir)
 
@@ -123,7 +123,7 @@ reg_param = {
 # =============================================================================
 # Save the encoding model weights
 # =============================================================================
-save_dir = os.path.join(args.project_dir, 'results', 'encoding_models',
+save_dir = os.path.join(args.emd_dir, 'results', 'encoding_models',
     'model_weights')
 os.makedirs(save_dir, exist_ok=True)
 

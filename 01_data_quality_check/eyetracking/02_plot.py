@@ -6,8 +6,8 @@ Parameters
 ----------
 subjects : list
     List of used subjects.
-project_dir : str
-    Directory of the project folder.
+emd_dir : str
+    Directory of the EEG Moments Dataset (EMD).
 
 """
 
@@ -24,14 +24,14 @@ import csv
 # =============================================================================
 parser = argparse.ArgumentParser()
 parser.add_argument('--subjects', default=[1, 2, 3, 4, 5, 6], type=list)
-parser.add_argument('--project_dir', default='/scratch/giffordale95/projects/eeg_moments_dataset', type=str)
+parser.add_argument('--emd_dir', default='/scratch/giffordale95/projects/eeg_moments_dataset', type=str)
 args, unknown = parser.parse_known_args()
 
 
 # =============================================================================
 # Plot save directory
 # =============================================================================
-save_dir = os.path.join(args.project_dir, 'results', 'data_quality_check',
+save_dir = os.path.join(args.emd_dir, 'results', 'data_quality_check',
     'eyetracking', 'plots')
 os.makedirs(save_dir, exist_ok=True)
 
@@ -42,7 +42,7 @@ os.makedirs(save_dir, exist_ok=True)
 trial_number = []
 
 for sub in args.subjects:
-    data_dir = os.path.join(args.project_dir, 'derivatives', 'eyetracking',
+    data_dir = os.path.join(args.emd_dir, 'derivatives', 'eyetracking',
         f'sub-{sub:02}', f'sub-{sub:02}_eyetracking_metadata.npy')
     metadata = np.load(data_dir, allow_pickle=True).item()
     trial_number.append(metadata['trial_number'])
@@ -57,7 +57,7 @@ cdf_fixations = []
 avg_pupil_size = []
 
 for s, sub in enumerate(args.subjects):
-    data_dir = os.path.join(args.project_dir, 'results', 'data_quality_check',
+    data_dir = os.path.join(args.emd_dir, 'results', 'data_quality_check',
         'eyetracking', 'gaze_pupil_metrics',
         f'gaze_pupil_metrics_sub-{sub:02d}.npy')
     data = np.load(data_dir, allow_pickle=True).item()
@@ -76,7 +76,7 @@ avg_pupil_size = np.array(avg_pupil_size)
 # decoding_pupil = []
 
 # for s, sub in enumerate(args.subjects):
-#     data_dir = os.path.join(args.project_dir, 'results', 'data_quality_check',
+#     data_dir = os.path.join(args.emd_dir, 'results', 'data_quality_check',
 #         'eyetracking', 'pairwise_decoding_rdms')
 #     pupil_file = f'pupil_rdms_sub-{sub:02d}.npy'
 #     rdms_pupil = np.load(os.path.join(data_dir, pupil_file))
