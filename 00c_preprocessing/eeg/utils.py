@@ -99,7 +99,7 @@ def preprocess_eeg(args, session):
 
         ### Get the channel names and time points ###
         ch_names = epochs_clean.info['ch_names']
-        times = epochs_clean.times
+        times = np.round(epochs_clean.times, 3)
 
         ### Match the EEG events with the stimulus IDs ###
         events = epochs_clean.events

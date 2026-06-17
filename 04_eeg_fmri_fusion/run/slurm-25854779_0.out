@@ -1,21 +1,0 @@
-SLURM_ARRAY_JOB_ID: 0
-eeg_subject: 1
-eeg_time_split: 0
-fmri_subject: 1
-fmri_hemi: left
->>> Train EEG-fMRI encoding fusion<<<
-
-Input arguments:
-eeg_subject      1
-fmri_subject     1
-fmri_hemi        left
-tot_eeg_time_splits 5
-eeg_time_split   0
-emd_dir          /scratch/giffordale95/projects/eeg_moments_dataset
-bmd_dir          /scratch/giffordale95/projects/eeg_moments_dataset/bold_moments_dataset
-  0%|          | 0/8 [00:00<?, ?it/s] 12%|█▎        | 1/8 [00:01<00:13,  1.90s/it] 25%|██▌       | 2/8 [00:03<00:11,  1.91s/it] 38%|███▊      | 3/8 [00:34<01:15, 15.09s/it] 50%|█████     | 4/8 [00:36<00:39,  9.96s/it] 62%|██████▎   | 5/8 [00:38<00:21,  7.11s/it] 75%|███████▌  | 6/8 [00:40<00:10,  5.28s/it] 88%|████████▊ | 7/8 [01:10<00:13, 13.39s/it]100%|██████████| 8/8 [01:12<00:00,  9.82s/it]100%|██████████| 8/8 [01:12<00:00,  9.09s/it]
-/home/giffordale95/projects/eeg_moments_dataset/github/EMD/04_eeg_fmri_fusion/01_encoding_fusion.py:131: DeprecationWarning: numpy.core.numeric is deprecated and has been renamed to numpy._core.numeric. The numpy._core namespace contains private NumPy internals and its use is discouraged, as NumPy internals can change without warning in any release. In practice, most real-world usage of numpy.core is to access functionality in the public NumPy API. If that is the case, use the public NumPy API. If not, you are using NumPy internals. If you would still like to access an internal attribute, use numpy._core.numeric._frombuffer.
-  fmri_train = pickle.load(f)[0]
-/home/giffordale95/projects/eeg_moments_dataset/github/EMD/04_eeg_fmri_fusion/01_encoding_fusion.py:138: DeprecationWarning: numpy.core.numeric is deprecated and has been renamed to numpy._core.numeric. The numpy._core namespace contains private NumPy internals and its use is discouraged, as NumPy internals can change without warning in any release. In practice, most real-world usage of numpy.core is to access functionality in the public NumPy API. If that is the case, use the public NumPy API. If not, you are using NumPy internals. If you would still like to access an internal attribute, use numpy._core.numeric._frombuffer.
-  fmri_test = pickle.load(f)[0]
-  0%|          | 0/360 [00:00<?, ?it/s]  0%|          | 1/360 [01:39<9:58:16, 99.99s/it]  1%|          | 2/360 [03:24<10:11:44, 102.53s/it]  1%|          | 3/360 [05:06<10:07:55, 102.17s/it]  1%|          | 4/360 [06:50<10:10:50, 102.95s/it]  1%|▏         | 5/360 [08:32<10:08:03, 102.77s/it]  2%|▏         | 6/360 [10:15<10:06:15, 102.76s/it]  2%|▏         | 7/360 [11:57<10:04:06, 102.68s/it]  2%|▏         | 8/360 [13:41<10:03:50, 102.93s/it]  2%|▎         | 9/360 [15:27<10:07:56, 103.92s/it]  3%|▎         | 10/360 [17:15<10:12:55, 105.07s/it]  3%|▎         | 11/360 [19:02<10:15:04, 105.74s/it]  3%|▎         | 12/360 [20:49<10:15:05, 106.05s/it]  4%|▎         | 13/360 [22:36<10:15:27, 106.42s/it]  4%|▍         | 14/360 [24:23<10:15:27, 106.73s/it]  4%|▍         | 15/360 [26:19<10:28:57, 109.39s/it]  4%|▍         | 16/360 [28:14<10:37:03, 111.11s/it]  5%|▍         | 17/360 [30:10<10:43:24, 112.55s/it]  5%|▌         | 18/360 [32:06<10:48:20, 113.74s/it]  5%|▌         | 19/360 [34:03<10:51:44, 114.67s/it]  6%|▌         | 20/360 [35:59<10:52:16, 115.11s/it]  6%|▌         | 21/360 [37:58<10:55:46, 116.07s/it]  6%|▌         | 22/360 [39:55<10:55:12, 116.31s/it]  6%|▋         | 23/360 [41:51<10:53:18, 116.32s/it]  7%|▋         | 24/360 [43:48<10:52:42, 116.55s/it]  7%|▋         | 25/360 [45:44<10:50:11, 116.45s/it]  7%|▋         | 26/360 [47:41<10:49:31, 116.68s/it]  8%|▊         | 27/360 [49:37<10:45:42, 116.34s/it]  8%|▊         | 28/360 [51:33<10:42:30, 116.11s/it]  8%|▊         | 29/360 [53:29<10:41:26, 116.27s/it]  8%|▊         | 30/360 [55:26<10:40:20, 116.43s/it]

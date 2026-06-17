@@ -13,7 +13,7 @@ declare -a fmri_subject_all
 declare -a fmri_hemi_all
 index=0
 
-for es in `seq 1 6` ; do
+for es in `seq 1 3` ; do
     for et in `seq 0 4` ; do
         for fs in `seq 1 10` ; do
             for fh in 'left' 'right' ; do
