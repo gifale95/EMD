@@ -47,7 +47,7 @@ for key, val in vars(args).items():
 # =============================================================================
 dataset_description_json = {
     "Name": "EEG Moments Dataset (EMD)",
-    "BIDSVersion": "1.11.11",
+    "BIDSVersion": "1.9.0",
     "DatasetType": "raw",
     "License": "CC NC 4.0",
     "Authors": [
@@ -100,20 +100,19 @@ del participants
 # Create the *_eeg.json file (EEG)
 # =============================================================================
 eeg_json = {
-    "EEGReference":"single electrode placed on FCz",
-    "EEGGround":"placed on Fpz",
+    "EEGReference":"FCz",
+    "EEGGround":"Fpz",
     "SamplingFrequency":1000,
     "PowerLineFrequency":50,
     "SoftwareFilters":{
-        "HighpassFilter": "n/a",
-        "LowpassFilter": 280,
-        "NotchFilter": "n/a"
+        "LowpassFilter": {
+            "MaximumFrequency": 280
+        }
     },
     "EEGChannelCount":128,
     "ECGChannelCount":0,
     "EMGChannelCount":0,
     "EOGChannelCount":0,
-    "MISCChannelCount":0,
     "RecordingType":"continuous",
     "EEGPlacementScheme":"10-10",
     "CapManufacturer":"EasyCap",
@@ -149,11 +148,7 @@ events_json = {
     },
     "stim_id": {
         "LongName": "Stimulus ID",
-        "Description": "Index indicating the number ID of the presented video.",
-        "Levels": {
-            "[1 1000]": "Videos belonging to the trainining split.",
-            "[1001 1102]": "Videos belonging to the test split."
-        }
+        "Description": "Index indicating the number ID of the presented video. Stimuli with stim_id in the range [1, 1000] belong to the training split, and stimuli with stim_id in the range [1001, 1102] belong to the test split."
     },
     "stim_file": {
         "LongName": "Stimulus File",
@@ -218,7 +213,14 @@ physio_json = {
     "ManufacturersModelName": "EYELINK II 1",
     "DeviceSerialNumber": "CL1-82113",
     "EyeTrackingMethod": "P-CR",
-    "SamplingFrequency": 1000
+    "SamplingFrequency": 1000,
+    "StimulusPresentation": {
+        "ScreenDistance": 0.6,
+        "ScreenOrigin": ["top", "left"],
+        "ScreenRefreshRate": 60,
+        "ScreenResolution": [1680, 1050],
+        "ScreenSize": [0.475, 0.297]
+    }
 }
 
 file_name_json = os.path.join(args.dataset_dir, "task-video_recording-eye1_physio.json")
@@ -253,11 +255,7 @@ events_json = {
     },
     "stim_id": {
         "LongName": "Stimulus ID",
-        "Description": "Index indicating the number ID of the presented video.",
-        "Levels": {
-            "[1 1000]": "Videos belonging to the trainining split.",
-            "[1001 1102]": "Videos belonging to the test split."
-        }
+        "Description": "Index indicating the number ID of the presented video. Stimuli with stim_id in the range [1, 1000] belong to the training split, and stimuli with stim_id in the range [1001, 1102] belong to the test split."
     },
     "stim_file": {
         "LongName": "Stimulus File",

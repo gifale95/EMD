@@ -32,7 +32,7 @@ for key, val in vars(args).items():
 # Load the results
 # =============================================================================
 # Load the results
-results_dir = os.path.join(args.emd_dir, 'results', 'eeg_fmri_encoding_fusion',
+results_dir = os.path.join(args.emd_dir, 'results', 'eeg_fmri_encoding_fusion_all_sub',
     'stats', 'stats.npy')
 stats = np.load(results_dir, allow_pickle=True).item()
 lh_correlation = stats['lh_correlation']
@@ -49,7 +49,7 @@ times = np.load(metadata_dir, allow_pickle=True).item()['times']
 # =============================================================================
 # Create the plots save directory
 # =============================================================================
-save_dir = os.path.join(args.emd_dir, 'results', 'eeg_fmri_encoding_fusion',
+save_dir = os.path.join(args.emd_dir, 'results', 'eeg_fmri_encoding_fusion_all_sub',
     'plots', 'encoding_accuracy_surfaceplots')
 os.makedirs(save_dir, exist_ok=True)
 
@@ -194,7 +194,7 @@ plt.ylim(bottom=-.05, top=.35)
 plt.legend(fontsize=fontsize, loc=0, ncols=4, frameon=False)
 
 # Save the figure
-save_dir = os.path.join(args.emd_dir, 'results', 'eeg_fmri_encoding_fusion',
+save_dir = os.path.join(args.emd_dir, 'results', 'eeg_fmri_encoding_fusion_all_sub',
     'plots')
 file_name = os.path.join(save_dir, 'roi_correlation.svg')
 fig.savefig(file_name, bbox_inches='tight', transparent=True, format='svg')

@@ -3,8 +3,6 @@ across vertices from the same ROIs, and compute the confidence intervals.
 
 Parameters
 ----------
-eeg_subjects : list
-    List of EEG subject numbers (EMD).
 tot_eeg_time_splits : int
     The total number of splits in which the EEG time points are divided.
 fmri_subjects : list
@@ -36,8 +34,7 @@ from tqdm import tqdm
 # Input arguments
 # =============================================================================
 parser = argparse.ArgumentParser()
-parser.add_argument('--eeg_subjects', default=[1, 2, 3], type=list) # !!! [1, 2, 3, 4, 5, 6]
-parser.add_argument('--tot_eeg_time_splits', default=5, type=int)
+parser.add_argument('--tot_eeg_time_splits', default=10, type=int)
 parser.add_argument('--fmri_subjects', default=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10], type=list)
 parser.add_argument('--fmri_hemis', default=['left', 'right'], type=list)
 parser.add_argument('--noise_ceiling_threshold', default=20, type=float)
@@ -60,47 +57,37 @@ np.random.seed(seed)
 # =============================================================================
 # Load the correlation results
 # =============================================================================
-result_dir = os.path.join(args.emd_dir, 'results', 'eeg_fmri_encoding_fusion',
+result_dir = os.path.join(args.emd_dir, 'results', 'eeg_fmri_encoding_fusion_all_sub',
     'correlation')
 
-# Loop across EEG subjects
+# Loop across fMRI subjects
 lh_correlation = []
 rh_correlation = []
-for eeg_sub in tqdm(args.eeg_subjects):
+for fmri_sub in args.fmri_subjects:
 
-    # Loop across fMRI subjects
-    lh_corr_fmri_sub = []
-    rh_corr_fmri_sub = []
-    for fmri_sub in args.fmri_subjects:
+    # Loop across fMRI hemispheres and EEG time points
+    for h, fmri_hemi in enumerate(args.fmri_hemis):
+        for eeg_time_split in range(args.tot_eeg_time_splits):
 
-        # Loop across fMRI hemispheres and EEG time points
-        for h, fmri_hemi in enumerate(args.fmri_hemis):
-            for eeg_time_split in range(args.tot_eeg_time_splits):
+            # Load the correlation results
+            file_name = (f'correlation_'
+                f'time_split-{eeg_time_split:02}_fmri_sub-{fmri_sub:02}_'
+                f'hemi-{fmri_hemi}.npy')
+            corr = np.load(os.path.join(result_dir, file_name))
 
-                # Load the correlation results
-                file_name = (f'correlation_eeg_sub-{eeg_sub:02}_'
-                    f'time_split-{eeg_time_split:02}_fmri_sub-{fmri_sub:02}_'
-                    f'hemi-{fmri_hemi}.npy')
-                corr = np.load(os.path.join(result_dir, file_name))
+            # Append the results across EEG time splits
+            if eeg_time_split == 0:
+                correlation = corr
+            else:
+                correlation = np.append(correlation, corr, 1)
+            del corr
 
-                # Append the results across EEG time splits
-                if eeg_time_split == 0:
-                    correlation = corr
-                else:
-                    correlation = np.append(correlation, corr, 1)
-                del corr
-
-            # Append the results across fMRI subjects
-            if fmri_hemi == 'left':
-                lh_corr_fmri_sub.append(correlation)
-            elif fmri_hemi == 'right':
-                rh_corr_fmri_sub.append(correlation)
-            del correlation
-    
-    # Append the results across EEG subjects
-    lh_correlation.append(np.array(lh_corr_fmri_sub))
-    rh_correlation.append(np.array(rh_corr_fmri_sub))
-    del lh_corr_fmri_sub, rh_corr_fmri_sub
+        # Append the results across fMRI subjects
+        if fmri_hemi == 'left':
+            lh_correlation.append(correlation)
+        elif fmri_hemi == 'right':
+            rh_correlation.append(correlation)
+        del correlation
 
 # Format to numpy arrays
 lh_correlation = np.array(lh_correlation)
@@ -150,7 +137,7 @@ for s, fmri_sub in enumerate(args.fmri_subjects):
 
 
 # =============================================================================
-# Average the results across vertices from the same ROIs and fMRI subjects
+# Average the results across vertices from the same ROIs
 # =============================================================================
 roi_correlation = {}
 
@@ -178,19 +165,18 @@ for roi in rois:
 
             # Append the ROI correlation results across hemispheres
             if h == 0:
-                corr_sub = correlation[f'hemi-{hemi}'][:,fs,roi_idx]
+                corr_sub = correlation[f'hemi-{hemi}'][fs,roi_idx]
             else:
                 corr_sub = np.append(corr_sub,
-                    correlation[f'hemi-{hemi}'][:,fs,roi_idx], 1)
+                    correlation[f'hemi-{hemi}'][fs,roi_idx], 1)
 
         # Average the correlation results across ROI vertices, and append them
         # across fMRI subjects
-        corr.append(np.mean(corr_sub, 1))
+        corr.append(np.mean(corr_sub, 0))
         del corr_sub
 
-    # Average the correlation results of each ROI across fMRI subjects, and
-    # store them in a dictionary
-    roi_correlation[roi] = np.mean(corr, 0)
+    # Store the correlation results in a dictionary
+    roi_correlation[roi] = corr
     del corr
 
 
@@ -205,7 +191,7 @@ for roi in rois:
     ci_dist[roi] = np.zeros((args.n_iter, n_times), dtype=np.float32)
 
 for i in tqdm(range(args.n_iter)):
-    idx = resample(np.arange(len(args.eeg_subjects)))
+    idx = resample(np.arange(len(args.fmri_subjects)))
     for roi in rois:
         ci_dist[roi][i] = np.mean(roi_correlation[roi][idx], 0)
 
@@ -218,13 +204,13 @@ for roi in rois:
 # Save the results
 # =============================================================================
 results = {
-    'lh_correlation': np.mean(correlation['hemi-left'], (0, 1)),
-    'rh_correlation': np.mean(correlation['hemi-right'], (0, 1)),
+    'lh_correlation': np.mean(correlation['hemi-left'], 0),
+    'rh_correlation': np.mean(correlation['hemi-right'], 0),
     'roi_correlation': roi_correlation,
     'ci_roi_correlation': ci_roi_correlation
 }
 
-save_dir = os.path.join(args.emd_dir, 'results', 'eeg_fmri_encoding_fusion',
+save_dir = os.path.join(args.emd_dir, 'results', 'eeg_fmri_encoding_fusion_all_sub',
     'stats')
 os.makedirs(save_dir, exist_ok=True)
 
