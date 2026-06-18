@@ -1,0 +1,50 @@
+SLURM_ARRAY_JOB_ID: 0
+eeg_time_split: 0
+fmri_subject: 1
+fmri_hemi: left
+>>> EEG-fMRI encoding fusion <<<
+
+Input arguments:
+eeg_subjects     [1, 2, 3]
+fmri_subject     1
+fmri_hemi        left
+tot_eeg_time_splits 10
+eeg_time_split   0
+emd_dir          /scratch/giffordale95/projects/eeg_moments_dataset
+bmd_dir          /scratch/giffordale95/projects/eeg_moments_dataset/bold_moments_dataset
+  0%|          | 0/3 [00:00<?, ?it/s]
+  0%|          | 0/8 [00:00<?, ?it/s][A
+ 12%|█▎        | 1/8 [00:01<00:09,  1.41s/it][A
+ 25%|██▌       | 2/8 [00:03<00:09,  1.56s/it][A
+ 38%|███▊      | 3/8 [01:18<02:56, 35.33s/it][A
+ 50%|█████     | 4/8 [01:20<01:28, 22.02s/it][A
+ 62%|██████▎   | 5/8 [01:21<00:44, 14.68s/it][A
+ 75%|███████▌  | 6/8 [01:23<00:20, 10.19s/it][A
+ 88%|████████▊ | 7/8 [02:31<00:28, 28.98s/it][A
+100%|██████████| 8/8 [02:32<00:00, 20.30s/it][A100%|██████████| 8/8 [02:32<00:00, 19.09s/it]
+ 33%|███▎      | 1/3 [02:33<05:06, 153.44s/it]
+  0%|          | 0/8 [00:00<?, ?it/s][A
+ 12%|█▎        | 1/8 [00:01<00:12,  1.84s/it][A
+ 25%|██▌       | 2/8 [01:14<04:22, 43.79s/it][A
+ 38%|███▊      | 3/8 [01:17<02:03, 24.73s/it][A
+ 50%|█████     | 4/8 [01:19<01:03, 15.81s/it][A
+ 62%|██████▎   | 5/8 [01:20<00:32, 10.69s/it][A
+ 75%|███████▌  | 6/8 [01:22<00:15,  7.53s/it][A
+ 88%|████████▊ | 7/8 [01:23<00:05,  5.47s/it][A
+100%|██████████| 8/8 [01:24<00:00,  4.14s/it][A100%|██████████| 8/8 [01:24<00:00, 10.59s/it]
+ 67%|██████▋   | 2/3 [03:59<01:53, 113.52s/it]
+  0%|          | 0/8 [00:00<?, ?it/s][A
+ 12%|█▎        | 1/8 [01:00<07:06, 60.90s/it][A
+ 25%|██▌       | 2/8 [01:03<02:38, 26.42s/it][A
+ 38%|███▊      | 3/8 [01:05<01:16, 15.30s/it][A
+ 50%|█████     | 4/8 [01:07<00:41, 10.26s/it][A
+ 62%|██████▎   | 5/8 [01:09<00:21,  7.14s/it][A
+ 75%|███████▌  | 6/8 [01:11<00:11,  5.58s/it][A
+ 88%|████████▊ | 7/8 [01:14<00:04,  4.49s/it][A
+100%|██████████| 8/8 [01:16<00:00,  3.75s/it][A100%|██████████| 8/8 [01:16<00:00,  9.55s/it]
+100%|██████████| 3/3 [05:16<00:00, 96.98s/it] 100%|██████████| 3/3 [05:16<00:00, 105.43s/it]
+/home/giffordale95/projects/eeg_moments_dataset/github/EMD/04_eeg_fmri_fusion_all_sub/01_encoding_fusion.py:146: DeprecationWarning: numpy.core.numeric is deprecated and has been renamed to numpy._core.numeric. The numpy._core namespace contains private NumPy internals and its use is discouraged, as NumPy internals can change without warning in any release. In practice, most real-world usage of numpy.core is to access functionality in the public NumPy API. If that is the case, use the public NumPy API. If not, you are using NumPy internals. If you would still like to access an internal attribute, use numpy._core.numeric._frombuffer.
+  fmri_train = pickle.load(f)[0]
+/home/giffordale95/projects/eeg_moments_dataset/github/EMD/04_eeg_fmri_fusion_all_sub/01_encoding_fusion.py:153: DeprecationWarning: numpy.core.numeric is deprecated and has been renamed to numpy._core.numeric. The numpy._core namespace contains private NumPy internals and its use is discouraged, as NumPy internals can change without warning in any release. In practice, most real-world usage of numpy.core is to access functionality in the public NumPy API. If that is the case, use the public NumPy API. If not, you are using NumPy internals. If you would still like to access an internal attribute, use numpy._core.numeric._frombuffer.
+  fmri_test = pickle.load(f)[0]
+  0%|          | 0/180 [00:00<?, ?it/s]  1%|          | 1/180 [01:43<5:09:31, 103.75s/it]  1%|          | 2/180 [03:27<5:08:33, 104.01s/it]  2%|▏         | 3/180 [05:12<5:07:45, 104.33s/it]  2%|▏         | 4/180 [06:57<5:06:25, 104.46s/it]  3%|▎         | 5/180 [08:41<5:04:31, 104.41s/it]  3%|▎         | 6/180 [10:26<5:03:13, 104.56s/it]  4%|▍         | 7/180 [12:11<5:02:05, 104.77s/it]  4%|▍         | 8/180 [13:57<5:00:54, 104.97s/it]  5%|▌         | 9/180 [15:42<4:59:56, 105.24s/it]  6%|▌         | 10/180 [17:28<4:58:37, 105.40s/it]  6%|▌         | 11/180 [19:15<4:58:10, 105.86s/it]  7%|▋         | 12/180 [21:02<4:57:12, 106.15s/it]  7%|▋         | 13/180 [22:49<4:55:56, 106.33s/it]  8%|▊         | 14/180 [24:35<4:54:20, 106.39s/it]  8%|▊         | 15/180 [26:22<4:52:45, 106.46s/it]  9%|▉         | 16/180 [28:08<4:51:11, 106.53s/it]  9%|▉         | 17/180 [29:55<4:49:36, 106.60s/it] 10%|█         | 18/180 [31:42<4:48:03, 106.69s/it] 11%|█         | 19/180 [33:29<4:46:27, 106.75s/it] 11%|█         | 20/180 [35:16<4:44:45, 106.78s/it] 12%|█▏        | 21/180 [37:03<4:43:07, 106.84s/it] 12%|█▏        | 22/180 [38:50<4:41:19, 106.83s/it] 13%|█▎        | 23/180 [40:37<4:39:32, 106.83s/it] 13%|█▎        | 24/180 [42:23<4:37:30, 106.74s/it] 14%|█▍        | 25/180 [44:09<4:35:30, 106.65s/it] 14%|█▍        | 26/180 [45:56<4:33:24, 106.53s/it] 15%|█▌        | 27/180 [47:42<4:31:29, 106.47s/it] 16%|█▌        | 28/180 [49:28<4:29:34, 106.41s/it] 16%|█▌        | 29/180 [51:15<4:27:48, 106.41s/it] 17%|█▋        | 30/180 [53:01<4:25:59, 106.40s/it] 17%|█▋        | 31/180 [54:48<4:24:21, 106.45s/it] 18%|█▊        | 32/180 [56:34<4:22:45, 106.52s/it]
