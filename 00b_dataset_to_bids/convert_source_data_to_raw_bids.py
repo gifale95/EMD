@@ -100,7 +100,7 @@ del participants
 # Create the *_eeg.json file (EEG)
 # =============================================================================
 eeg_json = {
-    "EEGReference":"FCz",
+    "EEGReference":"Fz",
     "EEGGround":"Fpz",
     "SamplingFrequency":1000,
     "PowerLineFrequency":50,

@@ -90,7 +90,7 @@ ncsnr, noise_ceiling = compute_ncsnr(preprocessed_eeg, stimulus_id_list)
 # Save the preprocessed EEG data and metadata
 # =============================================================================
 # Save directory
-save_dir = os.path.join(args.emd_dir, 'derivatives', 'eeg_eyeblink_removal',
+save_dir = os.path.join(args.emd_dir, 'derivatives', 'eeg',
     f'sub-{args.subject:02}')
 os.makedirs(save_dir, exist_ok=True)
 

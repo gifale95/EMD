@@ -56,7 +56,7 @@ os.makedirs(save_dir, exist_ok=True)
 
 # =============================================================================
 # Plot the encoding accuracy of the EEG-fMRI fusion encoding models on brain
-# surfaces (subject-average) # !!!
+# surfaces (subject-average)
 # =============================================================================
 # Plot parameters
 fontsize = 40
@@ -74,8 +74,7 @@ for t, time in enumerate(tqdm(times)):
 
     # Average the results across subjects, and append them across left and
     # right hemishperes
-    data = np.append(np.nanmean(corr_tfmri_fmri[:,0,:,t], 0),
-        np.nanmean(corr_tfmri_fmri[:,1,:,t], 0))
+    data = np.append(lh_correlation[:,t], rh_correlation[:,t])
 
     # Create the flat brain surface
     vertex_data = cortex.Vertex(
@@ -83,7 +82,7 @@ for t, time in enumerate(tqdm(times)):
         subject,
         cmap='afmhot',
         vmin=0,
-        vmax=1,
+        vmax=0.5,
         with_colorbar=True)
 
     # Plot the flat brain surface
@@ -95,18 +94,18 @@ for t, time in enumerate(tqdm(times)):
         roi_list=['Early', 'Intermediate', 'Ventral', 'Lateral', 'Dorsal'],
         linewidth=3,
         linecolor=(1, 1, 1),
-        with_labels=True,
+        with_labels=False,
         labelsize=25,
         curvature_brightness=0.4,
         with_colorbar=True
         )
 
     # Add title
-    title = f'Time (ms): {np.round(time*1000)}'
+    title = f'Time (s): {time}'
     plt.title(title, fontsize=fontsize)
 
     # Save the plot
-    plot_file = os.path.join(save_dir, f'correlation_time-{t:03d}.png')
+    plot_file = os.path.join(save_dir, f'correlation_time-{t:04d}.png')
     plt.savefig(plot_file, dpi=300, bbox_inches='tight', format='png')
     plt.close()
 
@@ -141,8 +140,9 @@ plt.rcParams['svg.fonttype'] = 'none'
 # Define the ROIs to plot]
 rois = ['7AL', 'BA2', 'EBA', 'FFA', 'IPS0', 'IPS1-2-3', 'LOC', 'MT', 'OFA',
     'PFop', 'PFt', 'PPA', 'RSC', 'STS', 'TOS', 'V1', 'V2', 'V3', 'V3ab','hV4']
-rois = ['V1', 'V2', 'V3', 'hV4', 'LOC', 'FFA', 'EBA', 'PPA']
 rois = ['V1', 'V2', 'V3', 'hV4']
+rois = ['V1', 'V2', 'V3', 'hV4', 'LOC', 'MT', '7AL', 'BA2', 'EBA', 'FFA', 'IPS0', 'IPS1-2-3']
+rois = ['V1', 'hV4', 'LOC', 'MT']
 
 # Get the plot colors
 def sample_cmap(N):
@@ -171,10 +171,10 @@ for r, roi in enumerate(rois):
         ci_roi_correlation[roi][0], color=colors[r], alpha=.1)
 
     # Plot the peak time point
-    # peak = times[np.argmax(np.mean(roi_correlation[roi], 0))]
-    # max_corr = max(np.mean(roi_correlation[roi], 0))
-    # plt.scatter(peak, max_corr, color=colors[r], s=200, marker='o',
-    #     edgecolors='k', linewidths=1, zorder=3, label='_nolegend_')
+    peak = times[np.argmax(np.mean(roi_correlation[roi], 0))]
+    max_corr = max(np.mean(roi_correlation[roi], 0))
+    plt.scatter(peak, max_corr, color=colors[r], s=200, marker='o',
+        edgecolors='k', linewidths=1, zorder=3, label='_nolegend_')
 
 # x-axis parameters
 plt.xlabel('Time (ms)', fontsize=fontsize)
@@ -188,7 +188,7 @@ plt.ylabel("Pearson's $r$", fontsize=fontsize)
 yticks = [0, 0.1, 0.2, 0.3, 0.4]
 ylabels = [0, 0.1, 0.2, 0.3, 0.4]
 plt.yticks(ticks=yticks, labels=ylabels)
-plt.ylim(bottom=-.05, top=.35)
+plt.ylim(bottom=-.05, top=.4)
 
 # Legend
 plt.legend(fontsize=fontsize, loc=0, ncols=4, frameon=False)

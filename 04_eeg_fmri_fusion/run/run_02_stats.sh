@@ -2,8 +2,8 @@
 #SBATCH --mail-user=giffordale95@zedat.fu-berlin.de
 #SBATCH --job-name=EMD-04_eeg_fmri_fusion-02_stats
 #SBATCH --mail-type=end
-#SBATCH --mem=150000
-#SBATCH --time=01:00:00
+#SBATCH --mem=45000
+#SBATCH --time=00:20:00
 #SBATCH --qos=extended
 
 # Changing to the .py script directory
