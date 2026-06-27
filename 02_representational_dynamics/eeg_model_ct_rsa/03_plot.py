@@ -1,0 +1,227 @@
+"""Plot the results from the cross-temporal RSA analysis between EEG AlexNet
+RDMs.
+
+Parameters
+----------
+subjects : list
+    List of used subjects.
+emd_dir : str
+    Directory of the EEG Moments Dataset (EMD).
+
+"""
+
+import argparse
+import os
+import numpy as np
+from scipy.stats import zscore
+import matplotlib
+from matplotlib import pyplot as plt
+
+
+# =============================================================================
+# Input arguments
+# =============================================================================
+parser = argparse.ArgumentParser()
+parser.add_argument('--subjects', default=[1, 2, 3, 4, 5, 6], type=list)
+parser.add_argument('--emd_dir', default='/scratch/giffordale95/projects/eeg_moments_dataset', type=str)
+args, unknown = parser.parse_known_args()
+
+
+# =============================================================================
+# Plot save directory
+# =============================================================================
+save_dir = os.path.join(args.emd_dir, 'results',
+    'representational_dynamics', 'eeg_model_ct_rsa', 'plots')
+os.makedirs(save_dir, exist_ok=True)
+
+
+# =============================================================================
+# Load the cross-temporal correlation results
+# =============================================================================
+# Loop across AlexNet layers
+ct_rsa = {}
+layers = [
+    'features_2',
+    'features_5',
+    'features_7',
+    'features_9',
+    'features_12',
+    'classifier_0',
+    'classifier_1',
+    'classifier_2',
+    'classifier_5',
+    'classifier_6'
+]
+
+# Loop across EEG subjects
+for s, sub in enumerate(args.subjects):
+
+    # Load the CT-RSA results
+    data_dir = os.path.join(args.emd_dir, 'results',
+        'representational_dynamics', 'eeg_model_ct_rsa', 'ct_rsa',
+        f'ct_rsa_sub-{sub:02d}.npy')
+    ct_rsa_sub = np.load(data_dir, allow_pickle=True).item()
+
+    # Store the CT-RSA results of each subject
+    for layer in layers:
+        if s == 0:
+            ct_rsa[layer] = []
+        ct_rsa[layer].append(ct_rsa_sub[layer])
+
+# Average the EEG results across subjects
+ct_rsa_avg = {}
+for layer in layers:
+    ct_rsa_avg[layer] = np.mean(np.array(ct_rsa[layer]), 0)
+
+
+# =============================================================================
+# Get the time points
+# =============================================================================
+# EEG time points
+data_dir = os.path.join(args.emd_dir, 'derivatives', 'eeg',
+    f'sub-{args.subjects[0]:02}',
+    f'sub-{args.subjects[0]:02}_eeg_metadata.npy')
+times_eeg = np.load(data_dir, allow_pickle=True).item()['times']
+
+# Only select EEG time points from 0 to 3 seconds
+idx_start = np.where(times_eeg >= 0)[0][0]
+idx_end = np.where(times_eeg <= 3)[0][-1]
+times_eeg = times_eeg[idx_start:idx_end+1]
+for layer in layers:
+    ct_rsa_avg[layer] = ct_rsa_avg[layer][idx_start:idx_end+1]
+
+# AlexNet time points
+n_times_alex = ct_rsa_avg[layers[0]].shape[1]
+times_alex = np.linspace(0, 3, n_times_alex)
+
+
+# =============================================================================
+# Plot parameters
+# =============================================================================
+fontsize = 20
+matplotlib.rcParams['font.sans-serif'] = 'DejaVu Sans'
+matplotlib.rcParams["font.weight"] = "normal"
+matplotlib.rcParams["axes.labelweight"] = "normal"
+matplotlib.rcParams['font.size'] = fontsize
+plt.rc('xtick', labelsize=fontsize)
+plt.rc('ytick', labelsize=fontsize)
+matplotlib.rcParams['axes.linewidth'] = 1
+matplotlib.rcParams['xtick.major.width'] = 0
+matplotlib.rcParams['xtick.major.size'] = 5
+matplotlib.rcParams['ytick.major.width'] = 0
+matplotlib.rcParams['ytick.major.size'] = 5
+matplotlib.rcParams['axes.spines.right'] = False
+matplotlib.rcParams['axes.spines.top'] = False
+matplotlib.rcParams['axes.spines.left'] = False
+matplotlib.rcParams['axes.spines.bottom'] = False
+matplotlib.rcParams['lines.markersize'] = 3
+matplotlib.rcParams['axes.grid'] = False
+matplotlib.rcParams['grid.linewidth'] = 2
+matplotlib.rcParams['grid.alpha'] = .3
+matplotlib.use("svg")
+plt.rcParams["text.usetex"] = False
+plt.rcParams['svg.fonttype'] = 'none'
+
+
+# =============================================================================
+# Plot the cross-temporal RSA results (best model time point)
+# =============================================================================
+# Get the best model time points for each EEG time point (based on the average
+# of the top-5 model time points to get a more robust estimate)
+ct_rsa_best_model_time = {}
+for layer in layers:
+    rsa = ct_rsa_avg[layer]
+    idx_best = np.mean(np.argsort(rsa, 1)[:,-5:], 1) / n_times_alex
+    ct_rsa_best_model_time[layer] = idx_best
+    del idx_best
+
+# Select the layers to plot
+plot_layers = [
+    'features_2'
+]
+
+# Plot colors
+def sample_cmap(N):
+    cmap = plt.cm.get_cmap('inferno')
+    values = np.linspace(0, 1, N+2)
+    colors = cmap(values)[1:-1]
+    return colors
+colors = sample_cmap(len(plot_layers))
+
+# Create the figure
+matplotlib.rcParams['axes.spines.left'] = True
+matplotlib.rcParams['axes.spines.bottom'] = True
+fig = plt.figure(figsize=(15, 7.5))
+
+# Plot the CT-RSA results of each AlexNet layer
+for l, layer in enumerate(plot_layers):
+    plt.plot(times_eeg, ct_rsa_best_model_time[layer], color=colors[l],
+        linewidth=2, alpha=1, label=layer)
+
+# x-axis parameters
+plt.xlabel('Time EEG (s)', fontsize=fontsize)
+xticks = [0, 1, 2, 3]
+xlabels = [0, 1, 2, 3]
+plt.xticks(ticks=xticks, labels=xlabels)
+plt.xlim(left=min(times_eeg), right=max(times_eeg))
+
+# y-axis parameters
+plt.ylabel("Time AlexNet (s)", fontsize=fontsize)
+# yticks = [0, 10, 21, 31]
+# ylabels = [0, 1, 2, 3]
+# plt.yticks(ticks=yticks, labels=ylabels)
+# plt.ylim(bottom=0, top=len(times_alex))
+
+# Legend
+plt.legend(loc=0, ncol=len(plot_layers), fontsize=fontsize, frameon=False)
+
+# Save the figure
+file_name = os.path.join(save_dir, 'best_model_timepoints.svg')
+fig.savefig(file_name, bbox_inches='tight', transparent=True, format='svg')
+plt.close()
+
+
+# =============================================================================
+# Plot the cross-temporal RSA results (2D heatmap)
+# =============================================================================
+# Normalize the CT-RSA scores of each EEG time point in the range [0, 1],
+# to emphasize the differences in alignment between AlexNet timepoints at each
+# EEG timepoint
+ct_rsa_norm = {}
+for layer in layers:
+    rsa = ct_rsa_avg[layer]
+    rsa_min = rsa.min(axis=1, keepdims=True)
+    rsa_max = rsa.max(axis=1, keepdims=True)
+    ct_rsa_norm[layer] = np.swapaxes(
+        (rsa - rsa_min) / (rsa_max - rsa_min), 0, 1)
+
+# Select the layer to plot
+plot_layer = 'features_2'
+
+# Create the figure
+matplotlib.rcParams['axes.spines.left'] = False
+matplotlib.rcParams['axes.spines.bottom'] = False
+fig = plt.figure(figsize=(15, 7.5))
+
+# Plot the CT-RSA results of each AlexNet layer
+plt.imshow(ct_rsa_norm[plot_layer], aspect='auto', cmap='inferno',
+    origin='lower')
+
+# x-axis parameters
+plt.xlabel('Time EEG (s)', fontsize=fontsize)
+xticks = [0, 500, 1000, 1500]
+xlabels = [0, 1, 2, 3]
+plt.xticks(ticks=xticks, labels=xlabels)
+plt.xlim(left=0, right=len(times_eeg))
+
+# y-axis parameters
+plt.ylabel("Time AlexNet (s)", fontsize=fontsize)
+yticks = [0, 10, 21, 31]
+ylabels = [0, 1, 2, 3]
+plt.yticks(ticks=yticks, labels=ylabels)
+plt.ylim(bottom=0, top=len(times_alex))
+
+# Save the figure
+file_name = os.path.join(save_dir, '2d_heatmap.svg')
+fig.savefig(file_name, bbox_inches='tight', transparent=True, format='svg')
+plt.close()

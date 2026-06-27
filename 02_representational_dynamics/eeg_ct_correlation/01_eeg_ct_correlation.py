@@ -119,7 +119,7 @@ for i in tqdm(range(args.n_iter)):
     pseudo_2z = (pseudo_2 - pseudo_2.mean(axis=0)) / pseudo_2.std(axis=0)
     del eeg_pseudo, pseudo_1, pseudo_2
 
-    # Cross-temporal RSA: shape (EEG time points, EEG time points)
+    # Cross-temporal correlation: shape (EEG time points, EEG time points)
     if i == 0:
         ct_corr = (pseudo_1z.T @ pseudo_2z / pseudo_1z.shape[0]).astype(np.float32)
     else:

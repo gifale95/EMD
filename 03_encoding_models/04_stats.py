@@ -54,8 +54,8 @@ ch_names = metadata['ch_names']
 # =============================================================================
 # Load the partial correlation results for all subjects
 # =============================================================================
-total_variance_vision = []
-total_variance_language = []
+variance_vision = []
+variance_language = []
 unique_variance_vision = []
 unique_variance_language = []
 
@@ -66,15 +66,15 @@ for sub in args.subjects:
         'encoding_models', 'partial_correlation', file_name),
         allow_pickle=True).item()
 
-    total_variance_vision.append(results['total_variance_vision'])
-    total_variance_language.append(results['total_variance_language'])
+    variance_vision.append(results['variance_vision'])
+    variance_language.append(results['variance_language'])
     unique_variance_vision.append(results['unique_variance_vision'])
     unique_variance_language.append(results['unique_variance_language'])
     del results
 
 results = {}
-results['total_variance_vision'] = np.array(total_variance_vision)
-results['total_variance_language'] = np.array(total_variance_language)
+results['variance_vision'] = np.array(variance_vision)
+results['variance_language'] = np.array(variance_language)
 results['unique_variance_vision'] = np.array(unique_variance_vision)
 results['unique_variance_language'] = np.array(unique_variance_language)
 

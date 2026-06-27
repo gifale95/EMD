@@ -141,20 +141,20 @@ del reg_language, language_features_test
 # Partial correlation
 # =============================================================================
 # Empty result arrays of shape (channels * time points)
-total_variance_vision = np.zeros((eeg_test.shape[1]), dtype=np.float32)
-total_variance_language = np.zeros((eeg_test.shape[1]), dtype=np.float32)
+variance_vision = np.zeros((eeg_test.shape[1]), dtype=np.float32)
+variance_language = np.zeros((eeg_test.shape[1]), dtype=np.float32)
 unique_variance_vision = np.zeros((eeg_test.shape[1]), dtype=np.float32)
 unique_variance_language = np.zeros((eeg_test.shape[1]), dtype=np.float32)
 
 # Loop across EEG features
 for f in tqdm(range(eeg_test.shape[1])):
 
-    # Compute the total variance explained by the vision models
-    total_variance_vision[f] = pearsonr(eeg_test[:,f],
+    # Compute the variance explained by the vision models
+    variance_vision[f] = pearsonr(eeg_test[:,f],
         eeg_test_pred_vision[:,f])[0]
 
-    # Compute the total variance explained by the language models
-    total_variance_language[f] = pearsonr(eeg_test[:,f],
+    # Compute the variance explained by the language models
+    variance_language[f] = pearsonr(eeg_test[:,f],
         eeg_test_pred_language[:,f])[0]
 
     # Compute the unique variance explained by vision models
@@ -202,10 +202,8 @@ for f in tqdm(range(eeg_test.shape[1])):
         eeg_test_pred_language_res)[0]
 
 # Reshape the partial correlation results to (channels, time points)
-total_variance_vision = np.reshape(total_variance_vision,
-    (eeg_shape[1], eeg_shape[2]))
-total_variance_language = np.reshape(total_variance_language,
-    (eeg_shape[1], eeg_shape[2]))
+variance_vision = np.reshape(variance_vision, (eeg_shape[1], eeg_shape[2]))
+variance_language = np.reshape(variance_language, (eeg_shape[1], eeg_shape[2]))
 unique_variance_vision = np.reshape(unique_variance_vision,
     (eeg_shape[1], eeg_shape[2]))
 unique_variance_language = np.reshape(unique_variance_language,
@@ -216,8 +214,8 @@ unique_variance_language = np.reshape(unique_variance_language,
 # Save the partial correlation results
 # =============================================================================
 results = {
-    'total_variance_vision': total_variance_vision,
-    'total_variance_language': total_variance_language,
+    'variance_vision': variance_vision,
+    'variance_language': variance_language,
     'unique_variance_vision': unique_variance_vision,
     'unique_variance_language': unique_variance_language
 }

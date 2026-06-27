@@ -1,9 +1,9 @@
 #!/bin/bash
 #SBATCH --mail-user=giffordale95@zedat.fu-berlin.de
-#SBATCH --job-name=EMD-02_representational_dynamics-eeg_model_ct_rsa-01_create_correlation_eeg_rdms
+#SBATCH --job-name=EMD-02_representational_dynamics-eeg_model_ct_rsa-02_ct_rsa
 #SBATCH --mail-type=end
-#SBATCH --mem=10000
-#SBATCH --time=00:10:00
+#SBATCH --mem=2000
+#SBATCH --time=00:30:00
 #SBATCH --qos=extended
 
 # Creating the parameters combinations
@@ -28,4 +28,4 @@ source /home/giffordale95/anaconda3/etc/profile.d/conda.sh
 conda activate berg
 
 # Running the job
-python 01_create_correlation_eeg_rdms.py --subject $subject
+python 02_ct_rsa.py --subject $subject

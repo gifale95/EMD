@@ -52,8 +52,8 @@ data = np.load(data_dir, allow_pickle=True).item()
 partial_correlation = data['partial_correlation']
 ci = data['ci']
 
-res_types = ['total_variance_vision', 'total_variance_language',
-    'unique_variance_vision', 'unique_variance_language']
+res_types = ['variance_vision', 'variance_language', 'unique_variance_vision',
+    'unique_variance_language']
 res_labels = ['Vision', 'Language', 'Vision | Language', 'Language | Vision']
 
 
