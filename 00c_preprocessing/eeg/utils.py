@@ -33,7 +33,7 @@ def preprocess_eeg(args, session):
     import mne
     from mne.preprocessing import ICA
     import pandas as pd
-    from autoreject import AutoReject
+    from autoreject import AutoReject # https://github.com/autoreject/autoreject
 
     ### Get the EEG files ###
     eeg_files = glob(os.path.join(args.emd_dir, f'sub-{args.subject:02}',
@@ -153,36 +153,39 @@ def compute_ncsnr(preprocessed_eeg, stimulus_id):
     """
 
     import numpy as np
-    from sklearn.preprocessing import StandardScaler
+    from scipy.stats import zscore
 
     ### Standardize the data at each scan session ###
     for s in range(len(preprocessed_eeg)):
         eeg_shape = preprocessed_eeg[s].shape
-        eeg_sess = np.reshape(preprocessed_eeg[s], (eeg_shape[0],-1))
-        scaler = StandardScaler()
-        eeg_sess = scaler.fit_transform(eeg_sess)
+        eeg_ses = zscore(eeg_ses, axis=0, nan_policy='omit')
         if s == 0:
-            zscored_data = np.reshape(eeg_sess, eeg_shape)
+            zscored_data = eeg_ses
             stim_id = stimulus_id[s]
         else:
-            zscored_data = np.append(zscored_data, np.reshape(eeg_sess, 
-                eeg_shape), 0)
+            zscored_data = np.append(zscored_data, eeg_ses, 0)
             stim_id = np.append(stim_id, stimulus_id[s], 0)
 
     ### Select the test split data ###
     test_video_cond = np.arange(1001, 1103)
-    test_video_rep = 3 * len(preprocessed_eeg)
+    tot_test_video_rep = 3 * len(preprocessed_eeg)
     # Test split data array of shape:
     # (Video conditions × EEG repetitions × EEG channels × EEG time points)
-    test_data = np.zeros((len(test_video_cond), test_video_rep, eeg_shape[1],
-        eeg_shape[2]), dtype=np.float32)
+    test_data = np.zeros((len(test_video_cond), tot_test_video_rep,
+        eeg_shape[1], eeg_shape[2]), dtype=np.float32)
     test_data[:] = np.nan
+    # Create the video repeat dictionary (since some trials were discarded
+    # during preprocessing, not all test videos might have 24 repetitions)
+    repeats = {}
+    for r in range(1, tot_test_video_rep+1):
+        repeats[r] = 0
     # Index the test split data
     for v, video in enumerate(test_video_cond):
         idx_videos = np.where(stim_id == video)[0]
         if len(idx_videos) < 2:
-            raise Exception(f'Less than 2 video presentations for condition {video}!')
+            raise Exception(f'At least 2 video repetitions for condition {video} are required to compute the noise variance!')
         test_data[v,:len(idx_videos)] = zscored_data[idx_videos]
+        repeats[len(idx_videos)] += 1
 
     ### Compute the ncsnr ###
     tot_var = np.nanvar(np.reshape(test_data,
@@ -194,7 +197,13 @@ def compute_ncsnr(preprocessed_eeg, stimulus_id):
     ncsnr = std_signal / std_noise
 
     ### Compute the noise ceiling ###
-    noise_ceiling = 100 * ((ncsnr ** 2) / ((ncsnr ** 2) + (1 / test_video_rep)))
+    norm_term_num = 0
+    norm_term_den = 0
+    for key, val in repeats.items():
+        norm_term_num += val / key
+        norm_term_den += val
+    norm_term = norm_term_num / norm_term_den
+    noise_ceiling = 100 * ((ncsnr ** 2) / ((ncsnr ** 2) + norm_term))
 
     ### Output ###
     return ncsnr, noise_ceiling
