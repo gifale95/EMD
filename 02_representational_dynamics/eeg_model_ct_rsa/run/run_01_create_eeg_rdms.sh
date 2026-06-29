@@ -3,7 +3,7 @@
 #SBATCH --job-name=EMD-02_representational_dynamics-eeg_model_ct_rsa-01_create_eeg_rdms
 #SBATCH --mail-type=end
 #SBATCH --mem=10000
-#SBATCH --time=00:10:00
+#SBATCH --time=00:20:00
 #SBATCH --qos=extended
 
 # Creating the parameters combinations

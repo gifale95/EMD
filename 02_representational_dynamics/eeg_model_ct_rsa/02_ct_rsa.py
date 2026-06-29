@@ -2,7 +2,8 @@
 EEG RDMs and AlexNet RDMs. In brief, the RDMs of each EEG time points are
 correlated with the RDMs of each AlexNet video time point and layer.
 
-The AlexNet RDMs were computed using code from this GitHub repo:
+The AlexNet RDMs were computed using using Net2Brain using the code from this
+GitHub repo:
 https://github.com/AnneWZonneveld/eeg-moments
 
 Parameters
@@ -18,6 +19,7 @@ import argparse
 import os
 import numpy as np
 from tqdm import tqdm
+from scipy.spatial.distance import squareform
 from scipy.stats import spearmanr
 
 
@@ -44,9 +46,14 @@ data_dir = os.path.join(args.emd_dir, 'results', 'representational_dynamics',
     f'correlation_rdms_sub-{args.subject:02d}.npy')
 eeg_rdms = np.load(data_dir)
 
-# Take the lower triangle of the RDMs
-idx_lower = np.tril_indices(eeg_rdms.shape[0], k=-1)
-eeg_rdms = eeg_rdms[idx_lower]
+# Take the lower triangle of the RDMs using the squareform function, since
+# that's how Net2Brain stored the AlexNet RDMs
+eeg_rdms_vector = []
+for t in range(eeg_rdms.shape[2]):
+    rdm = eeg_rdms[:,:,t]
+    np.fill_diagonal(rdm, 0)
+    eeg_rdms_vector.append(squareform(rdm, checks=False))
+eeg_rdms_vector = np.array(eeg_rdms_vector)
 
 
 # =============================================================================
@@ -60,8 +67,6 @@ layers = [
     'features_7',
     'features_9',
     'features_12',
-    'classifier_0',
-    'classifier_1',
     'classifier_2',
     'classifier_5',
     'classifier_6'
@@ -72,8 +77,7 @@ for layer in layers:
     data_dir = os.path.join(args.emd_dir, 'results',
         'representational_dynamics', 'eeg_model_ct_rsa', 'alexnet_rdms',
         f'RDM_{layer}.npz')
-    alexnet_rdms[layer] = np.swapaxes(np.squeeze(
-        np.load(data_dir, allow_pickle=True)['rdm']), 0, 1)
+    alexnet_rdms[layer] = np.squeeze(np.load(data_dir, allow_pickle=True)['rdm'])
 
 
 # =============================================================================
@@ -84,15 +88,15 @@ ct_rsa = {}
 for layer in tqdm(layers):
 
     # Loop across EEG and AlexNet time points
-    ct_rsa_layer = np.zeros((eeg_rdms.shape[1], alexnet_rdms[layer].shape[1]),
+    ct_rsa_layer = np.zeros((len(eeg_rdms_vector), len(alexnet_rdms[layer])),
         dtype=np.float32)
-    for t_eeg in range(eeg_rdms.shape[1]):
-        for t_alexnet in range(alexnet_rdms[layer].shape[1]):
+    for t_eeg in range(len(eeg_rdms_vector)):
+        for t_alexnet in range(len(alexnet_rdms[layer])):
 
             # Correlate the EEG RDMs with the AlexNet RDMs
             ct_rsa_layer[t_eeg, t_alexnet] = spearmanr(
-                eeg_rdms[:,t_eeg], alexnet_rdms[layer][:,t_alexnet])[0]
-    
+                eeg_rdms_vector[t_eeg], alexnet_rdms[layer][t_alexnet])[0]
+
     # Store the CT-RSA results for the current layer
     ct_rsa[layer] = ct_rsa_layer
     del ct_rsa_layer

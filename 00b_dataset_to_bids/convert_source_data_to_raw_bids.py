@@ -210,7 +210,7 @@ physio_json = {
         "Units": "a.u."
     },
     "SampleCoordinateSystem": "gaze-on-screen",
-    "ManufacturersModelName": "EYELINK II 1",
+    "ManufacturersModelName": "EyeLink 1000",
     "DeviceSerialNumber": "CL1-82113",
     "EyeTrackingMethod": "P-CR",
     "SamplingFrequency": 1000,
