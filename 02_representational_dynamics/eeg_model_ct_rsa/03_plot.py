@@ -15,6 +15,7 @@ import os
 import numpy as np
 import matplotlib
 from matplotlib import pyplot as plt
+from scipy.stats import spearmanr
 
 
 # =============================================================================
@@ -80,8 +81,10 @@ data_dir = os.path.join(args.emd_dir, 'derivatives', 'eeg',
 times_eeg = np.load(data_dir, allow_pickle=True).item()['times']
 
 # Only select EEG time points from 0 to 3 seconds
-idx_start = np.where(times_eeg >= 0)[0][0]
-idx_end = np.where(times_eeg <= 3)[0][-1]
+min_times = 0
+max_times = 3
+idx_start = np.where(times_eeg >= min_times)[0][0]
+idx_end = np.where(times_eeg <= max_times)[0][-1]
 times_eeg = times_eeg[idx_start:idx_end+1]
 for layer in layers:
     ct_rsa[layer] = ct_rsa[layer][idx_start:idx_end+1]
@@ -179,7 +182,11 @@ for layer in layers:
     del idx_best
 
 # Compute the correlation between EEG and AlexNet time points # !!!
-Compute the correlation between EEG and AlexNet time points # !!!
+eeg_time = np.linspace(min_times, max_times, len(times_eeg))
+corr_eeg_model_times = {}
+for layer in layers:
+    corr_eeg_model_times[layer] = spearmanr(eeg_time,
+        ct_rsa_best_model_time[layer])[0]
 
 # Select the layers to plot
 plot_layers = [
@@ -203,6 +210,10 @@ fig = plt.figure(figsize=(7.5, 7.5))
 for l, layer in enumerate(plot_layers):
     plt.plot(times_eeg, ct_rsa_best_model_time[layer], color=colors[l],
         linewidth=2, alpha=1, label=layer)
+
+# Plot the correlation between EEG and AlexNet time points
+plt.text(0.25, 2.8, f'$ρ$ = {corr_eeg_model_times[layer]:.2f}', color='k',
+    fontsize=fontsize)
 
 # x-axis parameters
 plt.xlabel('Time EEG (s)', fontsize=fontsize)
