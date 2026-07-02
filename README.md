@@ -18,7 +18,7 @@ Alessandro T. Gifford, Pablo Oyarzo, Anne W. Zonneveld, Christina Sartzetaki, Ir
 
 ### 🧰 Data
 
-The EEG Moments Dataset (EMD) is freely available at [!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!](!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!).
+The EEG Moments Dataset (EMD) is freely available on OpenNeuro: [https://openneuro.org/datasets/ds008057](https://openneuro.org/datasets/ds008057).
 
 
 
