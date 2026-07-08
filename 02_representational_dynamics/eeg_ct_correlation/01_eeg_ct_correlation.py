@@ -80,6 +80,7 @@ for c, chan in enumerate(ch_names):
         idx_ch.append(c)
 idx_ch = np.array(idx_ch)
 eeg = eeg[:,idx_ch]
+n_chan = len(idx_ch)
 
 
 # =============================================================================
@@ -89,7 +90,8 @@ video_conditions = np.unique(stimulus_id_test)
 n_pseudo_trl = 2
 
 # Loop acoss analysis iterations
-ct_corr = []
+n_times = eeg.shape[2]
+ct_corr = np.zeros((n_times, n_times), dtype=np.float32)
 for i in tqdm(range(args.n_iter)):
 
     # Create the pseudo-trials by averaging across repeats of each video
@@ -110,24 +112,25 @@ for i in tqdm(range(args.n_iter)):
 
 # =============================================================================
 # Correlate each time point combination of the EEG responses of the two
-# pseudo-trials, across video conditions and channels
+# pseudo-trials, independently for each channel, across video conditions
 # =============================================================================
-    # Z-score across channels
-    pseudo_1 = np.reshape(eeg_pseudo[:,0], (-1, eeg_pseudo.shape[3]))
-    pseudo_2 = np.reshape(eeg_pseudo[:,1], (-1, eeg_pseudo.shape[3]))
-    pseudo_1z = (pseudo_1 - pseudo_1.mean(axis=0)) / pseudo_1.std(axis=0)
-    pseudo_2z = (pseudo_2 - pseudo_2.mean(axis=0)) / pseudo_2.std(axis=0)
-    del eeg_pseudo, pseudo_1, pseudo_2
+    # Loop across EEG channels
+    for c in range(n_chan):
 
-    # Cross-temporal correlation: shape (EEG time points, EEG time points)
-    if i == 0:
-        ct_corr = (pseudo_1z.T @ pseudo_2z / pseudo_1z.shape[0]).astype(np.float32)
-    else:
-        ct_corr += (pseudo_1z.T @ pseudo_2z / pseudo_1z.shape[0]).astype(np.float32)
-    del pseudo_1z, pseudo_2z
+        # Z-score across video conditions
+        pseudo_1 = eeg_pseudo[:,0,c]
+        pseudo_2 = eeg_pseudo[:,1,c]
+        pseudo_1z = (pseudo_1 - pseudo_1.mean(axis=0)) / pseudo_1.std(axis=0)
+        pseudo_2z = (pseudo_2 - pseudo_2.mean(axis=0)) / pseudo_2.std(axis=0)
+        del pseudo_1, pseudo_2
 
-# Average the results across iterations
-ct_corr = ct_corr / args.n_iter
+        # Cross-temporal correlation: shape (EEG time points, EEG time points)
+        ct_corr += (pseudo_1z.T @ pseudo_2z / pseudo_1z.shape[0])
+        del pseudo_1z, pseudo_2z
+    del eeg_pseudo
+
+# Average the results across iterations and EEG channels
+ct_corr = ct_corr / (args.n_iter * n_chan)
 
 
 # =============================================================================

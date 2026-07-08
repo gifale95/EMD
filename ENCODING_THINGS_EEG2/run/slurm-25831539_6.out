@@ -1,9 +1,0 @@
-SLURM_ARRAY_JOB_ID: 6
-subject: 7
->>> Train encoding models <<<
-
-Input arguments:
-subject          7
-things_eeg_2_dir /scratch/ccn_datasets/things_eeg_2
-project_dir      /scratch/giffordale95/projects/encoding_things_eeg2_zitong
-  0%|          | 0/50 [00:00<?, ?it/s] 14%|█▍        | 7/50 [00:00<00:00, 68.90it/s] 30%|███       | 15/50 [00:00<00:00, 72.23it/s] 46%|████▌     | 23/50 [00:00<00:00, 73.24it/s] 62%|██████▏   | 31/50 [00:00<00:00, 73.26it/s] 78%|███████▊  | 39/50 [00:00<00:00, 71.45it/s] 94%|█████████▍| 47/50 [00:00<00:00, 71.13it/s]                                               

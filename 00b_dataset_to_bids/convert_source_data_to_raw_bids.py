@@ -49,7 +49,7 @@ dataset_description_json = {
     "Name": "EEG Moments Dataset (EMD)",
     "BIDSVersion": "1.9.0",
     "DatasetType": "raw",
-    "License": "CC NC 4.0",
+    "License": "CC0",
     "Authors": [
         "Alessandro T. Gifford",
         "Pablo Oyarzo",

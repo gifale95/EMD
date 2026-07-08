@@ -3,7 +3,7 @@
 #SBATCH --job-name=EMD-02_representational_dynamics-eeg_ct_correlation-01_eeg_ct_correlation
 #SBATCH --mail-type=end
 #SBATCH --mem=12000
-#SBATCH --time=10:00:00
+#SBATCH --time=07:00:00
 #SBATCH --qos=extended
 
 # Creating the parameters combinations
