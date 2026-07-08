@@ -181,7 +181,7 @@ for layer in layers:
     ct_rsa_best_model_time[layer] = idx_best
     del idx_best
 
-# Compute the correlation between EEG and AlexNet time points # !!!
+# Compute the correlation between EEG and AlexNet time points
 eeg_time = np.linspace(min_times, max_times, len(times_eeg))
 corr_eeg_model_times = {}
 for layer in layers:
