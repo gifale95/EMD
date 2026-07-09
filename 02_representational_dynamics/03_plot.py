@@ -31,7 +31,7 @@ args, unknown = parser.parse_known_args()
 # Plot save directory
 # =============================================================================
 save_dir = os.path.join(args.emd_dir, 'results',
-    'representational_dynamics', 'eeg_model_ct_rsa', 'plots')
+    'representational_dynamics', 'plots')
 os.makedirs(save_dir, exist_ok=True)
 
 
@@ -56,8 +56,7 @@ for s, sub in enumerate(args.subjects):
 
     # Load the CT-RSA results
     data_dir = os.path.join(args.emd_dir, 'results',
-        'representational_dynamics', 'eeg_model_ct_rsa', 'ct_rsa',
-        f'ct_rsa_sub-{sub:02d}.npy')
+        'representational_dynamics', 'ct_rsa', f'ct_rsa_sub-{sub:02d}.npy')
     ct_rsa_sub = np.load(data_dir, allow_pickle=True).item()
 
     # Store the CT-RSA results of each subject

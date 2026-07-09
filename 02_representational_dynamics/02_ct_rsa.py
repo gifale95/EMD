@@ -42,8 +42,7 @@ for key, val in vars(args).items():
 # =============================================================================
 # Load the RDMs
 data_dir = os.path.join(args.emd_dir, 'results', 'representational_dynamics',
-    'eeg_model_ct_rsa', 'eeg_rdms',
-    f'correlation_rdms_sub-{args.subject:02d}.npy')
+    'eeg_rdms', f'correlation_rdms_sub-{args.subject:02d}.npy')
 eeg_rdms = np.load(data_dir)
 
 # Take the lower triangle of the RDMs using the squareform function, since
@@ -75,8 +74,7 @@ for layer in layers:
 
     # Load the RDMs
     data_dir = os.path.join(args.emd_dir, 'results',
-        'representational_dynamics', 'eeg_model_ct_rsa', 'alexnet_rdms',
-        f'RDM_{layer}.npz')
+        'representational_dynamics', 'alexnet_rdms', f'RDM_{layer}.npz')
     alexnet_rdms[layer] = np.squeeze(np.load(data_dir, allow_pickle=True)['rdm'])
 
 
@@ -106,7 +104,7 @@ for layer in tqdm(layers):
 # Save the results
 # =============================================================================
 save_dir = os.path.join(args.emd_dir, 'results',
-    'representational_dynamics', 'eeg_model_ct_rsa', 'ct_rsa')
+    'representational_dynamics', 'ct_rsa')
 os.makedirs(save_dir, exist_ok=True)
 
 file_name = f'ct_rsa_sub-{args.subject:02d}.npy'

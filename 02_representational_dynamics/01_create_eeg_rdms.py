@@ -113,7 +113,7 @@ rdms = np.transpose(rdms, (1, 2, 0))
 # Save the results
 # =============================================================================
 save_dir = os.path.join(args.emd_dir, 'results', 'representational_dynamics',
-    'eeg_model_ct_rsa', 'eeg_rdms')
+    'eeg_rdms')
 os.makedirs(save_dir, exist_ok=True)
 
 file_name = f'correlation_rdms_sub-{args.subject:02d}.npy'
