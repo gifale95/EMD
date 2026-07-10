@@ -80,25 +80,16 @@ results['unique_variance_language'] = np.array(unique_variance_language)
 
 
 # =============================================================================
-# Average the results across EEG channel groups
+# Average the results occipital and parietal EEG channels
 # =============================================================================
-channel_types = ['O', 'P', 'T', 'C', 'F']
-channel_type_names = ['Occipital', 'Parietal', 'Temporal', 'Central',
-    'Frontal']
 idx_ch = []
-for ch_type in channel_types:
-    idx = []
-    for c, chan in enumerate(ch_names):
-        if ch_type in chan:
-            idx.append(c)
-    idx_ch.append(np.asarray(idx))
-    del idx
+for c, chan in enumerate(ch_names):
+    if 'O' in chan or 'P' in chan:
+        idx_ch.append(c)
 
 results_chan_avg = {}
 for res_type in results.keys():
-    for i, ch_type in enumerate(channel_types):
-        results_chan_avg[f'{res_type}_{ch_type}'] = np.mean(
-            results[res_type][:,idx_ch[i]], 1)
+    results_chan_avg[res_type] = np.mean(results[res_type][:,idx_ch], 1)
 
 
 # =============================================================================
@@ -130,8 +121,7 @@ results = {
     'ci': ci
 }
 
-save_dir = os.path.join(args.emd_dir, 'results', 'encoding_models',
-    'stats')
+save_dir = os.path.join(args.emd_dir, 'results', 'encoding_models', 'stats')
 os.makedirs(save_dir, exist_ok=True)
 
 file_name = 'stats.npy'
