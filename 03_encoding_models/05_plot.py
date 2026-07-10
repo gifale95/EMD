@@ -21,7 +21,8 @@ from matplotlib import pyplot as plt
 # =============================================================================
 parser = argparse.ArgumentParser()
 parser.add_argument('--subjects', default=[1, 2, 3, 4, 5, 6], type=list)
-parser.add_argument('--emd_dir', default='/scratch/giffordale95/projects/eeg_moments_dataset', type=str)
+# parser.add_argument('--emd_dir', default='/scratch/giffordale95/projects/eeg_moments_dataset', type=str)
+parser.add_argument('--emd_dir', default='/home/ale/aaa_stuff/science/projects/eeg_moments_dataset', type=str)
 args, unknown = parser.parse_known_args()
 
 
@@ -148,7 +149,7 @@ plt.yticks(ticks=yticks, labels=ylabels)
 plt.ylim(bottom=-0.1, top=0.5)
 
 # Legend
-plt.legend(loc=0, ncol=len(labels), fontsize=fontsize, frameon=False)
+plt.legend(loc=2, ncol=len(res_types), fontsize=fontsize, frameon=False)
 
 # Save the figure
 file_name = os.path.join(save_dir, 'correlation.svg')
@@ -201,7 +202,7 @@ plt.yticks(ticks=yticks, labels=ylabels)
 plt.ylim(bottom=-0.1, top=0.5)
 
 # Legend
-plt.legend(loc=0, ncol=len(labels), fontsize=fontsize, frameon=False)
+plt.legend(loc=2, ncol=len(res_types), fontsize=fontsize, frameon=False)
 
 # Save the figure
 file_name = os.path.join(save_dir, 'partial_correlation.svg')
