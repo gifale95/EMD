@@ -127,7 +127,7 @@ matplotlib.rcParams['axes.spines.left'] = False
 matplotlib.rcParams['axes.spines.bottom'] = False
 
 # Create the figure
-fig, axs = plt.subplots(2, 3, sharex=True, sharey=True, figsize=(15, 10))
+fig, axs = plt.subplots(2, 3, sharex=True, sharey=True, figsize=(12, 7.5))
 axs = np.reshape(axs, (-1))
 
 # Loop across subjects
@@ -188,7 +188,7 @@ for s, sub in enumerate(args.subjects):
     visual_angles = cdf_fixations[s]['visual_angles']
     cdf_fix = cdf_fixations[s]['cdf_fixations'] * 100
     plt.plot(visual_angles, cdf_fix, color=colors[s], linewidth=2, alpha=1,
-        label=f'Participant {sub}')
+        label=f'{sub}')
 
 # x-axis parameters
 plt.xlabel('Threshold', fontsize=fontsize)
@@ -205,7 +205,8 @@ plt.yticks(ticks=yticks, labels=ylabels)
 plt.ylim(bottom=0, top=100)
 
 # Legend
-plt.legend(loc=0, ncol=1, fontsize=fontsize, frameon=False)
+plt.legend(loc=0, ncol=2, fontsize=fontsize, frameon=False,
+    title='Participants:')
 
 # Save the figure
 file_name = os.path.join(save_dir, 'cdf_fixations.svg')

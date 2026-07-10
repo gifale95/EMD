@@ -170,7 +170,7 @@ plt.rcParams['svg.fonttype'] = 'none'
 # Plot the ERPs
 # =============================================================================
 # Create the figure
-fig, axs = plt.subplots(6, 1, sharex=True, sharey=False, figsize=(20, 30))
+fig, axs = plt.subplots(6, 1, sharex=True, sharey=False, figsize=(12.5, 30))
 axs = np.reshape(axs, (-1))
 
 # Loop across subjects
