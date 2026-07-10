@@ -170,7 +170,7 @@ plt.rcParams['svg.fonttype'] = 'none'
 # Plot the ERPs
 # =============================================================================
 # Create the figure
-fig, axs = plt.subplots(6, 1, sharex=True, sharey=False, figsize=(12.5, 30))
+fig, axs = plt.subplots(2, 3, sharex=True, sharey=False, figsize=(25, 10))
 axs = np.reshape(axs, (-1))
 
 # Loop across subjects
@@ -188,7 +188,7 @@ for s, sub in enumerate(args.subjects):
     axs[s].set_title(f'Participant {sub}', fontsize=fontsize)
 
     # x-axis parameters
-    if s == len(args.subjects)-1:
+    if s in [3, 4, 5]:
         axs[s].set_xlabel('Time (s)', fontsize=fontsize)
         xticks = [0, .5, 1, 1.5, 2, 2.5, 3, 3.498]
         xlabels = [0, .5, 1, 1.5, 2, 2.5, 3, 3.5]
@@ -196,7 +196,8 @@ for s, sub in enumerate(args.subjects):
         axs[s].set_xlim(left=min(times), right=max(times))
 
     # y-axis parameters
-    axs[s].set_ylabel("Voltage (µV)", fontsize=fontsize)
+    if s in [0, 3]:
+        axs[s].set_ylabel("Voltage (µV)", fontsize=fontsize)
     ymin = np.nanmin(erps[s]) - abs((np.nanmin(erps[s])) * .1)
     ymax = np.nanmax(erps[s]) + abs((np.nanmax(erps[s])) * .1)
     axs[s].set_ylim(bottom=ymin, top=ymax)
@@ -219,7 +220,7 @@ def sample_cmap(N):
 colors = sample_cmap(len(idx_ch))
 
 # Create the figure
-fig, axs = plt.subplots(6, 1, sharex=True, sharey=True, figsize=(20, 30))
+fig, axs = plt.subplots(2, 3, sharex=True, sharey=True, figsize=(25, 10))
 axs = np.reshape(axs, (-1))
 
 # Loop across subjects
@@ -239,7 +240,7 @@ for s, sub in enumerate(args.subjects):
     axs[s].set_title(f'Participant {sub}', fontsize=fontsize)
 
     # x-axis parameters
-    if s == len(args.subjects)-1:
+    if s in [3, 4, 5]:
         axs[s].set_xlabel('Time (s)', fontsize=fontsize)
         xticks = [0, .5, 1, 1.5, 2, 2.5, 3, 3.498]
         xlabels = [0, .5, 1, 1.5, 2, 2.5, 3, 3.5]
@@ -247,16 +248,16 @@ for s, sub in enumerate(args.subjects):
         axs[s].set_xlim(left=min(times), right=max(times))
 
     # y-axis parameters
-    axs[s].set_ylabel("Noise ceiling (%)", fontsize=fontsize)
-    yticks = [0, 20, 40, 60, 80, 100]
-    ylabels = [0, 20, 40, 60, 80, 100]
-    axs[s].set_yticks(ticks=yticks, labels=ylabels)
-    axs[s].set_ylim(bottom=0, top=90)
+    if s in [0, 3]:
+        axs[s].set_ylabel("Noise ceiling (%)", fontsize=fontsize)
+        yticks = [0, 20, 40, 60, 80, 100]
+        ylabels = [0, 20, 40, 60, 80, 100]
+        axs[s].set_yticks(ticks=yticks, labels=ylabels)
+        axs[s].set_ylim(bottom=0, top=90)
 
     # Legend
     if s == 0:
-        axs[s].legend(loc=0, ncol=len(idx_ch), fontsize=fontsize,
-            frameon=False)
+        axs[s].legend(loc=0, ncol=3, fontsize=15, frameon=False)
 
 # Save the figure
 file_name = os.path.join(save_dir, 'noise_ceiling.svg')
@@ -276,7 +277,7 @@ def sample_cmap(N):
 colors = sample_cmap(len(channel_type_names))
 
 # Create the figure
-fig, axs = plt.subplots(6, 1, sharex=True, sharey=True, figsize=(20, 30))
+fig, axs = plt.subplots(2, 3, sharex=True, sharey=True, figsize=(25, 10))
 axs = np.reshape(axs, (-1))
 
 # Loop across subjects
@@ -296,7 +297,7 @@ for s, sub in enumerate(args.subjects):
     axs[s].set_title(f'Participant {sub}', fontsize=fontsize)
 
     # x-axis parameters
-    if s == len(args.subjects)-1:
+    if s in [3, 4, 5]:
         axs[s].set_xlabel('Time (s)', fontsize=fontsize)
         xticks = [0, .5, 1, 1.5, 2, 2.5, 3, 3.498]
         xlabels = [0, .5, 1, 1.5, 2, 2.5, 3, 3.5]
@@ -304,16 +305,16 @@ for s, sub in enumerate(args.subjects):
         axs[s].set_xlim(left=min(times), right=max(times))
 
     # y-axis parameters
-    axs[s].set_ylabel("Decoding accuracy (%)", fontsize=fontsize)
-    yticks = [50, 60, 70, 80, 90, 100]
-    ylabels = [50, 60, 70, 80, 90, 100]
-    axs[s].set_yticks(ticks=yticks, labels=ylabels)
-    axs[s].set_ylim(bottom=45, top=80)
+    if s in [0, 3]:
+        axs[s].set_ylabel("Decoding accuracy (%)", fontsize=fontsize)
+        yticks = [50, 60, 70, 80, 90, 100]
+        ylabels = [50, 60, 70, 80, 90, 100]
+        axs[s].set_yticks(ticks=yticks, labels=ylabels)
+        axs[s].set_ylim(bottom=45, top=80)
 
     # Legend
     if s == 0:
-        axs[s].legend(loc=0, ncol=len(args.channels), fontsize=fontsize,
-            frameon=False)
+        axs[s].legend(loc=0, ncol=3, fontsize=15, frameon=False)
 
 # Save the figure
 file_name = os.path.join(save_dir, 'pairwise_decoding.svg')
