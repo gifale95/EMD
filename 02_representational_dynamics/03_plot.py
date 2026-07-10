@@ -30,8 +30,8 @@ args, unknown = parser.parse_known_args()
 # =============================================================================
 # Plot save directory
 # =============================================================================
-save_dir = os.path.join(args.emd_dir, 'results',
-    'representational_dynamics', 'plots')
+save_dir = os.path.join(args.emd_dir, 'results', 'representational_dynamics',
+    'plots')
 os.makedirs(save_dir, exist_ok=True)
 
 
@@ -155,11 +155,14 @@ plt.xticks(ticks=xticks, labels=xlabels)
 plt.xlim(left=0, right=len(times_eeg))
 
 # y-axis parameters
-plt.ylabel("Time AlexNet (s)", fontsize=fontsize)
+plt.ylabel("Time stimulus (s)", fontsize=fontsize)
 yticks = [0, 10, 21, 31]
 ylabels = [0, 1, 2, 3]
 plt.yticks(ticks=yticks, labels=ylabels)
 plt.ylim(bottom=0, top=len(times_alex))
+
+# Colorbar
+# plt.colorbar(label='Normalized CT-RSA score', fraction=0.046, pad=0.04)
 
 # Save the figure
 file_name = os.path.join(save_dir, '2d_heatmap.svg')
@@ -222,7 +225,7 @@ plt.xticks(ticks=xticks, labels=xlabels)
 plt.xlim(left=min(times_eeg), right=max(times_eeg))
 
 # y-axis parameters
-plt.ylabel("Time AlexNet (s)", fontsize=fontsize)
+plt.ylabel("Most similar stimulus time (s)", fontsize=fontsize)
 yticks = [0, 1, 2, 3]
 ylabels = [0, 1, 2, 3]
 plt.yticks(ticks=yticks, labels=ylabels)
