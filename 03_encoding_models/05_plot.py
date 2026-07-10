@@ -1,4 +1,4 @@
-"""Plot the partial correlation results.
+"""Plot the encoding model correlation and partial correlation results.
 
 Parameters
 ----------
@@ -28,26 +28,41 @@ args, unknown = parser.parse_known_args()
 # =============================================================================
 # Plot save directory
 # =============================================================================
-save_dir = os.path.join(args.emd_dir, 'results', 'encoding_models',
-    'plots')
+save_dir = os.path.join(args.emd_dir, 'results', 'encoding_models', 'plots')
 os.makedirs(save_dir, exist_ok=True)
 
 
 # =============================================================================
-# Load the EEG channels and time points
+# Load the EEG time points, channel names, and noise ceiling
 # =============================================================================
-data_dir = os.path.join(args.emd_dir, 'derivatives', 'eeg',
-    f'sub-{args.subjects[0]:02}', f'sub-{args.subjects[0]:02}_eeg_metadata.npy')
-metadata = np.load(data_dir, allow_pickle=True).item()
-times = metadata['times']
-ch_names = metadata['ch_names']
+noise_ceiling = []
+for s, sub in enumerate(args.subjects):
+    data_dir = os.path.join(args.emd_dir, 'derivatives', 'eeg',
+        f'sub-{args.subjects[0]:02}',
+        f'sub-{args.subjects[0]:02}_eeg_metadata.npy')
+    metadata = np.load(data_dir, allow_pickle=True).item()
+    times = metadata['times']
+    ch_names = metadata['ch_names']
+    noise_ceiling.append(metadata['noise_ceiling'])
+noise_ceiling = np.array(noise_ceiling)
+
+# Average the noise ceiling across occipital and parietal EEG channels
+idx_ch = []
+for c, chan in enumerate(ch_names):
+    if 'O' in chan or 'P' in chan:
+        idx_ch.append(c)
+noise_ceiling = np.mean(noise_ceiling[:,idx_ch], 1)
+
+# Convert the noise ceiling to correlation values (now it reflects r² explained
+# variance values)
+noise_ceiling = np.sqrt(noise_ceiling/100)
 
 
 # =============================================================================
 # Load the partial correlation results
 # =============================================================================
-data_dir = os.path.join(args.emd_dir, 'results', 'encoding_models',
-    'stats', 'stats.npy')
+data_dir = os.path.join(args.emd_dir, 'results', 'encoding_models', 'stats',
+    'stats.npy')
 data = np.load(data_dir, allow_pickle=True).item()
 partial_correlation = data['partial_correlation']
 ci = data['ci']
@@ -55,14 +70,6 @@ ci = data['ci']
 res_types = ['variance_vision', 'variance_language', 'unique_variance_vision',
     'unique_variance_language']
 res_labels = ['Vision', 'Language', 'Vision | Language', 'Language | Vision']
-
-
-# =============================================================================
-# EEG channel selection
-# =============================================================================
-channel_types = ['O', 'P', 'T', 'C', 'F']
-channel_type_names = ['Occipital', 'Parietal', 'Temporal', 'Central',
-    'Frontal']
 
 
 # =============================================================================
@@ -93,60 +100,108 @@ plt.rcParams["text.usetex"] = False
 plt.rcParams['svg.fonttype'] = 'none'
 
 # Plot colors
-def sample_cmap(N):
-    cmap = plt.cm.get_cmap('inferno')
-    values = np.linspace(0, 1, N+2)
-    colors = cmap(values)[1:-1]
-    return colors
-colors = sample_cmap(len(channel_type_names))
+colors = [(139/255, 0/255, 0/255), (0/255, 0/255, 0/255)]
 
 
 # =============================================================================
-# Plot the partial correlation results (for each channel type)
+# Plot the correlation results
 # =============================================================================
+# Define the data to plot
+res_types = ['variance_vision', 'variance_language']
+labels = ['Vision', 'Language']
+
 # Create the figure
-fig, axs = plt.subplots(len(res_types), 1, sharex=True, sharey=True,
-    figsize=(20, 20))
-axs = np.reshape(axs, (-1))
+fig = plt.figure(figsize=(20, 7.5))
 
-# Loop across result types
+# Plot the stimulus onset/offset and correlation chance dashed lines
+plt.plot([0, 0], [100, -100], 'k--', [3, 3], [100, -100], 'k--',
+    [-10, 10], [0, 0], 'k--', linewidth=2, alpha=.25, label='_nolegend_')
+
+# Plot the noise ceiling
+# plt.plot(times, np.mean(noise_ceiling, 0), 'k--', linewidth=2, alpha=.25,
+#     label='Noise ceiling')
+
+# Loop across vision and language models
 for r, res_type in enumerate(res_types):
 
-    # Plot the stimulus onset/offset and correlation chance dashed lines
-    axs[r].plot([0, 0], [100, -100], 'k--', [3, 3], [100, -100], 'k--',
-        [-10, 10], [0, 0], 'k--', linewidth=2, alpha=.25, label='_nolegend_')
+    # Plot the correlation results
+    res = np.mean(partial_correlation[res_type], 0)
+    plt.plot(times, res, color=colors[r], linewidth=2, alpha=1,
+        label=labels[r])
 
-    # Plot the partial correlation results of each channel group
-    for c, chan in enumerate(channel_types):
-        res = np.mean(partial_correlation[f'{res_type}_{chan}'], 0)
-        axs[r].plot(times, res, color=colors[c], linewidth=2, alpha=1,
-            label=channel_type_names[c])
-        # Plot the confidence intervals
-        axs[r].fill_between(times, ci[f'{res_type}_{chan}'][0],
-            ci[f'{res_type}_{chan}'][1], color=colors[c], alpha=.1)
+    # Plot the confidence intervals
+    plt.fill_between(times, ci[res_type][0], ci[res_type][1],
+        color=colors[r], alpha=.1)
 
-    # Plot title
-    axs[r].set_title(res_labels[r], fontsize=fontsize)
+# x-axis parameters
+plt.xlabel('Time (s)', fontsize=fontsize)
+xticks = [0, .5, 1, 1.5, 2, 2.5, 3, 3.498]
+xlabels = [0, .5, 1, 1.5, 2, 2.5, 3, 3.5]
+plt.xticks(ticks=xticks, labels=xlabels)
+plt.xlim(left=min(times), right=max(times))
 
-    # x-axis parameters
-    if r == len(res_types)-1:
-        axs[r].set_xlabel('Time (s)', fontsize=fontsize)
-        xticks = [0, .5, 1, 1.5, 2, 2.5, 3, 3.498]
-        xlabels = [0, .5, 1, 1.5, 2, 2.5, 3, 3.5]
-        axs[r].set_xticks(ticks=xticks, labels=xlabels)
-        axs[r].set_xlim(left=min(times), right=max(times))
+# y-axis parameters
+plt.ylabel("Pearson's $r$", fontsize=fontsize)
+yticks = [0, 0.1, 0.2, 0.3, 0.4, 0.5]
+ylabels = [0, 0.1, 0.2, 0.3, 0.4, 0.5]
+plt.yticks(ticks=yticks, labels=ylabels)
+plt.ylim(bottom=-0.1, top=0.5)
 
-    # y-axis parameters
-    axs[r].set_ylabel("Pearson's $r$", fontsize=fontsize)
-    yticks = [0, 0.2, 0.4, 0.6]
-    ylabels = [0, 0.2, 0.4, 0.6]
-    axs[r].set_yticks(ticks=yticks, labels=ylabels)
-    axs[r].set_ylim(bottom=-0.1, top=0.5)
+# Legend
+plt.legend(loc=0, ncol=len(labels), fontsize=fontsize, frameon=False)
 
-    # Legend
-    if r == 0:
-        axs[r].legend(loc=0, ncol=len(channel_type_names), fontsize=fontsize,
-            frameon=False)
+# Save the figure
+file_name = os.path.join(save_dir, 'correlation.svg')
+fig.savefig(file_name, bbox_inches='tight', transparent=True, format='svg')
+plt.close()
+
+
+# =============================================================================
+# Plot the partial correlation results
+# =============================================================================
+# Define the data to plot
+res_types = ['unique_variance_vision', 'unique_variance_language']
+labels = ['Vision | Language', 'Language | Vision']
+
+# Create the figure
+fig = plt.figure(figsize=(20, 7.5))
+
+# Plot the stimulus onset/offset and correlation chance dashed lines
+plt.plot([0, 0], [100, -100], 'k--', [3, 3], [100, -100], 'k--',
+    [-10, 10], [0, 0], 'k--', linewidth=2, alpha=.25, label='_nolegend_')
+
+# Plot the noise ceiling
+# plt.plot(times, np.mean(noise_ceiling, 0), 'k--', linewidth=2, alpha=.25,
+#     label='Noise ceiling')
+
+# Loop across vision and language models
+for r, res_type in enumerate(res_types):
+
+    # Plot the correlation results
+    res = np.mean(partial_correlation[res_type], 0)
+    plt.plot(times, res, color=colors[r], linewidth=2, alpha=1,
+        label=labels[r])
+
+    # Plot the confidence intervals
+    plt.fill_between(times, ci[res_type][0], ci[res_type][1],
+        color=colors[r], alpha=.1)
+
+# x-axis parameters
+plt.xlabel('Time (s)', fontsize=fontsize)
+xticks = [0, .5, 1, 1.5, 2, 2.5, 3, 3.498]
+xlabels = [0, .5, 1, 1.5, 2, 2.5, 3, 3.5]
+plt.xticks(ticks=xticks, labels=xlabels)
+plt.xlim(left=min(times), right=max(times))
+
+# y-axis parameters
+plt.ylabel("Partial Pearson's $r$", fontsize=fontsize)
+yticks = [0, 0.1, 0.2, 0.3, 0.4, 0.5]
+ylabels = [0, 0.1, 0.2, 0.3, 0.4, 0.5]
+plt.yticks(ticks=yticks, labels=ylabels)
+plt.ylim(bottom=-0.1, top=0.5)
+
+# Legend
+plt.legend(loc=0, ncol=len(labels), fontsize=fontsize, frameon=False)
 
 # Save the figure
 file_name = os.path.join(save_dir, 'partial_correlation.svg')

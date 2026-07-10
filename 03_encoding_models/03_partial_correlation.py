@@ -214,8 +214,8 @@ unique_variance_language = np.reshape(unique_variance_language,
 # Save the partial correlation results
 # =============================================================================
 results = {
-    'variance_vision': variance_vision,
-    'variance_language': variance_language,
+    'total_variance_vision': variance_vision,
+    'total_variance_language': variance_language,
     'unique_variance_vision': unique_variance_vision,
     'unique_variance_language': unique_variance_language
 }

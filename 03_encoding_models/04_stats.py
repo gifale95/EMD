@@ -66,8 +66,8 @@ for sub in args.subjects:
         'encoding_models', 'partial_correlation', file_name),
         allow_pickle=True).item()
 
-    variance_vision.append(results['variance_vision'])
-    variance_language.append(results['variance_language'])
+    variance_vision.append(results['total_variance_vision'])
+    variance_language.append(results['total_variance_language'])
     unique_variance_vision.append(results['unique_variance_vision'])
     unique_variance_language.append(results['unique_variance_language'])
     del results
