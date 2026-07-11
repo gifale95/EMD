@@ -51,7 +51,7 @@ pip install -r requirements.txt
 ### 📦 Code description
 
 * **[`00a_experimental_paradigm`](https://github.com/gifale95/EMD/tree/main/00a_experimental_paradigm):** Code used to run EMD's data collection experiment.
-* **[`00b_dataset_to_bids`](https://github.com/gifale95/EMD/tree/main/00a_experimental_paradigm):** Code used to convert the EEG and eye-tracking data to raw BIDS format.
+* **[`00b_dataset_to_bids`](https://github.com/gifale95/EMD/tree/main/00b_dataset_to_bids):** Code used to convert the EEG and eye-tracking data to raw BIDS format.
 * **[`00c_preprocessing`](https://github.com/gifale95/EMD/tree/main/00c_preprocessing):** Code used to preprocess the raw EEG and eye-tracking data.
 * **[`paper_figure_2`](https://github.com/gifale95/EMD/tree/main/paper_figure_2):** Data quality checks of eye-tracking gaze positions.
 * **[`paper_figure_3`](https://github.com/gifale95/EMD/tree/main/paper_figure_3):** Data quality checks of EEG responses, including event-related potential (ERP), noise ceiling signal to noise ratio (NCSNR), and pairwise decoding analyses.
