@@ -1,5 +1,5 @@
-"""Plot the EEG ERPs, noise ceiling, pairwise decoding, and save the number of
-retained EEG trials.
+"""Plot the EEG ERPs, NCSNR, pairwise decoding, and save the number of retained
+EEG trials.
 
 Parameters
 ----------
@@ -209,7 +209,7 @@ plt.close()
 
 
 # =============================================================================
-# Plot the noise ceiling
+# Plot the NCSNR
 # =============================================================================
 # Plot colors
 def sample_cmap(N):
@@ -230,9 +230,9 @@ for s, sub in enumerate(args.subjects):
     axs[s].plot([0, 0], [100, -100], 'k--', [3, 3], [100, -100], 'k--', 
         linewidth=2, alpha=.25, label='_nolegend_')
 
-    # Plot the noise ceiling of each subject and channel group
+    # Plot the NCSNR of each subject and channel group
     for c in range(len(idx_ch)):
-        nc = np.nanmean(noise_ceiling[s][idx_ch[c]], 0)
+        nc = np.nanmean(ncsnr[s][idx_ch[c]], 0)
         axs[s].plot(times, nc, color=colors[c], linewidth=2, alpha=1,
             label=channel_type_names[c])
 
@@ -249,18 +249,18 @@ for s, sub in enumerate(args.subjects):
 
     # y-axis parameters
     if s in [0, 3]:
-        axs[s].set_ylabel("Noise ceiling (%)", fontsize=fontsize)
-        yticks = [0, 20, 40, 60, 80, 100]
-        ylabels = [0, 20, 40, 60, 80, 100]
+        axs[s].set_ylabel("NCSNR", fontsize=fontsize)
+        yticks = [0, 0.2, 0.4, 0.6, 0.8, 1.0]
+        ylabels = [0, 0.2, 0.4, 0.6, 0.8, 1.0]
         axs[s].set_yticks(ticks=yticks, labels=ylabels)
-        axs[s].set_ylim(bottom=0, top=90)
+        axs[s].set_ylim(bottom=0, top=0.6)
 
     # Legend
     if s == 0:
         axs[s].legend(loc=0, ncol=3, fontsize=15, frameon=False)
 
 # Save the figure
-file_name = os.path.join(save_dir, 'noise_ceiling.svg')
+file_name = os.path.join(save_dir, 'ncsnr.svg')
 fig.savefig(file_name, bbox_inches='tight', transparent=True, format='svg')
 plt.close()
 

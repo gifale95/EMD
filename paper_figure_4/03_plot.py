@@ -190,31 +190,21 @@ for layer in layers:
     corr_eeg_model_times[layer] = spearmanr(eeg_time,
         ct_rsa_best_model_time[layer])[0]
 
-# Select the layers to plot
-plot_layers = [
-    'features_2'
-]
-
-# Plot colors
-def sample_cmap(N):
-    cmap = plt.cm.get_cmap('inferno')
-    values = np.linspace(0, 1, N+2)
-    colors = cmap(values)[1:-1]
-    return colors
-colors = sample_cmap(len(plot_layers))
+# Select the layer to plot
+plot_layer = 'features_2'
 
 # Create the figure
 matplotlib.rcParams['axes.spines.left'] = True
 matplotlib.rcParams['axes.spines.bottom'] = True
+color = (139/255, 0/255, 0/255)
 fig = plt.figure(figsize=(7.5, 7.5))
 
-# Plot the CT-RSA results of each AlexNet layer
-for l, layer in enumerate(plot_layers):
-    plt.plot(times_eeg, ct_rsa_best_model_time[layer], color=colors[l],
-        linewidth=2, alpha=1, label=layer)
+# Plot the CT-RSA results
+plt.plot(times_eeg, ct_rsa_best_model_time[plot_layer], color=color,
+    linewidth=2, alpha=1, label=layer)
 
 # Plot the correlation between EEG and AlexNet time points
-plt.text(0.25, 2.8, f'$ρ$ = {corr_eeg_model_times[layer]:.2f}', color='k',
+plt.text(0.25, 2.8, f'$ρ$ = {corr_eeg_model_times[plot_layer]:.2f}', color='k',
     fontsize=fontsize)
 
 # x-axis parameters

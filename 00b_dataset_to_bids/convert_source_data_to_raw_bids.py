@@ -64,7 +64,8 @@ dataset_description_json = {
     ],
     "ReferencesAndLinks": [
         "Paper: ???????????????????????????????", # !!!
-        "Code: https://github.com/gifale95/EMD"
+        "Code: https://github.com/gifale95/EMD",
+        "BOLD Moments Dataset: https://doi.org/10.1038/s41467-024-50310-3"
     ]
 }
 

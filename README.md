@@ -8,9 +8,9 @@ Alessandro T. Gifford, Pablo Oyarzo, Anne W. Zonneveld, Christina Sartzetaki, Ir
 
 
 
-## 📜 Paper abstract
+## 📜 Paper abstract !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+Vision neuroscience has experienced a surge in the collection and use of large-scale datasets of brain responses to naturalistic images. However, static images lack the temporal dimension essential for understanding how vision is solved in the brain during dynamic real life settings. To facilitate the study of the neural correlates of dynamic visual event perception, we introduce the EEG Moments Dataset (EMD). EMD consists of 128-channel EEG responses and eye-tracking recordings of 6 human participants viewing 1,102 short naturalistic videos (3-second long) while maintaining central fixation. We show that EMD’s EEG responses well encode stimulus-related information, exhibit a temporal correspondence with the video stimuli, and have a rich representational content revealed by brain encoding models based on different feature spaces. Furthermore, complemented by the BOLD Moments Dataset (BMD) – a large-scale dataset of human functional magnetic resonance imaging (fMRI) responses for the same videos – EMD enables a spatio-temporally resolved investigation of brain responses to dynamic visual events. We release EMD’s EEG and eye-tracking data in both raw and preprocessed format, the 1,102 video stimuli, and rich stimulus metadata. Finally, we provide a code tutorial to familiarize with EMD’s preprocessed data, stimuli, and stimulus metadata.
 
 
 
@@ -50,7 +50,7 @@ pip install -r requirements.txt
 
 ### 📦 Code description !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-* **[`00_prepare_fmri`](https://github.com/gifale95/NSD-synthetic/blob/main/00_prepare_fmri):** Prepare NSD-synthetic and NSD-core's fMRI responses for the following analyses.
+* **[`00a_experimental_paradigm`](https://github.com/gifale95/NSD-synthetic/blob/main/00_prepare_fmri):** Code used to .
 * **[`paper_figure_2`](https://github.com/gifale95/NSD-synthetic/blob/main/paper_figure_2):** Analyse NSD-synthetic's univariate and multivariate fMRI responses, and noise ceiling signal-to-noise ratio (ncsnr).
 * **[`paper_figure_3`](https://github.com/gifale95/NSD-synthetic/blob/main/paper_figure_3):** Perform multidimensional scaling (MDS) on NSD-synthetic and NSD-core's fMRI responses.
 * **[`paper_figure_4`](https://github.com/gifale95/NSD-synthetic/blob/main/paper_figure_4):** Train encoding model on NSD-core, and test them both in-distribution (NSD-core) and out-of-distribution (NSD-synthetic).
@@ -60,9 +60,9 @@ pip install -r requirements.txt
 
 
 
-## 🚀 Preprocessed data tutorial
+## 🚀 EMD data tutorial
 
-Through [this interactive Colab tutorial](https://colab.research.google.com/drive/1Z5MDo8yy3sucggLQ4SMETtud2E1igRE9?usp=drive_link) in Python you will learn how to load, understand, use, and visualize EMD's preprocessed EEG and eye-tracking data.
+Through [this interactive Colab tutorial](https://colab.research.google.com/drive/1Z5MDo8yy3sucggLQ4SMETtud2E1igRE9?usp=drive_link) in Python you will familiarize with EMD’s preprocessed EEG and eye-tracking data, as well as with the stimuli and stimulus metadata.
 
 
 
