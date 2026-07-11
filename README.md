@@ -48,15 +48,16 @@ pip install -r requirements.txt
 
 
 
-### 📦 Code description !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+### 📦 Code description
 
-* **[`00a_experimental_paradigm`](https://github.com/gifale95/NSD-synthetic/blob/main/00_prepare_fmri):** Code used to .
-* **[`paper_figure_2`](https://github.com/gifale95/NSD-synthetic/blob/main/paper_figure_2):** Analyse NSD-synthetic's univariate and multivariate fMRI responses, and noise ceiling signal-to-noise ratio (ncsnr).
-* **[`paper_figure_3`](https://github.com/gifale95/NSD-synthetic/blob/main/paper_figure_3):** Perform multidimensional scaling (MDS) on NSD-synthetic and NSD-core's fMRI responses.
-* **[`paper_figure_4`](https://github.com/gifale95/NSD-synthetic/blob/main/paper_figure_4):** Train encoding model on NSD-core, and test them both in-distribution (NSD-core) and out-of-distribution (NSD-synthetic).
-* **[`paper_figure_5`](https://github.com/gifale95/NSD-synthetic/blob/main/paper_figure_5):** Compare diffent encoding models based on their in-distribution (NSD-core) and out-of-distribution (NSD-synthetic) performances.
-* **[`paper_figure_6`](https://github.com/gifale95/NSD-synthetic/blob/main/paper_figure_6):** Compare the out-of-distribution generalization performance of encoding models tested on individual NSD-synthetic image classes.
-* **[`paper_figure_7`](https://github.com/gifale95/NSD-synthetic/blob/main/paper_figure_7):** Compare the generalization performance of encoding models tested both in- and out-of-distribution on NSD-core, and out-of-distribution on NSD-synthetic.
+* **[`00a_experimental_paradigm`](https://github.com/gifale95/EMD/tree/main/00a_experimental_paradigm):** Code used to run EMD's data collection experiment.
+* **[`00b_dataset_to_bids`](https://github.com/gifale95/EMD/tree/main/00a_experimental_paradigm):** Code used to convert the EEG and eye-tracking data to raw BIDS format.
+* **[`00c_preprocessing`](https://github.com/gifale95/EMD/tree/main/00c_preprocessing):** Code used to preprocess the raw EEG and eye-tracking data.
+* **[`paper_figure_2`](https://github.com/gifale95/EMD/tree/main/paper_figure_2):** Data quality checks of eye-tracking gaze positions.
+* **[`paper_figure_3`](https://github.com/gifale95/EMD/tree/main/paper_figure_3):** Data quality checks of EEG responses, including event-related potential (ERP), noise ceiling signal to noise ratio (NCSNR), and pairwise decoding analyses.
+* **[`paper_figure_4`](https://github.com/gifale95/EMD/tree/main/paper_figure_4):** Temporal correspondence between stimulus videos and EEG responses using cross-temporal representational similarity analysis (CT-RSA).
+* **[`paper_figure_5`](https://github.com/gifale95/EMD/tree/main/paper_figure_5):** Encoding models of EEG responses to videos using vision- and language- based stimulus features.
+* **[`paper_figure_6`](https://github.com/gifale95/EMD/tree/main/paper_figure_6):** Encoding-based fusion between EMD's EEG responses and BMD's fMRI responses.
 
 
 
