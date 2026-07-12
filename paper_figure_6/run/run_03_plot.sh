@@ -7,7 +7,7 @@
 #SBATCH --qos=extended
 
 # Changing to the .py script directory
-cd /home/giffordale95/projects/eeg_moments_dataset/github/EMD/04_eeg_fmri_fusion
+cd /home/giffordale95/projects/eeg_moments_dataset/github/EMD/paper_figure_6
 
 # Activating the Anaconda environment
 source /home/giffordale95/anaconda3/etc/profile.d/conda.sh

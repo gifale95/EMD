@@ -230,7 +230,7 @@ elif args.model_name == 'slow_r50':
 # =============================================================================
 # Create the dataset and dataloader
 # =============================================================================
-video_dir = os.path.join(args.emd_dir, 'stimuli')
+video_dir = os.path.join(args.emd_dir, 'stimuli', 'mp4_h264')
 
 # Create the dataset
 dataset = VideoDataset(video_dir=video_dir, num_samples=num_samples,

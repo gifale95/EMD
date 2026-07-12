@@ -1,0 +1,8 @@
+>>> Plot <<<
+
+Input arguments:
+fmri_hemis       ['left', 'right']
+emd_dir          /scratch/giffordale95/projects/eeg_moments_dataset
+[fetch_surf_fsaverage] Dataset found in 
+/home/giffordale95/nilearn_data/fsaverage
+  0%|          | 0/37 [00:00<?, ?it/s]

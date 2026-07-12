@@ -151,10 +151,6 @@ events_json = {
         "LongName": "Stimulus ID",
         "Description": "Index indicating the number ID of the presented video. Stimuli with stim_id in the range [1, 1000] belong to the training split, and stimuli with stim_id in the range [1001, 1102] belong to the test split."
     },
-    "stim_file": {
-        "LongName": "Stimulus File",
-        "Description": "Represents the location of the stimulus video file presented at the given onset time."
-    },
     "is_task": {
         "Description": "Whether the trial required an active behavioral response",
         "Levels": {
@@ -258,10 +254,6 @@ events_json = {
         "LongName": "Stimulus ID",
         "Description": "Index indicating the number ID of the presented video. Stimuli with stim_id in the range [1, 1000] belong to the training split, and stimuli with stim_id in the range [1001, 1102] belong to the test split."
     },
-    "stim_file": {
-        "LongName": "Stimulus File",
-        "Description": "Represents the location of the stimulus video file presented at the given onset time."
-    },
     "is_task": {
         "Description": "Whether the trial required an active behavioral response",
         "Levels": {
@@ -283,13 +275,6 @@ file_name_json = os.path.join(args.dataset_dir, "task-video_recording-eye1_physi
 with open(file_name_json, "w") as f:
     json.dump(events_json, f, indent=4)
 del events_json
-
-
-# =============================================================================
-# Get the stimulus video file names
-# =============================================================================
-videos = os.listdir(os.path.join(args.dataset_dir, 'stimuli'))
-videos.sort()
 
 
 # =============================================================================
@@ -403,7 +388,7 @@ for ses in range(1, args.n_sessions+1):
             raise ValueError(f"The length of correctness ({len(correctness)}) does not match the expected number of stimulus presentations ({len(stim_order_run)}).")
 
         # Add the events to the *_events.tsv file
-        events_tsv = [["onset", "duration", "trial_num", "stim_id", "stim_file", "is_task", "correct"]]
+        events_tsv = [["onset", "duration", "trial_num", "stim_id", "is_task", "correct"]]
         for i, stim in enumerate(stim_order_run):
             correct =  "n/a" if np.isnan(correctness[i]) else correctness[i].astype(int)
             events_tsv.append(
@@ -411,7 +396,6 @@ for ses in range(1, args.n_sessions+1):
                 3,                      # duration
                 trial_nums[i],          # trial_num
                 int(stim),              # stim_id
-                videos[stim-1],         # stim_file
                 task_trial[i],          # is_task
                 correct                 # correct
             ])
@@ -517,7 +501,6 @@ for ses in range(1, args.n_sessions+1):
         event_type = []
         trial_nums = []
         stim_id = []
-        stim_file = []
         is_task = []
         correct = []
         for i in range(len(onset_blink)):
@@ -526,7 +509,6 @@ for ses in range(1, args.n_sessions+1):
             event_type.append("blink")
             trial_nums.append("n/a")
             stim_id.append("n/a")
-            stim_file.append("n/a")
             is_task.append("n/a")
             correct.append("n/a")
         # Create the stimulus presentation events
@@ -536,14 +518,13 @@ for ses in range(1, args.n_sessions+1):
             event_type.append("stimulus")
             trial_nums.append(i+1)
             stim_id.append(stim_order_run[i])
-            stim_file.append(videos[stim_order_run[i]-1])
             is_task.append(task_trial[i])
             correct.append("n/a" if np.isnan(correctness[i]) else correctness[i].astype(int))
         # Sort the events by onset time
         idx = np.argsort(onset)
 
         # Add the events to the *_recording-eye1_physioevents.tsv.gz file
-        events_tsv = [["onset", "duration", "event_type", "trial_num", "stim_id", "stim_file", "is_task", "correct"]]
+        events_tsv = [["onset", "duration", "event_type", "trial_num", "stim_id", "is_task", "correct"]]
         for i in idx:
             events_tsv.append([
                 onset[i],       # onset
@@ -551,7 +532,6 @@ for ses in range(1, args.n_sessions+1):
                 event_type[i],  # event_type
                 trial_nums[i],  # trial_num
                 stim_id[i],     # stim_id
-                stim_file[i],   # stim_file
                 is_task[i],     # is_task
                 correct[i]      # correct
             ])

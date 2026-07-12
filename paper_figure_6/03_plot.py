@@ -59,14 +59,17 @@ os.makedirs(save_dir, exist_ok=True)
 # Plot the encoding accuracy of the EEG-fMRI fusion encoding models on brain
 # surfaces (selected time points)
 # =============================================================================
+# Set the output resolution of the plots to DPI=300
+matplotlib.rcParams['savefig.dpi'] = 300
+
+# Get the fsaverage mesh
+fsaverage = datasets.fetch_surf_fsaverage(mesh='fsaverage')  # 163842 verts/hemi
+
+# Loop across plotting time points
 plot_times = [0, 0.024, 0.05, 0.074, 0.1, 0.124, 0.15, 0.174, 0.2, 0.224, 0.25,
     0.274, 0.3, 0.324, 0.35, 0.374, 0.4, 0.424, 0.45, 0.474, 0.5, 0.524, 0.55,
     0.574, 0.6, 0.8, 1, 1.2, 1.4, 1.6, 1.8, 2, 2.2, 2.4, 2.6, 2.8, 3]
 plot_views = ['lateral', 'medial', 'dorsal', 'ventral', 'anterior', 'posterior']
-
-fsaverage = datasets.fetch_surf_fsaverage(mesh='fsaverage')  # 163842 verts/hemi
-
-# Loop across plotting time points
 for p_times in tqdm(plot_times):
 
     # Select the data time point to plot
@@ -78,9 +81,9 @@ for p_times in tqdm(plot_times):
     for p_views in plot_views:
 
         # Plot the left hemisphere
-        title = f'LH, Time (s): {p_times}, View: {p_views}'
+        title = f'LH, Time (s): {p_times:.3f}, View: {p_views}'
         output_file = os.path.join(save_dir,
-            f'correlation_lh_time-{p_times}_view-{p_views}.png')
+            f'correlation_lh_time-{p_times:.3f}_view-{p_views}.png')
         plotting.plot_surf_stat_map(
             fsaverage['infl_left'],
             stat_map=data_lh,
@@ -96,9 +99,9 @@ for p_times in tqdm(plot_times):
         )
 
         # Plot the right hemisphere
-        title = f'RH, Time (s): {p_times}, View: {p_views}'
+        title = f'RH, Time (s): {p_times:.3f}, View: {p_views}'
         output_file = os.path.join(save_dir,
-            f'correlation_rh_time-{p_times}_view-{p_views}.png')
+            f'correlation_rh_time-{p_times:.3f}_view-{p_views}.png')
         plotting.plot_surf_stat_map(
             fsaverage['infl_right'],
             stat_map=data_rh,
