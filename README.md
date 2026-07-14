@@ -18,7 +18,7 @@ Vision neuroscience has experienced a surge in the collection and use of large-s
 
 ### 🧰 Data
 
-The EEG Moments Dataset (EMD) is freely available on OpenNeuro: [https://openneuro.org/datasets/ds008057](https://openneuro.org/datasets/ds008057).
+The EEG Moments Dataset (EMD) is freely available on OpenNeuro: [https://openneuro.org/datasets/ds008257](https://openneuro.org/datasets/ds008257).
 
 
 

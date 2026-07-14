@@ -95,7 +95,7 @@ with open(file_name_tsv, "w", newline="") as f:
 # =============================================================================
 # Plot parameters
 # =============================================================================
-fontsize = 20
+fontsize = 25
 matplotlib.rcParams['font.sans-serif'] = 'DejaVu Sans'
 matplotlib.rcParams["font.weight"] = "normal"
 matplotlib.rcParams["axes.labelweight"] = "normal"
@@ -127,7 +127,7 @@ matplotlib.rcParams['axes.spines.left'] = False
 matplotlib.rcParams['axes.spines.bottom'] = False
 
 # Create the figure
-fig, axs = plt.subplots(2, 3, sharex=True, sharey=True, figsize=(12, 7.5))
+fig, axs = plt.subplots(2, 3, sharex=True, sharey=True, figsize=(14, 8.5))
 axs = np.reshape(axs, (-1))
 
 # Loop across subjects
@@ -178,7 +178,7 @@ def sample_cmap(N):
 colors = sample_cmap(len(cdf_fixations))
 
 # Create the figure
-fig = plt.figure(figsize=(7.5, 7.5))
+fig = plt.figure(figsize=(7.5, 8.5))
 
 # Plot the 1° threshold dashed line
 plt.plot([1, 1], [0, 100], 'k--', linewidth=2, alpha=.25, label='_nolegend_')
