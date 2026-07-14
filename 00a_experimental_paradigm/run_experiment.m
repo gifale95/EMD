@@ -145,7 +145,7 @@ data.task_trials = task_trials;
 % Open Psychtoolbox and display instructions
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-[win, screenRect] = Screen('OpenWindow', screenWin, [159 162 166], [0 0 800 800]);
+[win, screenRect] = Screen('OpenWindow', screenWin, [159 162 166]);
 Screen('BlendFunction', win, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 %VBLSyncTest() %%%
 

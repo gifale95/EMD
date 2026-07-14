@@ -162,7 +162,8 @@ events_json = {
         "Description": "Behavioral response accuracy",
         "Levels": {
             "0": "Incorrect response",
-            "1": "Correct response"
+            "1": "Correct response",
+            "2": "Non-task trial (no response expected)"
         }
     }
 }
@@ -265,7 +266,8 @@ events_json = {
         "Description": "Behavioral response accuracy",
         "Levels": {
             "0": "Incorrect response",
-            "1": "Correct response"
+            "1": "Correct response",
+            "2": "Non-task trial (no response expected)"
         }
     }
 }
@@ -390,7 +392,7 @@ for ses in range(1, args.n_sessions+1):
         # Add the events to the *_events.tsv file
         events_tsv = [["onset", "duration", "trial_num", "stim_id", "is_task", "correct"]]
         for i, stim in enumerate(stim_order_run):
-            correct =  "n/a" if np.isnan(correctness[i]) else correctness[i].astype(int)
+            correct =  2 if np.isnan(correctness[i]) else correctness[i].astype(int)
             events_tsv.append(
                 [events[i][0]/1000,     # onset
                 3,                      # duration
@@ -519,7 +521,7 @@ for ses in range(1, args.n_sessions+1):
             trial_nums.append(i+1)
             stim_id.append(stim_order_run[i])
             is_task.append(task_trial[i])
-            correct.append("n/a" if np.isnan(correctness[i]) else correctness[i].astype(int))
+            correct.append(2 if np.isnan(correctness[i]) else correctness[i].astype(int))
         # Sort the events by onset time
         idx = np.argsort(onset)
 
