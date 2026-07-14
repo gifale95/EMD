@@ -1,30 +1,31 @@
-# !!!!!!!!!!!!!!!!!!!!!! PAPER TITLE !!!!!!!!!!!!!!!!!!!!!!!
+# EEG Moments Dataset (EMD)
 
-Here we provide the code to reproduce all results from the paper:</br>
-"[!!!!!!!!!!!!!!!!!!!!!! PAPER TITLE !!!!!!!!!!!!!!!!!!!!!!!](!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1)".</br>
-Alessandro T. Gifford, Pablo Oyarzo, Anne W. Zonneveld, Christina Sartzetaki, Iris I.A. Groen, Radoslaw M. Cichy
+This is the accompanying GitHub repository of the [EEG Moments Dataset (EMD)](paper_link)!!!!!!!!!!. EMD consists of 128-channel EEG responses and eye-tracking recordings of 6 human participants viewing 1,102 short naturalistic videos (3-second long; with audio track) while maintaining central fixation. EMD is the companion dataset of the [BOLD Moments Dataset (BMD)](https://doi.org/10.1038/s41467-024-50310-3), which consists of fMRI recordings of 10 human participants for the same 1,102 videos.
 
-![Figure 1](figure_1.jpg)
+<p align="center">
+  <img src="figure_1.jpg" alt="Figure 1" width="750"><br>
+  <em>EMD’s stimuli, stimulus metadata, experimental design, and data acquisition. (a) EMD’s stimuli consist of 1,102 short naturalistic videos (3-s long), of which 1,000 belong to the dataset training set, and 102 to the dataset testing set. (b) Each video stimulus has rich metadata including object labels, scene labels, action labels, text descriptions, a spoken transcription, a memorability score and decay rate, and motion energy features (not shown here). (c) EMD consists of 6 participants with 8 data collection sessions each. During these 8 sessions, each of the 1,000 training videos were repeated 6 times, and each of the 102 testing videos were repeated 24 times. (d) Each experimental trial started with 1 s of blank screen, followed by 3 s of video presentation, 0.25 s of blank screen, and ended with 1.5 s where participants were instructed to blink. Videos were presented on a gray background at the center of the screen subtending 5° of visual angle and overlaid with a central red fixation cross (0.52° of visual angle). Participants were instructed to focus on the fixation cross for the duration of the experiment. (e) We recorded neural responses throughout the video viewing experiment using 128-channel EEG at a sampling rate of 1,000 Hz. (f) We recorded monocular eye-tracking data throughout the video viewing experiment, including x gaze, y gaze, and pupil size, at a sampling rate of 1,000 Hz.</em>
+</p>
 
 
 
-## 📜 Paper abstract !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+## 🧰 Download EMD
 
-Vision neuroscience has experienced a surge in the collection and use of large-scale datasets of brain responses to naturalistic images. However, static images lack the temporal dimension essential for understanding how vision is solved in the brain during dynamic real life settings. To facilitate the study of the neural correlates of dynamic visual event perception, we introduce the EEG Moments Dataset (EMD). EMD consists of 128-channel EEG responses and eye-tracking recordings of 6 human participants viewing 1,102 short naturalistic videos (3-second long; with audio track) while maintaining central fixation. We show that EMD’s EEG responses well encode stimulus-related information, exhibit a temporal correspondence with the video stimuli, and have a rich representational content revealed by brain encoding models based on different feature spaces. Furthermore, complemented by the BOLD Moments Dataset (BMD) – a large-scale dataset of human functional magnetic resonance imaging (fMRI) responses for the same videos – EMD enables a spatio-temporally resolved investigation of brain responses to dynamic visual events. We release EMD’s EEG and eye-tracking data in both raw and preprocessed format, the 1,102 video stimuli, and rich stimulus metadata. Finally, we provide a code tutorial to familiarize with EMD’s preprocessed data, stimuli, and stimulus metadata.
+EMD is freely available on OpenNeuro: [https://openneuro.org/datasets/ds008257](https://openneuro.org/datasets/ds008257).
 
+
+## 🚀 EMD data tutorial
+
+Through [this interactive Colab tutorial](https://colab.research.google.com/drive/1Z5MDo8yy3sucggLQ4SMETtud2E1igRE9?usp=drive_link) in Python you will familiarize with EMD’s preprocessed EEG and eye-tracking data, as well as with the stimuli and stimulus metadata.
 
 
 ## ♻️ Reproducibility
 
-### 🧰 Data
-
-The EEG Moments Dataset (EMD) is freely available on OpenNeuro: [https://openneuro.org/datasets/ds008257](https://openneuro.org/datasets/ds008257).
+This repository contains code to reproduce all [paper's results](link_paper)!!!!!!!!!!!!!.
 
 
 
 ### ⚙️ Installation
-
-This repository contains code to reproduce all paper's results.
 
 To run the code, you first need to install the libraries in the [requirements.txt](https://github.com/gifale95/EMD/blob/main/requirements.txt) file within an Anaconda environment. Here, we guide you through the installation steps.
 
@@ -58,12 +59,6 @@ pip install -r requirements.txt
 * **[`paper_figure_4`](https://github.com/gifale95/EMD/tree/main/paper_figure_4):** Temporal correspondence between stimulus videos and EEG responses using cross-temporal representational similarity analysis (CT-RSA).
 * **[`paper_figure_5`](https://github.com/gifale95/EMD/tree/main/paper_figure_5):** Encoding models of EEG responses to videos using vision- and language- based stimulus features.
 * **[`paper_figure_6`](https://github.com/gifale95/EMD/tree/main/paper_figure_6):** Encoding-based fusion between EMD's EEG responses and BMD's fMRI responses.
-
-
-
-## 🚀 EMD data tutorial
-
-Through [this interactive Colab tutorial](https://colab.research.google.com/drive/1Z5MDo8yy3sucggLQ4SMETtud2E1igRE9?usp=drive_link) in Python you will familiarize with EMD’s preprocessed EEG and eye-tracking data, as well as with the stimuli and stimulus metadata.
 
 
 
