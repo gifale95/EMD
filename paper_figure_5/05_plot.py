@@ -75,7 +75,7 @@ res_labels = ['Vision', 'Language', 'Vision | Language', 'Language | Vision']
 # =============================================================================
 # Plot parameters
 # =============================================================================
-fontsize = 20
+fontsize = 25
 matplotlib.rcParams['font.sans-serif'] = 'DejaVu Sans'
 matplotlib.rcParams["font.weight"] = "normal"
 matplotlib.rcParams["axes.labelweight"] = "normal"
@@ -111,7 +111,7 @@ res_types = ['variance_vision', 'variance_language']
 labels = ['Vision', 'Language']
 
 # Create the figure
-fig = plt.figure(figsize=(20, 7.5))
+fig = plt.figure(figsize=(20, 6))
 
 # Plot the stimulus onset/offset and correlation chance dashed lines
 plt.plot([0, 0], [100, -100], 'k--', [3, 3], [100, -100], 'k--',
@@ -142,8 +142,8 @@ plt.xlim(left=min(times), right=max(times))
 
 # y-axis parameters
 plt.ylabel("Pearson's $r$", fontsize=fontsize)
-yticks = [0, 0.1, 0.2, 0.3, 0.4, 0.5]
-ylabels = [0, 0.1, 0.2, 0.3, 0.4, 0.5]
+yticks = [0, 0.2, 0.4]
+ylabels = [0, 0.2, 0.4]
 plt.yticks(ticks=yticks, labels=ylabels)
 plt.ylim(bottom=-0.1, top=0.5)
 
@@ -164,7 +164,7 @@ res_types = ['unique_variance_vision', 'unique_variance_language']
 labels = ['Vision | Language', 'Language | Vision']
 
 # Create the figure
-fig = plt.figure(figsize=(20, 7.5))
+fig = plt.figure(figsize=(20, 6))
 
 # Plot the stimulus onset/offset and correlation chance dashed lines
 plt.plot([0, 0], [100, -100], 'k--', [3, 3], [100, -100], 'k--',
@@ -195,8 +195,8 @@ plt.xlim(left=min(times), right=max(times))
 
 # y-axis parameters
 plt.ylabel("Partial Pearson's $r$", fontsize=fontsize)
-yticks = [0, 0.1, 0.2, 0.3, 0.4, 0.5]
-ylabels = [0, 0.1, 0.2, 0.3, 0.4, 0.5]
+yticks = [0, 0.2, 0.4]
+ylabels = [0, 0.2, 0.4]
 plt.yticks(ticks=yticks, labels=ylabels)
 plt.ylim(bottom=-0.1, top=0.5)
 

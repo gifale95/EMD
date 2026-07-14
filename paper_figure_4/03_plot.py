@@ -96,7 +96,7 @@ times_alex = np.linspace(0, 3, n_times_alex)
 # =============================================================================
 # Plot parameters
 # =============================================================================
-fontsize = 20
+fontsize = 25
 matplotlib.rcParams['font.sans-serif'] = 'DejaVu Sans'
 matplotlib.rcParams["font.weight"] = "normal"
 matplotlib.rcParams["axes.labelweight"] = "normal"
