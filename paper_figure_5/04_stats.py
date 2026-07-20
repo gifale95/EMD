@@ -1,5 +1,5 @@
 """Aggregate the partial correlation results across all subjects, and compute
-the confidence intervals.
+the confidence intervals and statistical significance.
 
 Parameters
 ----------
@@ -19,6 +19,8 @@ import random
 import numpy as np
 from sklearn.utils import resample
 from tqdm import tqdm
+from scipy.stats import ttest_1samp
+from statsmodels.stats.multitest import multipletests
 
 
 # =============================================================================
@@ -114,11 +116,26 @@ for res_type in results_chan_avg.keys():
 
 
 # =============================================================================
+# Compute the significance
+# =============================================================================
+sig = {}
+for res_type in results_chan_avg.keys():
+
+    # Compute the p-value with a t-test against 0
+    pval = ttest_1samp(results_chan_avg[res_type], 0, axis=0,
+        alternative='greater')[1]
+
+    # Correct for multiple comparisons
+    sig[res_type] = multipletests(pval, 0.05, 'fdr_bh')[0]
+
+
+# =============================================================================
 # Save the results
 # =============================================================================
 results = {
     'partial_correlation': results_chan_avg,
-    'ci': ci
+    'ci': ci,
+    'sig': sig
 }
 
 save_dir = os.path.join(args.emd_dir, 'results', 'encoding_models', 'stats')

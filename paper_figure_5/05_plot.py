@@ -66,10 +66,7 @@ data_dir = os.path.join(args.emd_dir, 'results', 'encoding_models', 'stats',
 data = np.load(data_dir, allow_pickle=True).item()
 partial_correlation = data['partial_correlation']
 ci = data['ci']
-
-res_types = ['variance_vision', 'variance_language', 'unique_variance_vision',
-    'unique_variance_language']
-res_labels = ['Vision', 'Language', 'Vision | Language', 'Language | Vision']
+sig = data['sig']
 
 
 # =============================================================================
@@ -108,7 +105,14 @@ colors = [(139/255, 0/255, 0/255), (0/255, 0/255, 0/255)]
 # =============================================================================
 # Define the data to plot
 res_types = ['variance_vision', 'variance_language']
-labels = ['Vision', 'Language']
+labels = ['Vision model', 'Language model']
+
+# Format the significance for plotting
+sig_plot = {}
+for i, res_type in enumerate(res_types):
+    sig_plot[res_type] = np.empty((len(times)), dtype=np.float32)
+    sig_plot[res_type][:] = np.nan
+    sig_plot[res_type][sig[res_type]] = .46 + 0.02 * i
 
 # Create the figure
 fig = plt.figure(figsize=(20, 6))
@@ -132,6 +136,10 @@ for r, res_type in enumerate(res_types):
     # Plot the confidence intervals
     plt.fill_between(times, ci[res_type][0], ci[res_type][1],
         color=colors[r], alpha=.1)
+    
+    # Plot the significance
+    plt.plot(times, sig_plot[res_type], 'o', color=colors[r], markersize=5,
+        alpha=1, label='_nolegend_')
 
 # x-axis parameters
 plt.xlabel('Time (s)', fontsize=fontsize)
@@ -148,7 +156,7 @@ plt.yticks(ticks=yticks, labels=ylabels)
 plt.ylim(bottom=-0.1, top=0.5)
 
 # Legend
-plt.legend(loc=2, ncol=len(res_types), fontsize=fontsize, frameon=False)
+plt.legend(loc=0, ncol=1, fontsize=fontsize, frameon=False)
 
 # Save the figure
 file_name = os.path.join(save_dir, 'correlation.svg')
@@ -161,7 +169,14 @@ plt.close()
 # =============================================================================
 # Define the data to plot
 res_types = ['unique_variance_vision', 'unique_variance_language']
-labels = ['Vision | Language', 'Language | Vision']
+labels = ['Vision model | Language model', 'Language model | Vision model']
+
+# Format the significance for plotting
+sig_plot = {}
+for i, res_type in enumerate(res_types):
+    sig_plot[res_type] = np.empty((len(times)), dtype=np.float32)
+    sig_plot[res_type][:] = np.nan
+    sig_plot[res_type][sig[res_type]] = .46 + 0.02 * i
 
 # Create the figure
 fig = plt.figure(figsize=(20, 6))
@@ -186,6 +201,10 @@ for r, res_type in enumerate(res_types):
     plt.fill_between(times, ci[res_type][0], ci[res_type][1],
         color=colors[r], alpha=.1)
 
+    # Plot the significance
+    plt.plot(times, sig_plot[res_type], 'o', color=colors[r], markersize=5,
+        alpha=1, label='_nolegend_')
+
 # x-axis parameters
 plt.xlabel('Time (s)', fontsize=fontsize)
 xticks = [0, .5, 1, 1.5, 2, 2.5, 3, 3.498]
@@ -201,9 +220,21 @@ plt.yticks(ticks=yticks, labels=ylabels)
 plt.ylim(bottom=-0.1, top=0.5)
 
 # Legend
-plt.legend(loc=2, ncol=len(res_types), fontsize=fontsize, frameon=False)
+plt.legend(loc=0, ncol=1, fontsize=fontsize, frameon=False)
 
 # Save the figure
 file_name = os.path.join(save_dir, 'partial_correlation.svg')
 fig.savefig(file_name, bbox_inches='tight', transparent=True, format='svg')
 plt.close()
+
+
+# =============================================================================
+# Print the peak time points
+# =============================================================================
+res_types = ['variance_vision', 'variance_language', 'unique_variance_vision',
+    'unique_variance_language']
+for res_type in res_types:
+    res = np.mean(partial_correlation[res_type], 0)
+    peak_idx = np.argmax(res)
+    peak_time = times[peak_idx]
+    print(f'{res_type}: {peak_time:.3f} s')

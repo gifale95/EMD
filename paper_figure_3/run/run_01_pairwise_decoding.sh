@@ -2,8 +2,8 @@
 #SBATCH --mail-user=giffordale95@zedat.fu-berlin.de
 #SBATCH --job-name=EMD-01_data_quality_check-eeg-01_pairwise_decoding
 #SBATCH --mail-type=end
-#SBATCH --mem=10000
-#SBATCH --time=15:00:00
+#SBATCH --mem=15000
+#SBATCH --time=40:00:00
 #SBATCH --qos=extended
 
 # Creating the parameters combinations
@@ -12,7 +12,7 @@ declare -a channels_all
 index=0
 
 for s in `seq 1 6` ; do
-    for c in 'O' 'P' 'T' 'C' 'F' ; do
+    for c in 'all' ; do
         subject_all[$index]=$s
         channels_all[$index]=$c
         ((index=index+1))
@@ -27,7 +27,7 @@ echo subject: $subject
 echo channels: $channels
 
 # Changing to the .py script directory
-cd /home/giffordale95/projects/eeg_moments_dataset/github/EMD/01_data_quality_check/eeg
+cd /home/giffordale95/projects/eeg_moments_dataset/github/EMD/paper_figure_3
 
 # Activating the Anaconda environment
 source /home/giffordale95/anaconda3/etc/profile.d/conda.sh

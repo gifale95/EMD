@@ -20,6 +20,9 @@ import numpy as np
 import matplotlib
 from matplotlib import pyplot as plt
 import csv
+import mne
+from mne.channels.layout import _find_topomap_coords
+from mne.viz.topomap import _make_head_outlines
 
 
 # =============================================================================
@@ -27,7 +30,6 @@ import csv
 # =============================================================================
 parser = argparse.ArgumentParser()
 parser.add_argument('--subjects', default=[1, 2, 3, 4, 5, 6], type=list)
-parser.add_argument('--channels', default=['O', 'P', 'T', 'C', 'F'], type=list)
 parser.add_argument('--emd_dir', default='/scratch/giffordale95/projects/eeg_moments_dataset', type=str)
 args, unknown = parser.parse_known_args()
 
@@ -63,7 +65,7 @@ erps = erps * 1e6
 
 
 # =============================================================================
-# Load the NCSNR and noise ceiling
+# Load the EEG channel names, times, NCSNR, and noise ceiling
 # =============================================================================
 ncsnr = []
 noise_ceiling = []
@@ -85,33 +87,17 @@ noise_ceiling = np.asarray(noise_ceiling)
 # =============================================================================
 # Load the pairwise decoding results
 # =============================================================================
-# Load the pairwise decoding results of all subjects and channel types
-decoding = {}
+# Load the pairwise decoding results of all subjects
+decoding = []
 for s, sub in enumerate(args.subjects):
-    for c, chan in enumerate(args.channels):
-        data_dir = os.path.join(args.emd_dir, 'results',
-            'data_quality_check', 'eeg', 'pairwise_decoding_rdms',
-            f'rdms_sub-{sub:02d}_channels-{chan}.npy')
-        rdms = np.load(data_dir)
-        if s == 0 and c == 0:
-            idx_tril = np.tril_indices(rdms.shape[0], k=-1)
-        decoding[(sub, chan)] = np.mean(rdms[idx_tril], 0) * 100
-
-
-# =============================================================================
-# EEG channel selection
-# =============================================================================
-channel_type_names = ['Occipital', 'Parietal', 'Temporal', 'Central',
-    'Frontal']
-
-idx_ch = []
-for ch_type in args.channels:
-    idx = []
-    for c, chan in enumerate(ch_names):
-        if ch_type in chan:
-            idx.append(c)
-    idx_ch.append(np.asarray(idx))
-    del idx
+    data_dir = os.path.join(args.emd_dir, 'results',
+        'data_quality_check', 'eeg', 'pairwise_decoding_rdms',
+        f'rdms_sub-{sub:02d}_channels-all.npy')
+    rdms = np.load(data_dir)
+    if s == 0:
+        idx_tril = np.tril_indices(rdms.shape[0], k=-1)
+    decoding.append(np.mean(rdms[idx_tril], 0) * 100)
+decoding = np.array(decoding)
 
 
 # =============================================================================
@@ -141,7 +127,7 @@ with open(file_name_tsv, "w", newline="") as f:
 # =============================================================================
 # Plot parameters
 # =============================================================================
-fontsize = 20
+fontsize = 25
 matplotlib.rcParams['font.sans-serif'] = 'DejaVu Sans'
 matplotlib.rcParams["font.weight"] = "normal"
 matplotlib.rcParams["axes.labelweight"] = "normal"
@@ -169,38 +155,54 @@ plt.rcParams['svg.fonttype'] = 'none'
 # =============================================================================
 # Plot the ERPs
 # =============================================================================
+# Channel positions -> 2D
+montage = mne.channels.make_standard_montage('standard_1005')
+ch_pos = montage.get_positions()['ch_pos']
+
+# O9/O10 are absent from standard_1005 (inferior-occipital ring); borrow neighbors
+missing_fallback = {'O9': 'O1', 'O10': 'O2'}
+coord_names = [c if c in ch_pos else missing_fallback[c] for c in ch_names]
+info = mne.create_info(list(dict.fromkeys(coord_names)), 1000, 'eeg')
+info.set_montage(montage)
+pos2d = _find_topomap_coords(info, picks='eeg') # azimuthal-equidistant projection
+name_to_xy = dict(zip(info.ch_names, pos2d))
+xy = np.array([name_to_xy[c] for c in coord_names]) # Shape: (n_channels, 2)
+
+# 2D position -> color (bilinear blend of 4 corner colors)
+xy_n = (xy - xy.min(0)) / (np.ptp(xy, 0) + 1e-12) # np.ptp: ndarray.ptp removed in numpy 2.0
+corners = {'ll': np.array([0.85, 0.10, 0.10]),   # posterior-left   red
+           'lr': np.array([0.95, 0.75, 0.10]),   # posterior-right  yellow
+           'ul': np.array([0.10, 0.25, 0.80]),   # anterior-left    blue
+           'ur': np.array([0.10, 0.70, 0.35])}   # anterior-right   green
+u, v = xy_n[:, 0][:, None], xy_n[:, 1][:, None]
+colors = ((1 - u) * (1 - v) * corners['ll'] + u * (1 - v) * corners['lr']
+          + (1 - u) * v * corners['ul'] + u * v * corners['ur']) # Shape: (n_channels, 3)
+
 # Create the figure
-fig, axs = plt.subplots(2, 3, sharex=True, sharey=False, figsize=(25, 10))
-axs = np.reshape(axs, (-1))
+fig = plt.figure(figsize=(20, 6))
 
-# Loop across subjects
-for s, sub in enumerate(args.subjects):
+# Plot the stimulus onset and offset dashed lines
+plt.plot([0, 0], [100, -100], 'k--', [3, 3], [100, -100], 'k--', 
+    linewidth=2, alpha=.25, label='_nolegend_')
 
-    # # Plot the stimulus onset and offset dashed lines
-    axs[s].plot([0, 0], [100, -100], 'k--', [3, 3], [100, -100], 'k--', 
-        linewidth=2, alpha=.25, label='_nolegend_')
+# Plot the ERPs of the chosen subject
+sub = 1
+erp = erps[sub-1] # Shape: (n_channels, n_times)
+for i in range(erp.shape[0]): 
+    plt.plot(times, erp[i], color=colors[i], linewidth=1, alpha=0.75)
 
-    # Plot the ERPs of each subject
-    axs[s].plot(times, np.transpose(erps[s]), color='k', linewidth=1,
-        alpha=0.2)
+# x-axis parameters
+plt.xlabel('Time (s)', fontsize=fontsize)
+xticks = [0, .5, 1, 1.5, 2, 2.5, 3, 3.498]
+xlabels = [0, .5, 1, 1.5, 2, 2.5, 3, 3.5]
+plt.xticks(ticks=xticks, labels=xlabels)
+plt.xlim(left=min(times), right=max(times))
 
-    # Plot title
-    axs[s].set_title(f'Participant {sub}', fontsize=fontsize)
-
-    # x-axis parameters
-    if s in [3, 4, 5]:
-        axs[s].set_xlabel('Time (s)', fontsize=fontsize)
-        xticks = [0, .5, 1, 1.5, 2, 2.5, 3, 3.498]
-        xlabels = [0, .5, 1, 1.5, 2, 2.5, 3, 3.5]
-        axs[s].set_xticks(ticks=xticks, labels=xlabels)
-        axs[s].set_xlim(left=min(times), right=max(times))
-
-    # y-axis parameters
-    if s in [0, 3]:
-        axs[s].set_ylabel("Voltage (µV)", fontsize=fontsize)
-    ymin = np.nanmin(erps[s]) - abs((np.nanmin(erps[s])) * .1)
-    ymax = np.nanmax(erps[s]) + abs((np.nanmax(erps[s])) * .1)
-    axs[s].set_ylim(bottom=ymin, top=ymax)
+# y-axis parameters
+plt.ylabel("Voltage (µV)", fontsize=fontsize)
+ymin = np.nanmin(erp) - abs((np.nanmin(erp)) * .1)
+ymax = np.nanmax(erp) + abs((np.nanmax(erp)) * .1)
+plt.ylim(bottom=ymin, top=ymax)
 
 # Save the figure
 file_name = os.path.join(save_dir, 'eeg_erps.svg')
@@ -209,55 +211,104 @@ plt.close()
 
 
 # =============================================================================
+# Plot the electrode position topography
+# =============================================================================
+# Channels -> 2D coords -> per-channel color
+montage = mne.channels.make_standard_montage('standard_1005')
+ch_pos = montage.get_positions()['ch_pos']
+missing_fallback = {'O9': 'O1', 'O10': 'O2'} # absent from standard_1005; borrow neighbor for viz
+coord_names = [c if c in ch_pos else missing_fallback[c] for c in ch_names]
+info = mne.create_info(list(dict.fromkeys(coord_names)), 1000, 'eeg')
+info.set_montage(montage)
+pos2d = _find_topomap_coords(info, picks='eeg') # azimuthal-equidistant projection
+name_to_xy = dict(zip(info.ch_names, pos2d))
+xy = np.array([name_to_xy[c] for c in coord_names]) # Shape: (n_channels, 2)
+xy_n = (xy - xy.min(0)) / (np.ptp(xy, 0) + 1e-12) # np.ptp: ndarray.ptp removed in numpy 2.0
+corners = {'ll': np.array([0.85, 0.10, 0.10]),   # posterior-left  red
+           'lr': np.array([0.95, 0.75, 0.10]),   # posterior-right yellow
+           'ul': np.array([0.10, 0.25, 0.80]),   # anterior-left   blue
+           'ur': np.array([0.10, 0.70, 0.35])}   # anterior-right  green
+u, v = xy_n[:, 0][:, None], xy_n[:, 1][:, None]
+colors = ((1 - u) * (1 - v) * corners['ll'] + u * (1 - v) * corners['lr']
+          + (1 - u) * v * corners['ul'] + u * v * corners['ur']) # Shape: (n_channels, 3)
+
+# Plot parameters
+fontsize = 20
+matplotlib.rcParams['font.sans-serif'] = 'DejaVu Sans'
+matplotlib.rcParams['font.size'] = fontsize
+plt.rcParams['text.usetex'] = False
+marker_size = 300
+label_size = 4.5
+show_labels = False
+y_offset = 0.015
+
+# Plot the electrode position topography
+xy_plot = xy - np.array([0.0, y_offset]) # shift markers down relative to the fixed head outline
+sphere = np.array([0., 0., 0., 0.095]) # MNE default head sphere (HEAD_SIZE_DEFAULT)
+outlines = _make_head_outlines(sphere, xy, 'head', clip_origin=(0., 0.))
+fig, ax = plt.subplots(figsize=(8, 8))
+for key in ['head', 'nose', 'ear_left', 'ear_right']:
+    ax.plot(*outlines[key], color='k', linewidth=1.5, zorder=1)
+ax.scatter(xy_plot[:, 0], xy_plot[:, 1], c=colors, s=marker_size,
+    edgecolors='k', linewidths=0.5, zorder=2)
+if show_labels:
+    for c, (x, y) in zip(ch_names, xy_plot): # true names, not fallback
+        ax.annotate(c, (x, y), fontsize=label_size, ha='center', va='center', zorder=3)
+ax.set_aspect('equal')
+ax.axis('off')
+
+# Save the figure
+file_name = os.path.join(save_dir, 'topoplot_erp_colors.svg')
+fig.savefig(file_name, bbox_inches='tight', transparent=True, format='svg')
+plt.close()
+
+
+# =============================================================================
 # Plot the NCSNR
 # =============================================================================
+# EEG channel selection
+idx_ch = []
+for c, chan in enumerate(ch_names):
+    if 'O' in chan or 'P' in chan:
+        idx_ch.append(c)
+idx_ch = np.array(idx_ch)
+
 # Plot colors
 def sample_cmap(N):
     cmap = plt.cm.get_cmap('inferno')
     values = np.linspace(0, 1, N+2)
     colors = cmap(values)[1:-1]
     return colors
-colors = sample_cmap(len(idx_ch))
+colors = sample_cmap(len(args.subjects))
 
 # Create the figure
-fig, axs = plt.subplots(2, 3, sharex=True, sharey=True, figsize=(25, 10))
-axs = np.reshape(axs, (-1))
+fig = plt.figure(figsize=(20, 6))
 
-# Loop across subjects
+# Plot the stimulus onset and offset dashed lines
+plt.plot([0, 0], [100, -100], 'k--', [3, 3], [100, -100], 'k--', 
+    linewidth=2, alpha=.25, label='_nolegend_')
+
+# Plot the NCSNR of each subject
 for s, sub in enumerate(args.subjects):
+    nc = np.nanmean(ncsnr[s][idx_ch], 0)
+    plt.plot(times, nc, color=colors[s], linewidth=2, alpha=1, label=sub)
 
-    # Plot the stimulus onset and offset dashed lines
-    axs[s].plot([0, 0], [100, -100], 'k--', [3, 3], [100, -100], 'k--', 
-        linewidth=2, alpha=.25, label='_nolegend_')
+# x-axis parameters
+plt.xlabel('Time (s)', fontsize=fontsize)
+xticks = [0, .5, 1, 1.5, 2, 2.5, 3, 3.498]
+xlabels = [0, .5, 1, 1.5, 2, 2.5, 3, 3.5]
+plt.xticks(ticks=xticks, labels=xlabels)
+plt.xlim(left=min(times), right=max(times))
 
-    # Plot the NCSNR of each subject and channel group
-    for c in range(len(idx_ch)):
-        nc = np.nanmean(ncsnr[s][idx_ch[c]], 0)
-        axs[s].plot(times, nc, color=colors[c], linewidth=2, alpha=1,
-            label=channel_type_names[c])
+# y-axis parameters
+plt.ylabel("NCSNR", fontsize=fontsize)
+yticks = [0, 0.1, 0.2, 0.3, 0.4, 0.5]
+ylabels = [0, 0.1, 0.2, 0.3, 0.4, 0.5]
+plt.yticks(ticks=yticks, labels=ylabels)
+plt.ylim(bottom=0, top=0.45)
 
-    # Plot title
-    axs[s].set_title(f'Participant {sub}', fontsize=fontsize)
-
-    # x-axis parameters
-    if s in [3, 4, 5]:
-        axs[s].set_xlabel('Time (s)', fontsize=fontsize)
-        xticks = [0, .5, 1, 1.5, 2, 2.5, 3, 3.498]
-        xlabels = [0, .5, 1, 1.5, 2, 2.5, 3, 3.5]
-        axs[s].set_xticks(ticks=xticks, labels=xlabels)
-        axs[s].set_xlim(left=min(times), right=max(times))
-
-    # y-axis parameters
-    if s in [0, 3]:
-        axs[s].set_ylabel("NCSNR", fontsize=fontsize)
-        yticks = [0, 0.2, 0.4, 0.6, 0.8, 1.0]
-        ylabels = [0, 0.2, 0.4, 0.6, 0.8, 1.0]
-        axs[s].set_yticks(ticks=yticks, labels=ylabels)
-        axs[s].set_ylim(bottom=0, top=0.6)
-
-    # Legend
-    if s == 0:
-        axs[s].legend(loc=0, ncol=3, fontsize=15, frameon=False)
+# Legend
+plt.legend(loc=0, ncol=6, fontsize=25, frameon=False, title='Participants:')
 
 # Save the figure
 file_name = os.path.join(save_dir, 'ncsnr.svg')
@@ -274,47 +325,36 @@ def sample_cmap(N):
     values = np.linspace(0, 1, N+2)
     colors = cmap(values)[1:-1]
     return colors
-colors = sample_cmap(len(channel_type_names))
+colors = sample_cmap(len(args.subjects))
 
 # Create the figure
-fig, axs = plt.subplots(2, 3, sharex=True, sharey=True, figsize=(25, 10))
-axs = np.reshape(axs, (-1))
+fig = plt.figure(figsize=(20, 6))
 
-# Loop across subjects
+# Plot the stimulus onset/offset and decoding chance dashed lines
+plt.plot([0, 0], [100, -100], 'k--', [3, 3], [100, -100], 'k--',
+    [-10, 10], [50, 50], 'k--', linewidth=2, alpha=.25, label='_nolegend_')
+
+# Plot the decoding results of each subject
 for s, sub in enumerate(args.subjects):
-
-    # Plot the stimulus onset/offset and decoding chance dashed lines
-    axs[s].plot([0, 0], [100, -100], 'k--', [3, 3], [100, -100], 'k--',
-        [-10, 10], [50, 50], 'k--', linewidth=2, alpha=.25,
-        label='_nolegend_')
-
-    # Plot the decoding results of each subject and channel group
-    for c, chan in enumerate(args.channels):
-        axs[s].plot(times, decoding[(sub, chan)], color=colors[c], linewidth=2,
-            alpha=1, label=channel_type_names[c])
-
-    # Plot title
-    axs[s].set_title(f'Participant {sub}', fontsize=fontsize)
+    plt.plot(times, decoding[s], color=colors[s], linewidth=2, alpha=1,
+        label=sub)
 
     # x-axis parameters
-    if s in [3, 4, 5]:
-        axs[s].set_xlabel('Time (s)', fontsize=fontsize)
-        xticks = [0, .5, 1, 1.5, 2, 2.5, 3, 3.498]
-        xlabels = [0, .5, 1, 1.5, 2, 2.5, 3, 3.5]
-        axs[s].set_xticks(ticks=xticks, labels=xlabels)
-        axs[s].set_xlim(left=min(times), right=max(times))
+    plt.xlabel('Time (s)', fontsize=fontsize)
+    xticks = [0, .5, 1, 1.5, 2, 2.5, 3, 3.498]
+    xlabels = [0, .5, 1, 1.5, 2, 2.5, 3, 3.5]
+    plt.xticks(ticks=xticks, labels=xlabels)
+    plt.xlim(left=min(times), right=max(times))
 
     # y-axis parameters
-    if s in [0, 3]:
-        axs[s].set_ylabel("Decoding accuracy (%)", fontsize=fontsize)
-        yticks = [50, 60, 70, 80, 90, 100]
-        ylabels = [50, 60, 70, 80, 90, 100]
-        axs[s].set_yticks(ticks=yticks, labels=ylabels)
-        axs[s].set_ylim(bottom=45, top=80)
+    plt.ylabel("Decoding accuracy (%)", fontsize=fontsize)
+    yticks = [50, 60, 70, 80, 90, 100]
+    ylabels = [50, 60, 70, 80, 90, 100]
+    plt.yticks(ticks=yticks, labels=ylabels)
+    plt.ylim(bottom=45, top=80)
 
-    # Legend
-    if s == 0:
-        axs[s].legend(loc=0, ncol=3, fontsize=15, frameon=False)
+# Legend
+plt.legend(loc=0, ncol=6, fontsize=25, frameon=False, title='Participants:')
 
 # Save the figure
 file_name = os.path.join(save_dir, 'pairwise_decoding.svg')

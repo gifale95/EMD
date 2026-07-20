@@ -28,7 +28,7 @@ from sklearn.svm import SVC
 # =============================================================================
 parser = argparse.ArgumentParser()
 parser.add_argument('--subject', default=1, type=int)
-parser.add_argument('--channels', default='O', type=str)
+parser.add_argument('--channels', default='all', type=str)
 parser.add_argument('--emd_dir', default='/scratch/giffordale95/projects/eeg_moments_dataset', type=str)
 args, unknown = parser.parse_known_args()
 
@@ -78,7 +78,7 @@ stimulus_id_test = np.concatenate(stimulus_id_test, 0)
 # =============================================================================
 idx_ch = []
 for c, chan in enumerate(ch_names):
-    if args.channels in chan:
+    if args.channels == 'all' or args.channels in chan:
         idx_ch.append(c)
 idx_ch = np.array(idx_ch)
 eeg = eeg[:,idx_ch]
