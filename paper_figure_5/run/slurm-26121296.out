@@ -1,2 +1,0 @@
-/var/spool/slurmd/job26121296/slurm_script: line 10: cd: /home/giffordale95/projects/eeg_moments_dataset/github/EMD/03_encoding_models: No such file or directory
-python: can't open file '/home/giffordale95/projects/eeg_moments_dataset/github/EMD/paper_figure_5/run/05_plot.py': [Errno 2] No such file or directory
