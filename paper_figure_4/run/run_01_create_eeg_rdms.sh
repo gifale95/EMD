@@ -21,7 +21,7 @@ subject=${subject_all[$SLURM_ARRAY_TASK_ID]}
 echo subject: $subject
 
 # Changing to the .py script directory
-cd /home/giffordale95/projects/eeg_moments_dataset/github/EMD/02_representational_dynamics/eeg_model_ct_rsa
+cd /home/giffordale95/projects/eeg_moments_dataset/github/EMD/paper_figure_4
 
 # Activating the Anaconda environment
 source /home/giffordale95/anaconda3/etc/profile.d/conda.sh

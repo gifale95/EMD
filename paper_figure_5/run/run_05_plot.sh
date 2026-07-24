@@ -7,7 +7,7 @@
 #SBATCH --qos=extended
 
 # Changing to the .py script directory
-cd /home/giffordale95/projects/eeg_moments_dataset/github/EMD/03_encoding_models
+cd /home/giffordale95/projects/eeg_moments_dataset/github/EMD/paper_figure_5
 
 # Activating the Anaconda environment
 source /home/giffordale95/anaconda3/etc/profile.d/conda.sh

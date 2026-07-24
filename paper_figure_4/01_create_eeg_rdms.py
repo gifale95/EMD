@@ -1,5 +1,6 @@
 """Create correlation-based EEG RDMs for the 102 test videos, using the
-occipital EEG channels.
+occipital EEG channels. The EEG responses are averaged into 32 time bins
+between 0-3 epoch seconds.
 
 Parameters
 ----------
@@ -42,6 +43,7 @@ file_name = f'sub-{args.subject:02}_eeg_metadata.npy'
 metadata = np.load(os.path.join(data_dir, file_name), allow_pickle=True).item()
 stimulus_id = metadata['stimulus_id']
 ch_names = metadata['ch_names']
+times = metadata['times']
 
 # Load the EEG responses
 eeg = []
@@ -86,23 +88,49 @@ for v, video in enumerate(video_conditions):
     eeg_avg[v] = np.nanmean(eeg[idx], 0)
 del eeg
 
+
+# =============================================================================
+# Average the EEG resposnes into 32 time bins between 0-3 epoch seconds
+# =============================================================================
+# Only select EEG time points from 0 to 3 seconds
+min_times = 0
+max_times = 3
+idx_start = np.where(times >= min_times)[0][0]
+idx_end = np.where(times <= max_times)[0][-1]
+eeg_avg = eeg_avg[:,:,idx_start:idx_end+1]
+times = times[idx_start:idx_end+1]
+
+# Average the EEG responses into 32 time bins, so as to match the time bins of
+# the AlexNet stimulus features (for the first bin only use EEG time points
+# from 60ms after simulus onset, to account for the visual processing delay)
+n_bins = 32
+eeg_splits = np.array_split(eeg_avg, n_bins, 2)
+for s, split in enumerate(eeg_splits):
+    if s == 0:
+        idx_start = np.where(times >= 0.06)[0][0]
+        eeg_bin = np.nanmean(split[:,:,idx_start:], 2, keepdims=True)
+    else:
+        eeg_bin = np.append(eeg_bin, np.nanmean(split, 2, keepdims=True), 2)
+del eeg_avg
+
 # Set NaN values to 0
-eeg_avg = np.nan_to_num(eeg_avg, nan=0)
+eeg_bin = np.nan_to_num(eeg_bin, nan=0)
 
 
 # =============================================================================
 # Create the RDMs for each EEG time point, using Pearson's correlation
 # =============================================================================
 # Z-score across channels
-eeg_mean = eeg_avg.mean(axis=1, keepdims=True)
-eeg_std = eeg_avg.std(axis=1, keepdims=True)
-eeg_z = (eeg_avg - eeg_mean) / (eeg_std + 1e-8)
+eeg_mean = eeg_bin.mean(axis=1, keepdims=True)
+eeg_std = eeg_bin.std(axis=1, keepdims=True)
+eeg_z = (eeg_bin - eeg_mean) / (eeg_std + 1e-8)
 
 # Reshape to (Times, Videos, Channels)
 eeg_z = np.transpose(eeg_z, (2, 0, 1))
 
 # Cross-correlation via batch matmul
-rdms = (np.matmul(eeg_z, eeg_z.transpose(0, 2, 1)) / (eeg_avg.shape[1])).astype(np.float32)
+rdms = (np.matmul(eeg_z, eeg_z.transpose(0, 2, 1)) / \
+        (eeg_bin.shape[1])).astype(np.float32)
 rdms = 1 - rdms
 
 # Back to (Videos_X, Videos_Y, Times)

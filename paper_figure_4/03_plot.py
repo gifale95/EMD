@@ -16,6 +16,7 @@ import numpy as np
 import matplotlib
 from matplotlib import pyplot as plt
 from scipy.stats import spearmanr
+from scipy.stats import linregress
 
 
 # =============================================================================
@@ -69,27 +70,22 @@ for s, sub in enumerate(args.subjects):
 for layer in layers:
     ct_rsa[layer] = np.mean(ct_rsa[layer], 0)
 
+# Reshape the results to (Stimulus time, EEG time)
+for layer in layers:
+    ct_rsa[layer] = np.transpose(ct_rsa[layer])
+
 
 # =============================================================================
 # Get the time points
 # =============================================================================
 # EEG time points
-data_dir = os.path.join(args.emd_dir, 'derivatives', 'eeg',
-    f'sub-{args.subjects[0]:02}',
-    f'sub-{args.subjects[0]:02}_eeg_metadata.npy')
-times_eeg = np.load(data_dir, allow_pickle=True).item()['times']
-
-# Only select EEG time points from 0 to 3 seconds
 min_times = 0
 max_times = 3
-idx_start = np.where(times_eeg >= min_times)[0][0]
-idx_end = np.where(times_eeg <= max_times)[0][-1]
-times_eeg = times_eeg[idx_start:idx_end+1]
-for layer in layers:
-    ct_rsa[layer] = ct_rsa[layer][idx_start:idx_end+1]
+n_bins_eeg = ct_rsa[layer].shape[1]
+times_eeg = np.linspace(min_times, max_times, n_bins_eeg)
 
 # AlexNet time points
-n_times_alex = ct_rsa[layers[0]].shape[1]
+n_times_alex = ct_rsa[layers[0]].shape[0]
 times_alex = np.linspace(0, 3, n_times_alex)
 
 
@@ -130,10 +126,9 @@ plt.rcParams['svg.fonttype'] = 'none'
 ct_rsa_norm = {}
 for layer in layers:
     rsa = ct_rsa[layer]
-    rsa_min = rsa.min(axis=1, keepdims=True)
-    rsa_max = rsa.max(axis=1, keepdims=True)
-    ct_rsa_norm[layer] = np.swapaxes(
-        (rsa - rsa_min) / (rsa_max - rsa_min), 0, 1)
+    rsa_min = rsa.min(axis=0, keepdims=True)
+    rsa_max = rsa.max(axis=0, keepdims=True)
+    ct_rsa_norm[layer] = (rsa - rsa_min) / (rsa_max - rsa_min)
 
 # Select the layer to plot
 plot_layer = 'features_2'
@@ -149,17 +144,17 @@ plt.imshow(ct_rsa_norm[plot_layer], aspect='auto', cmap='cividis',
 
 # x-axis parameters
 plt.xlabel('Time EEG (s)', fontsize=fontsize)
-xticks = [0, 500, 1000, 1500]
+xticks = [0, 10, 21, 31]
 xlabels = [0, 1, 2, 3]
 plt.xticks(ticks=xticks, labels=xlabels)
-plt.xlim(left=0, right=len(times_eeg))
+# plt.xlim(left=0, right=len(times_eeg))
 
 # y-axis parameters
 plt.ylabel("Time stimulus (s)", fontsize=fontsize)
 yticks = [0, 10, 21, 31]
 ylabels = [0, 1, 2, 3]
 plt.yticks(ticks=yticks, labels=ylabels)
-plt.ylim(bottom=0, top=len(times_alex))
+# plt.ylim(bottom=0, top=len(times_alex))
 
 # Colorbar
 # plt.colorbar(label='Normalized CT-RSA score', fraction=0.046, pad=0.04)
@@ -175,20 +170,23 @@ plt.close()
 # =============================================================================
 # Get the best model time points for each EEG time point (based on the average
 # of the top-5 model time points to get a more robust estimate)
-tot_seconds = 3
 ct_rsa_best_model_time = {}
 for layer in layers:
     rsa = ct_rsa[layer]
-    idx_best = np.mean(np.argsort(rsa, 1)[:,-5:], 1) / n_times_alex * tot_seconds
+    idx_best = np.mean(np.argsort(rsa, 0)[-5:], 0) / n_times_alex * max_times
     ct_rsa_best_model_time[layer] = idx_best
     del idx_best
 
 # Compute the correlation between EEG and AlexNet time points
-eeg_time = np.linspace(min_times, max_times, len(times_eeg))
 corr_eeg_model_times = {}
 for layer in layers:
-    corr_eeg_model_times[layer] = spearmanr(eeg_time,
+    corr_eeg_model_times[layer] = spearmanr(times_eeg,
         ct_rsa_best_model_time[layer])[0]
+
+# Fit a regression line between EEG and AlexNet time points
+regression = {}
+for layer in layers:
+    regression[layer] = linregress(times_eeg, ct_rsa_best_model_time[layer])
 
 # Select the layer to plot
 plot_layer = 'features_2'
@@ -201,25 +199,36 @@ fig = plt.figure(figsize=(7.5, 7.5))
 
 # Plot the CT-RSA results
 plt.plot(times_eeg, ct_rsa_best_model_time[plot_layer], color=color,
-    linewidth=2, alpha=1, label=layer)
+    linewidth=2, alpha=1, label='_nolegend_')
 
 # Plot the correlation between EEG and AlexNet time points
 plt.text(0.25, 2.8, f'$ρ$ = {corr_eeg_model_times[plot_layer]:.2f}', color='k',
     fontsize=fontsize)
+
+# Plot the regression line between EEG and AlexNet time points
+slope = regression[plot_layer].slope
+intercept = regression[plot_layer].intercept
+x_fit = np.array([min_times, max_times])
+y_fit = intercept + slope * x_fit
+plt.plot(x_fit, y_fit, color='k', linewidth=2, linestyle='--',
+    label=f'$y$ = {slope:.2f}$x$ + {intercept:.2f}', alpha=0.5)
 
 # x-axis parameters
 plt.xlabel('Time EEG (s)', fontsize=fontsize)
 xticks = [0, 1, 2, 3]
 xlabels = [0, 1, 2, 3]
 plt.xticks(ticks=xticks, labels=xlabels)
-plt.xlim(left=min(times_eeg), right=max(times_eeg))
+plt.xlim(left=min_times, right=max_times)
 
 # y-axis parameters
 plt.ylabel("Most similar stimulus time (s)", fontsize=fontsize)
 yticks = [0, 1, 2, 3]
 ylabels = [0, 1, 2, 3]
 plt.yticks(ticks=yticks, labels=ylabels)
-plt.ylim(bottom=0, top=3)
+plt.ylim(bottom=min_times, top=max_times)
+
+# Legend
+plt.legend(frameon=False, loc=0)
 
 # Save the figure
 file_name = os.path.join(save_dir, 'best_model_timepoints.svg')

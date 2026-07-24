@@ -92,7 +92,7 @@ for layer in tqdm(layers):
         for t_alexnet in range(len(alexnet_rdms[layer])):
 
             # Correlate the EEG RDMs with the AlexNet RDMs
-            ct_rsa_layer[t_eeg, t_alexnet] = spearmanr(
+            ct_rsa_layer[t_eeg,t_alexnet] = spearmanr(
                 eeg_rdms_vector[t_eeg], alexnet_rdms[layer][t_alexnet])[0]
 
     # Store the CT-RSA results for the current layer
@@ -103,8 +103,8 @@ for layer in tqdm(layers):
 # =============================================================================
 # Save the results
 # =============================================================================
-save_dir = os.path.join(args.emd_dir, 'results',
-    'representational_dynamics', 'ct_rsa')
+save_dir = os.path.join(args.emd_dir, 'results', 'representational_dynamics',
+    'ct_rsa')
 os.makedirs(save_dir, exist_ok=True)
 
 file_name = f'ct_rsa_sub-{args.subject:02d}.npy'
