@@ -69,28 +69,28 @@ fsaverage = datasets.fetch_surf_fsaverage(mesh='fsaverage')  # 163842 verts/hemi
 # Loop across plotting time points
 plot_times = [0, 0.024, 0.05, 0.074, 0.1, 0.124, 0.15, 0.174, 0.2, 0.224, 0.25,
     0.274, 0.3, 0.324, 0.35, 0.374, 0.4, 0.424, 0.45, 0.474, 0.5, 0.524, 0.55,
-    0.574, 0.6, 0.9, 1.2, 1.5, 1.8, 2.1, 2.4, 2.7, 3]
+    0.574, 0.6, 0.9, 1, 1.2, 1.5, 1.8, 2, 2.1, 2.4, 2.5, 2.7, 3]
 plot_views = ['lateral', 'ventral', 'posterior']
-for p_times in tqdm(plot_times):
+for p_time in tqdm(plot_times):
 
     # Select the data time point to plot
-    idx_time = np.where(times == p_times)[0][0]
+    idx_time = np.where(times == p_time)[0][0]
     data_lh = lh_correlation[:,idx_time]
     data_rh = rh_correlation[:,idx_time]
 
     # Loop across plotting views
-    for p_views in plot_views:
+    for p_view in plot_views:
 
         # Plot the left hemisphere
-        title = f'LH, Time (s): {p_times:.3f}, View: {p_views}'
+        title = f'LH, Time (s): {p_time:.3f}, View: {p_view}'
         output_file = os.path.join(save_dir,
-            f'correlation_lh_time-{p_times:.3f}_view-{p_views}.png')
+            f'correlation_lh_time-{p_time:.3f}_view-{p_view}.png')
         plotting.plot_surf_stat_map(
             fsaverage['infl_left'],
             stat_map=data_lh,
             bg_map=fsaverage['sulc_left'],
             hemi='left',
-            view=p_views,
+            view=p_view,
             vmin=0,
             vmax=0.5,
             cmap='afmhot',
@@ -100,18 +100,18 @@ for p_times in tqdm(plot_times):
         )
 
         # Plot the right hemisphere
-        title = f'RH, Time (s): {p_times:.3f}, View: {p_views}'
+        title = f'RH, Time (s): {p_time:.3f}, View: {p_view}'
         output_file = os.path.join(save_dir,
-            f'correlation_rh_time-{p_times:.3f}_view-{p_views}.png')
+            f'correlation_rh_time-{p_time:.3f}_view-{p_view}.png')
         plotting.plot_surf_stat_map(
             fsaverage['infl_right'],
             stat_map=data_rh,
             bg_map=fsaverage['sulc_right'],
             hemi='right',
-            view=p_views,
+            view=p_view,
             vmin=0,
             vmax=0.5,
-            cmap='afmhot',
+            cmap='inf',
             colorbar=False,
             # title=title,
             output_file=output_file
