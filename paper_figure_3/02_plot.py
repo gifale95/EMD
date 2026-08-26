@@ -211,7 +211,7 @@ plt.close()
 
 
 # =============================================================================
-# Plot the electrode position topography
+# Plot the electrode position topography (colored by the ERP topography)
 # =============================================================================
 # Channels -> 2D coords -> per-channel color
 montage = mne.channels.make_standard_montage('standard_1005')
@@ -234,9 +234,6 @@ colors = ((1 - u) * (1 - v) * corners['ll'] + u * (1 - v) * corners['lr']
 
 # Plot parameters
 fontsize = 20
-matplotlib.rcParams['font.sans-serif'] = 'DejaVu Sans'
-matplotlib.rcParams['font.size'] = fontsize
-plt.rcParams['text.usetex'] = False
 marker_size = 300
 label_size = 4.5
 show_labels = False
@@ -248,7 +245,7 @@ sphere = np.array([0., 0., 0., 0.095]) # MNE default head sphere (HEAD_SIZE_DEFA
 outlines = _make_head_outlines(sphere, xy, 'head', clip_origin=(0., 0.))
 fig, ax = plt.subplots(figsize=(8, 8))
 for key in ['head', 'nose', 'ear_left', 'ear_right']:
-    ax.plot(*outlines[key], color='k', linewidth=1.5, zorder=1)
+    ax.plot(*outlines[key], color='k', linewidth=7.5, zorder=1)
 ax.scatter(xy_plot[:, 0], xy_plot[:, 1], c=colors, s=marker_size,
     edgecolors='k', linewidths=0.5, zorder=2)
 if show_labels:
@@ -259,6 +256,98 @@ ax.axis('off')
 
 # Save the figure
 file_name = os.path.join(save_dir, 'topoplot_erp_colors.svg')
+fig.savefig(file_name, bbox_inches='tight', transparent=True, format='svg')
+plt.close()
+
+
+# =============================================================================
+# Plot the electrode position topography (all channels, black)
+# =============================================================================
+# Channels -> 2D coords -> per-channel color
+montage = mne.channels.make_standard_montage('standard_1005')
+ch_pos = montage.get_positions()['ch_pos']
+missing_fallback = {'O9': 'O1', 'O10': 'O2'} # absent from standard_1005; borrow neighbor for viz
+coord_names = [c if c in ch_pos else missing_fallback[c] for c in ch_names]
+info = mne.create_info(list(dict.fromkeys(coord_names)), 1000, 'eeg')
+info.set_montage(montage)
+pos2d = _find_topomap_coords(info, picks='eeg') # azimuthal-equidistant projection
+name_to_xy = dict(zip(info.ch_names, pos2d))
+xy = np.array([name_to_xy[c] for c in coord_names]) # Shape: (n_channels, 2)
+
+# Plot parameters
+fontsize = 20
+marker_size = 300
+label_size = 4.5
+show_labels = False
+y_offset = 0.015
+
+# Plot the electrode position topography
+xy_plot = xy - np.array([0.0, y_offset]) # shift markers down relative to the fixed head outline
+sphere = np.array([0., 0., 0., 0.095]) # MNE default head sphere (HEAD_SIZE_DEFAULT)
+outlines = _make_head_outlines(sphere, xy, 'head', clip_origin=(0., 0.))
+fig, ax = plt.subplots(figsize=(8, 8))
+for key in ['head', 'nose', 'ear_left', 'ear_right']:
+    ax.plot(*outlines[key], color='k', linewidth=7.5, zorder=1)
+ax.scatter(xy_plot[:, 0], xy_plot[:, 1], c='k', s=marker_size,
+    edgecolors='k', linewidths=0.5, zorder=2)
+if show_labels:
+    for c, (x, y) in zip(ch_names, xy_plot): # true names, not fallback
+        ax.annotate(c, (x, y), fontsize=label_size, ha='center', va='center', zorder=3)
+ax.set_aspect('equal')
+ax.axis('off')
+
+# Save the figure
+file_name = os.path.join(save_dir, 'topoplot_erp_all_channels_black.svg')
+fig.savefig(file_name, bbox_inches='tight', transparent=True, format='svg')
+plt.close()
+
+
+# =============================================================================
+# Plot the electrode position topography (occipital/parietal channels, black)
+# =============================================================================
+# Channels -> 2D coords -> per-channel color
+montage = mne.channels.make_standard_montage('standard_1005')
+ch_pos = montage.get_positions()['ch_pos']
+missing_fallback = {'O9': 'O1', 'O10': 'O2'} # absent from standard_1005; borrow neighbor for viz
+coord_names = [c if c in ch_pos else missing_fallback[c] for c in ch_names]
+info = mne.create_info(list(dict.fromkeys(coord_names)), 1000, 'eeg')
+info.set_montage(montage)
+pos2d = _find_topomap_coords(info, picks='eeg') # azimuthal-equidistant projection
+name_to_xy = dict(zip(info.ch_names, pos2d))
+xy = np.array([name_to_xy[c] for c in coord_names]) # Shape: (n_channels, 2)
+
+# Channel selection (occipital/parietal)
+# Subset after the projection, so coords are bit-identical to the all-channel
+# figure (the sphere fit inside _find_topomap_coords depends on info).
+# Case-sensitive on purpose: 'P' does not match the frontopolar Fp1/Fp2/Fpz.
+idx = np.where(np.array(['O' in c or 'P' in c for c in ch_names]))[0]
+ch_names_op = [ch_names[i] for i in idx]
+xy_op = xy[idx] # Shape: (n_channels_op, 2)
+
+# Plot parameters
+fontsize = 20
+marker_size = 300
+label_size = 4.5
+show_labels = False
+y_offset = 0.015
+
+# Plot the electrode position topography
+xy_plot = xy_op - np.array([0.0, y_offset]) # shift markers down relative to the fixed head outline
+sphere = np.array([0., 0., 0., 0.095]) # MNE default head sphere (HEAD_SIZE_DEFAULT)
+outlines = _make_head_outlines(sphere, xy, 'head', clip_origin=(0., 0.)) # full xy: head geometry stays identical across channel subsets
+fig, ax = plt.subplots(figsize=(8, 8))
+for key in ['head', 'nose', 'ear_left', 'ear_right']:
+   ax.plot(*outlines[key], color='k', linewidth=7.5, zorder=1)
+ax.scatter(xy_plot[:, 0], xy_plot[:, 1], c='k', s=marker_size,
+   edgecolors='k', linewidths=0.5, zorder=2)
+if show_labels:
+   for c, (x, y) in zip(ch_names_op, xy_plot): # true names, not fallback
+      ax.annotate(c, (x, y), fontsize=label_size, ha='center', va='center', zorder=3)
+ax.set_aspect('equal')
+ax.axis('off')
+
+# Save the figure
+file_name = os.path.join(save_dir, 'topoplot_erp_OP_channels_black.svg')
 fig.savefig(file_name, bbox_inches='tight', transparent=True, format='svg')
 plt.close()
 
@@ -339,19 +428,19 @@ for s, sub in enumerate(args.subjects):
     plt.plot(times, decoding[s], color=colors[s], linewidth=2, alpha=1,
         label=sub)
 
-    # x-axis parameters
-    plt.xlabel('Time (s)', fontsize=fontsize)
-    xticks = [0, .5, 1, 1.5, 2, 2.5, 3, 3.498]
-    xlabels = [0, .5, 1, 1.5, 2, 2.5, 3, 3.5]
-    plt.xticks(ticks=xticks, labels=xlabels)
-    plt.xlim(left=min(times), right=max(times))
+# x-axis parameters
+plt.xlabel('Time (s)', fontsize=fontsize)
+xticks = [0, .5, 1, 1.5, 2, 2.5, 3, 3.498]
+xlabels = [0, .5, 1, 1.5, 2, 2.5, 3, 3.5]
+plt.xticks(ticks=xticks, labels=xlabels)
+plt.xlim(left=min(times), right=max(times))
 
-    # y-axis parameters
-    plt.ylabel("Decoding accuracy (%)", fontsize=fontsize)
-    yticks = [50, 60, 70, 80, 90, 100]
-    ylabels = [50, 60, 70, 80, 90, 100]
-    plt.yticks(ticks=yticks, labels=ylabels)
-    plt.ylim(bottom=45, top=80)
+# y-axis parameters
+plt.ylabel("Decoding accuracy (%)", fontsize=fontsize)
+yticks = [50, 60, 70, 80, 90, 100]
+ylabels = [50, 60, 70, 80, 90, 100]
+plt.yticks(ticks=yticks, labels=ylabels)
+plt.ylim(bottom=45, top=80)
 
 # Legend
 plt.legend(loc=0, ncol=6, fontsize=25, frameon=False, title='Participants:')

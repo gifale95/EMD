@@ -86,13 +86,13 @@ ct_rsa = {}
 for layer in tqdm(layers):
 
     # Loop across EEG and AlexNet time points
-    ct_rsa_layer = np.zeros((len(eeg_rdms_vector), len(alexnet_rdms[layer])),
+    ct_rsa_layer = np.zeros((len(alexnet_rdms[layer]), len(eeg_rdms_vector)),
         dtype=np.float32)
-    for t_eeg in range(len(eeg_rdms_vector)):
-        for t_alexnet in range(len(alexnet_rdms[layer])):
+    for t_alexnet in range(len(alexnet_rdms[layer])):
+        for t_eeg in range(len(eeg_rdms_vector)):
 
             # Correlate the EEG RDMs with the AlexNet RDMs
-            ct_rsa_layer[t_eeg,t_alexnet] = spearmanr(
+            ct_rsa_layer[t_alexnet,t_eeg] = spearmanr(
                 eeg_rdms_vector[t_eeg], alexnet_rdms[layer][t_alexnet])[0]
 
     # Store the CT-RSA results for the current layer

@@ -15,6 +15,7 @@ import os
 import numpy as np
 import h5py
 from tqdm import tqdm
+from scipy.stats import pearsonr
 
 
 # =============================================================================
@@ -34,24 +35,25 @@ for key, val in vars(args).items():
 # =============================================================================
 # Load the eyetracking data for all videos
 # =============================================================================
+# Load the metadata
+metadata_dir = os.path.join(args.emd_dir, 'derivatives', 'eyetracking',
+    f'sub-{args.subject:02}', f'sub-{args.subject:02}_eyetracking_metadata.npy')
+metadata = np.load(metadata_dir, allow_pickle=True).item()
+times = metadata['times']
+
 # Loop across eyetracking recording sessions
 data_dir = os.path.join(args.emd_dir, 'derivatives', 'eyetracking',
     f'sub-{args.subject:02}')
 n_sessions = 8
 eye = []
+stimulus_id = []
 for ses in range(1, n_sessions+1):
     file_name = f'sub-{args.subject:02}_ses-{ses:02}_preprocessed_eyetracking.h5'
     eye.append(h5py.File(
         os.path.join(data_dir, file_name), 'r')['eyetracking'][:])
+    stimulus_id.append(metadata['stimulus_id'][f'ses-{ses:02}'])
 eye = np.concatenate(eye, 0)
-
-
-# =============================================================================
-# Get the time points
-# =============================================================================
-tmin = -0.1
-tmax = 3.5
-times = np.round(np.linspace(tmin, tmax, eye.shape[2]), 3)
+stimulus_id = np.concatenate(stimulus_id, 0)
 
 
 # =============================================================================
@@ -101,6 +103,51 @@ avg_pupil_size = np.nanmean(eye[:,2], 0)
 
 
 # =============================================================================
+# Correlation between video luminance and pupil size
+# =============================================================================
+# Average the pupil size across repeats of the same video
+eye_avg = []
+video_conditions = np.unique(stimulus_id)
+for v, video in enumerate(video_conditions):
+    idx = np.where(stimulus_id == video)[0]
+    eye_avg.append(np.nanmean(eye[idx,2], 0))
+eye_avg = np.array(eye_avg)
+
+# Load the luminance data
+data_dir = os.path.join(args.emd_dir, 'results', 'data_quality_check',
+    'eyetracking', 'image_luminance', 'image_luminance.npy')
+luminance = np.load(data_dir, allow_pickle=True).item()
+
+# Interpolate all videos to the same frame number (90 frames)
+n_frames = 90
+luminance_interp = []
+for v, video in enumerate(video_conditions):
+    lum_video = np.array(luminance[f'{video:04d}'])
+    if len(lum_video) > n_frames:
+        lum_video = np.interp(
+            np.linspace(0, len(lum_video)-1, n_frames),
+            np.arange(len(lum_video)),
+            lum_video
+        )
+    elif len(lum_video) < n_frames:
+        lum_video = np.interp(
+            np.arange(n_frames),
+            np.linspace(0, n_frames - 1, len(lum_video)),
+            lum_video
+        )
+    luminance_interp.append(lum_video)
+luminance_interp = np.array(luminance_interp)
+
+# Average the luminance of each video across frames
+luminance_avg = np.mean(luminance_interp, 1)
+
+# Correlate the pupil size and luminance of each video
+pupil_lum_corr = np.zeros((eye_avg.shape[1]))
+for t in range(eye_avg.shape[1]):
+    pupil_lum_corr[t] = pearsonr(luminance_avg, eye_avg[:,t])[0]
+
+
+# =============================================================================
 # Save the results
 # =============================================================================
 results = {
@@ -115,7 +162,8 @@ results = {
         'cdf_fixations': cdf_fixations,
         'visual_angles': visual_angles
     },
-    'avg_pupil_size': avg_pupil_size
+    'avg_pupil_size': avg_pupil_size,
+    'pupil_lum_corr': pupil_lum_corr
 }
 
 save_dir = os.path.join(args.emd_dir, 'results', 'data_quality_check',

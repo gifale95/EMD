@@ -55,6 +55,7 @@ for sub in args.subjects:
 gaze_heatmap = []
 cdf_fixations = []
 avg_pupil_size = []
+pupil_lum_corr = []
 
 for s, sub in enumerate(args.subjects):
     data_dir = os.path.join(args.emd_dir, 'results', 'data_quality_check',
@@ -64,8 +65,10 @@ for s, sub in enumerate(args.subjects):
     gaze_heatmap.append(data['gaze_heatmap'])
     cdf_fixations.append(data['cdf_fixations'])
     avg_pupil_size.append(data['avg_pupil_size'])
+    pupil_lum_corr.append(data['pupil_lum_corr'])
 
 avg_pupil_size = np.array(avg_pupil_size)
+pupil_lum_corr = np.array(pupil_lum_corr)
 
 
 # =============================================================================
@@ -210,6 +213,52 @@ plt.legend(loc=0, ncol=2, fontsize=fontsize, frameon=False,
 
 # Save the figure
 file_name = os.path.join(save_dir, 'cdf_fixations.svg')
+fig.savefig(file_name, bbox_inches='tight', transparent=True, format='svg')
+plt.close()
+
+
+# =============================================================================
+# Plot the correlation between pupil size and luminance
+# =============================================================================
+# Plot colors
+def sample_cmap(N):
+    cmap = plt.cm.get_cmap('inferno')
+    values = np.linspace(0, 1, N+2)
+    colors = cmap(values)[1:-1]
+    return colors
+colors = sample_cmap(len(args.subjects))
+
+# Create the figure
+fig = plt.figure(figsize=(20, 6))
+
+# Plot the stimulus onset/offset and correlation chance dashed lines
+plt.plot([0, 0], [100, -100], 'k--', [3, 3], [100, -100], 'k--',
+    [-10, 10], [0, 0], 'k--', linewidth=2, alpha=.25, label='_nolegend_')
+
+# Plot the decoding results of each subject
+for s, sub in enumerate(args.subjects):
+    plt.plot(times, pupil_lum_corr[s], color=colors[s], linewidth=2, alpha=1,
+        label=sub)
+
+# x-axis parameters
+plt.xlabel('Time (s)', fontsize=fontsize)
+xticks = [0, .5, 1, 1.5, 2, 2.5, 3, 3.498]
+xlabels = [0, .5, 1, 1.5, 2, 2.5, 3, 3.5]
+plt.xticks(ticks=xticks, labels=xlabels)
+plt.xlim(left=min(times), right=3)
+
+# y-axis parameters
+plt.ylabel("Pearson's $r$", fontsize=fontsize)
+yticks = [-1, -0.8, -0.6, -0.4, -0.2, 0]
+ylabels = [-1, -0.8, -0.6, -0.4, -0.2, 0]
+plt.yticks(ticks=yticks, labels=ylabels)
+plt.ylim(bottom=-.8, top=0.1)
+
+# Legend
+plt.legend(loc=0, ncol=6, fontsize=25, frameon=False, title='Participants:')
+
+# Save the figure
+file_name = os.path.join(save_dir, 'corr_pupil_luminance.svg')
 fig.savefig(file_name, bbox_inches='tight', transparent=True, format='svg')
 plt.close()
 

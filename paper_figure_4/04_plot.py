@@ -15,8 +15,6 @@ import os
 import numpy as np
 import matplotlib
 from matplotlib import pyplot as plt
-from scipy.stats import spearmanr
-from scipy.stats import linregress
 
 
 # =============================================================================
@@ -37,56 +35,20 @@ os.makedirs(save_dir, exist_ok=True)
 
 
 # =============================================================================
-# Load the cross-temporal correlation results
+# Load the CT-RSA stats
 # =============================================================================
-# Loop across AlexNet layers
-ct_rsa = {}
-layers = [
-    'features_2',
-    'features_5',
-    'features_7',
-    'features_9',
-    'features_12',
-    'classifier_2',
-    'classifier_5',
-    'classifier_6'
-]
+data_dir = os.path.join(args.emd_dir, 'results', 'representational_dynamics',
+    'stats', 'stats.npy')
+stats = np.load(data_dir, allow_pickle=True).item()
 
-# Loop across EEG subjects
-for s, sub in enumerate(args.subjects):
-
-    # Load the CT-RSA results
-    data_dir = os.path.join(args.emd_dir, 'results',
-        'representational_dynamics', 'ct_rsa', f'ct_rsa_sub-{sub:02d}.npy')
-    ct_rsa_sub = np.load(data_dir, allow_pickle=True).item()
-
-    # Store the CT-RSA results of each subject
-    for layer in layers:
-        if s == 0:
-            ct_rsa[layer] = []
-        ct_rsa[layer].append(ct_rsa_sub[layer])
-
-# Average the results across subjects
-for layer in layers:
-    ct_rsa[layer] = np.mean(ct_rsa[layer], 0)
-
-# Reshape the results to (Stimulus time, EEG time)
-for layer in layers:
-    ct_rsa[layer] = np.transpose(ct_rsa[layer])
-
-
-# =============================================================================
-# Get the time points
-# =============================================================================
-# EEG time points
-min_times = 0
-max_times = 3
-n_bins_eeg = ct_rsa[layer].shape[1]
-times_eeg = np.linspace(min_times, max_times, n_bins_eeg)
-
-# AlexNet time points
-n_times_alex = ct_rsa[layers[0]].shape[0]
-times_alex = np.linspace(0, 3, n_times_alex)
+times_eeg = stats['times_eeg']
+times_alex = stats['times_alex']
+ct_rsa = stats['ct_rsa']
+ct_rsa_best_model_time = stats['ct_rsa_best_model_time']
+ci_best_model_time = stats['ci_best_model_time']
+corr_eeg_model_times = stats['corr_eeg_model_times']
+p_val = stats['p_val']
+regression = stats['regression']
 
 
 # =============================================================================
@@ -120,12 +82,12 @@ plt.rcParams['svg.fonttype'] = 'none'
 # =============================================================================
 # Plot the cross-temporal RSA results (2D heatmap)
 # =============================================================================
-# Normalize the CT-RSA scores of each EEG time point in the range [0, 1],
-# to emphasize the differences in alignment between AlexNet timepoints at each
-# EEG timepoint
+# Average the CT-RSA results across subjects, and normalize the scores of each
+# EEG time point in the range [0, 1], to emphasize the differences in alignment
+# between AlexNet timepoints at each EEG timepoint
 ct_rsa_norm = {}
-for layer in layers:
-    rsa = ct_rsa[layer]
+for layer in ct_rsa.keys():
+    rsa = np.mean(ct_rsa[layer], 0)
     rsa_min = rsa.min(axis=0, keepdims=True)
     rsa_max = rsa.max(axis=0, keepdims=True)
     ct_rsa_norm[layer] = (rsa - rsa_min) / (rsa_max - rsa_min)
@@ -147,17 +109,15 @@ plt.xlabel('Time EEG (s)', fontsize=fontsize)
 xticks = [0, 10, 21, 31]
 xlabels = [0, 1, 2, 3]
 plt.xticks(ticks=xticks, labels=xlabels)
-# plt.xlim(left=0, right=len(times_eeg))
 
 # y-axis parameters
 plt.ylabel("Time stimulus (s)", fontsize=fontsize)
 yticks = [0, 10, 21, 31]
 ylabels = [0, 1, 2, 3]
 plt.yticks(ticks=yticks, labels=ylabels)
-# plt.ylim(bottom=0, top=len(times_alex))
 
 # Colorbar
-# plt.colorbar(label='Normalized CT-RSA score', fraction=0.046, pad=0.04)
+plt.colorbar(label='Normalized CT-RSA score', fraction=0.046, pad=0.04)
 
 # Save the figure
 file_name = os.path.join(save_dir, '2d_heatmap.svg')
@@ -168,25 +128,8 @@ plt.close()
 # =============================================================================
 # Plot the cross-temporal RSA results (best model time point)
 # =============================================================================
-# Get the best model time points for each EEG time point (based on the average
-# of the top-5 model time points to get a more robust estimate)
-ct_rsa_best_model_time = {}
-for layer in layers:
-    rsa = ct_rsa[layer]
-    idx_best = np.mean(np.argsort(rsa, 0)[-5:], 0) / n_times_alex * max_times
-    ct_rsa_best_model_time[layer] = idx_best
-    del idx_best
-
-# Compute the correlation between EEG and AlexNet time points
-corr_eeg_model_times = {}
-for layer in layers:
-    corr_eeg_model_times[layer] = spearmanr(times_eeg,
-        ct_rsa_best_model_time[layer])[0]
-
-# Fit a regression line between EEG and AlexNet time points
-regression = {}
-for layer in layers:
-    regression[layer] = linregress(times_eeg, ct_rsa_best_model_time[layer])
+min_times = 0
+max_times = 3
 
 # Select the layer to plot
 plot_layer = 'features_2'
@@ -201,9 +144,13 @@ fig = plt.figure(figsize=(7.5, 7.5))
 plt.plot(times_eeg, ct_rsa_best_model_time[plot_layer], color=color,
     linewidth=2, alpha=1, label='_nolegend_')
 
+# Plot the confidence intervals
+plt.fill_between(times_eeg, ci_best_model_time[plot_layer][0],
+    ci_best_model_time[plot_layer][1], color=color, alpha=.1)
+
 # Plot the correlation between EEG and AlexNet time points
-plt.text(0.25, 2.8, f'$ρ$ = {corr_eeg_model_times[plot_layer]:.2f}', color='k',
-    fontsize=fontsize)
+plt.text(0.25, 2.8, f'$ρ$ = {corr_eeg_model_times[plot_layer][0]:.2f}',
+    color='k', fontsize=fontsize)
 
 # Plot the regression line between EEG and AlexNet time points
 slope = regression[plot_layer].slope
@@ -228,7 +175,7 @@ plt.yticks(ticks=yticks, labels=ylabels)
 plt.ylim(bottom=min_times, top=max_times)
 
 # Legend
-plt.legend(frameon=False, loc=0)
+plt.legend(frameon=False, loc=4)
 
 # Save the figure
 file_name = os.path.join(save_dir, 'best_model_timepoints.svg')
