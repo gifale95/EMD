@@ -334,20 +334,6 @@ features_train = transform_pca_float32(features_train, principal_axes,
 features_test  = transform_pca_float32(features_test,  principal_axes,
     n_components_95)
 
-# # Downsample the features with PCA # !!! OLD DELETE
-# pca = PCA(n_components=0.95, svd_solver="covariance_eigh",
-#     random_state=20200220)
-# pca.fit(features_train)
-# features_train = pca.transform(features_train)
-# features_test = pca.transform(features_test)
-
-# # Only retain the N principal components that explain 95% of the variance # !!! OLD DELETE
-# explained_variance_ratio = pca.explained_variance_ratio_
-# cumulative_explained_variance = np.cumsum(explained_variance_ratio)
-# n_components_95 = np.where(cumulative_explained_variance >= 0.95)[0][0] + 1
-# features_train = features_train[:,:n_components_95]
-# features_test = features_test[:,:n_components_95]
-
 
 # =============================================================================
 # Save the vision features

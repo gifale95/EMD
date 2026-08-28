@@ -14,8 +14,7 @@ import os
 import numpy as np
 from tqdm import tqdm
 from PIL import Image
-from decord import VideoReader
-from decord import cpu
+from decord import VideoReader, cpu
 
 
 # =============================================================================
