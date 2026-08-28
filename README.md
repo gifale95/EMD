@@ -72,5 +72,5 @@ If you experience problems with the dataset or code please submit an issue, or g
 
 If you use any of our data or code, please cite:
 
-> * Gifford AT, Oyarzo P, Zonneveld AW, Sartzetaki C, Groen IIA, Cichy RM. 2026. !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!. _arXiv_, DOI: [!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1](!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!)
+> * Gifford AT, Oyarzo P, Zonneveld AW, Sartzetaki C, Groen IIA, Cichy RM. 2026. A large dataset of human EEG responses to short naturalistic videos for studying dynamic visual event processing. _arXiv_. DOI: [!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!](!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!)
 > * Lahner B, Dwivedi K, Iamshchinina P, Graumann M, Lascelles A, Roig G, Gifford AT, Pan B, Jin S, Murty AR, Kay K, Oliva A, Cichy RM. 2024. Modeling short visual events through the BOLD moments video fMRI dataset and metadata. _Nature Communications_, 15(1), 6241. DOI: [https://doi.org/10.1038/s41467-024-50310-3](https://doi.org/10.1038/s41467-024-50310-3)
