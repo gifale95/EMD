@@ -1,6 +1,6 @@
 # EEG Moments Dataset (EMD)
 
-This is the accompanying GitHub repository of the [EEG Moments Dataset (EMD)](paper_link)!!!!!!!!!!. EMD consists of 128-channel EEG responses and eye-tracking recordings of 6 human participants viewing 1,102 short naturalistic videos (3-second long; with audio track) while maintaining central fixation. EMD is the companion dataset of the [BOLD Moments Dataset (BMD)](https://doi.org/10.1038/s41467-024-50310-3), which consists of fMRI recordings of 10 human participants for the same 1,102 videos.
+This is the accompanying GitHub repository of the [EEG Moments Dataset (EMD)](https://doi.org/10.48550/arXiv.2608.28768). EMD consists of 128-channel EEG responses and eye-tracking recordings of 6 human participants viewing 1,102 short naturalistic videos (3-second long; with audio track) while maintaining central fixation. EMD is the companion dataset of the [BOLD Moments Dataset (BMD)](https://doi.org/10.1038/s41467-024-50310-3), which consists of fMRI recordings of 10 human participants for the same 1,102 videos.
 
 <p align="center">
   <img src="figure_1.png" alt="Figure 1" width="750"><br>
@@ -21,7 +21,7 @@ Through [this interactive Colab tutorial](https://colab.research.google.com/driv
 
 ## ♻️ Reproducibility
 
-This repository contains code to reproduce all [paper's results](link_paper)!!!!!!!!!!!!!.
+This repository contains code to reproduce all [paper's results](https://doi.org/10.48550/arXiv.2608.28768).
 
 
 
@@ -72,5 +72,5 @@ If you experience problems with the dataset or code please submit an issue, or g
 
 If you use any of our data or code, please cite:
 
-> * Gifford AT, Oyarzo P, Zonneveld AW, Sartzetaki C, Groen IIA, Cichy RM. 2026. A large dataset of human EEG responses to short naturalistic videos for studying dynamic visual event processing. _arXiv_. DOI: [!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!](!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!)
+> * Gifford AT, Oyarzo P, Zonneveld AW, Sartzetaki C, Groen IIA, Cichy RM. 2026. A large dataset of human EEG responses to short naturalistic videos for studying dynamic visual event processing. _arXiv_. DOI: [https://doi.org/10.48550/arXiv.2608.28768](https://doi.org/10.48550/arXiv.2608.28768)
 > * Lahner B, Dwivedi K, Iamshchinina P, Graumann M, Lascelles A, Roig G, Gifford AT, Pan B, Jin S, Murty AR, Kay K, Oliva A, Cichy RM. 2024. Modeling short visual events through the BOLD moments video fMRI dataset and metadata. _Nature Communications_, 15(1), 6241. DOI: [https://doi.org/10.1038/s41467-024-50310-3](https://doi.org/10.1038/s41467-024-50310-3)
