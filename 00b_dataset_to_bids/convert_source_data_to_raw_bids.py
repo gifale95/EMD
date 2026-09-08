@@ -58,12 +58,12 @@ dataset_description_json = {
         "Iris I.A. Groen",
         "Radoslaw M. Cichy"
     ],
-    "HowToAcknowledge": "Gifford AT, Oyarzo P, Zonneveld AW, Sartzetaki C, Groen IIA, Cichy RM. 2026. A large dataset of human EEG responses to short naturalistic videos for studying dynamic visual event processing. arXiv. DOI: !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
+    "HowToAcknowledge": "Gifford AT, Oyarzo P, Zonneveld AW, Sartzetaki C, Groen IIA, Cichy RM. 2026. A large dataset of human EEG responses to short naturalistic videos for studying dynamic visual event processing. arXiv. DOI: https://doi.org/10.48550/arXiv.2608.28768",
     "EthicsApprovals": [
         "Procedures were approved by the ethical committee of the Department of Education and Psychology at Freie Universität Berlin and were in accordance with the Declaration of Helsinki."
     ],
     "ReferencesAndLinks": [
-        "Paper: ???????????????????????????????",
+        "Paper: https://doi.org/10.48550/arXiv.2608.28768",
         "Code: https://github.com/gifale95/EMD",
         "BOLD Moments Dataset: https://doi.org/10.1038/s41467-024-50310-3"
     ]
