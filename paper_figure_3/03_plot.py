@@ -5,8 +5,6 @@ Parameters
 ----------
 subjects : list
     List of used subjects.
-channels : list
-    List of all channel types used for decoding.
 emd_dir : str
     Directory of the EEG Moments Dataset (EMD).
 
@@ -65,39 +63,25 @@ erps = erps * 1e6
 
 
 # =============================================================================
-# Load the EEG channel names, times, NCSNR, and noise ceiling
+# Load the EEG time points
 # =============================================================================
-ncsnr = []
-noise_ceiling = []
-trial_number = []
-
-for sub in args.subjects:
-    data_dir = os.path.join(args.emd_dir, 'derivatives', 'eeg',
-        f'sub-{sub:02}', f'sub-{sub:02}_eeg_metadata.npy')
-    metadata = np.load(data_dir, allow_pickle=True).item()
-    ncsnr.append(metadata['ncsnr'])
-    noise_ceiling.append(metadata['noise_ceiling'])
-    trial_number.append(metadata['trial_number'])
-    times = metadata['times']
-    ch_names = metadata['ch_names']
-ncsnr = np.asarray(ncsnr)
-noise_ceiling = np.asarray(noise_ceiling)
+data_dir = os.path.join(args.emd_dir, 'derivatives', 'eeg',
+    f'sub-{args.subjects[0]:02}', f'sub-{args.subjects[0]:02}_eeg_metadata.npy')
+metadata = np.load(data_dir, allow_pickle=True).item()
+times = metadata['times']
 
 
 # =============================================================================
-# Load the pairwise decoding results
+# Load the NCSNR and pairwise decoding stats
 # =============================================================================
-# Load the pairwise decoding results of all subjects
-decoding = []
-for s, sub in enumerate(args.subjects):
-    data_dir = os.path.join(args.emd_dir, 'results',
-        'data_quality_check', 'eeg', 'pairwise_decoding_rdms',
-        f'rdms_sub-{sub:02d}_channels-all.npy')
-    rdms = np.load(data_dir)
-    if s == 0:
-        idx_tril = np.tril_indices(rdms.shape[0], k=-1)
-    decoding.append(np.mean(rdms[idx_tril], 0) * 100)
-decoding = np.array(decoding)
+data_dir = os.path.join(args.emd_dir, 'results', 'data_quality_check', 'eeg',
+    'stats', 'stats_channels-all.npy')
+results = np.load(data_dir, allow_pickle=True).item()
+ncsnr = results['ncsnr']
+decoding = results['decoding']
+ci_ncsnr = results['ci_ncsnr']
+ci_decoding = results['ci_decoding']
+sig_decoding = results['sig_decoding']
 
 
 # =============================================================================
@@ -355,13 +339,6 @@ plt.close()
 # =============================================================================
 # Plot the NCSNR
 # =============================================================================
-# EEG channel selection
-idx_ch = []
-for c, chan in enumerate(ch_names):
-    if 'O' in chan or 'P' in chan:
-        idx_ch.append(c)
-idx_ch = np.array(idx_ch)
-
 # Plot colors
 def sample_cmap(N):
     cmap = plt.cm.get_cmap('inferno')
@@ -369,6 +346,7 @@ def sample_cmap(N):
     colors = cmap(values)[1:-1]
     return colors
 colors = sample_cmap(len(args.subjects))
+color_avg = (100/255, 100/255, 100/255)
 
 # Create the figure
 fig = plt.figure(figsize=(20, 6))
@@ -377,10 +355,14 @@ fig = plt.figure(figsize=(20, 6))
 plt.plot([0, 0], [100, -100], 'k--', [3, 3], [100, -100], 'k--', 
     linewidth=2, alpha=.25, label='_nolegend_')
 
-# Plot the NCSNR of each subject
+# Plot the NCSNR of individual subjects
 for s, sub in enumerate(args.subjects):
-    nc = np.nanmean(ncsnr[s][idx_ch], 0)
-    plt.plot(times, nc, color=colors[s], linewidth=2, alpha=1, label=sub)
+    plt.plot(times, ncsnr[s], color=colors[s], linewidth=2, alpha=1, label=sub)
+
+# Plot the subject-average NCSNR scores
+plt.plot(times, np.nanmean(ncsnr, 0), color=color_avg, linewidth=4, alpha=1,
+    label='Average')
+plt.fill_between(times, ci_ncsnr[0], ci_ncsnr[1], color=color_avg, alpha=.3)
 
 # x-axis parameters
 plt.xlabel('Time (s)', fontsize=fontsize)
@@ -415,6 +397,12 @@ def sample_cmap(N):
     colors = cmap(values)[1:-1]
     return colors
 colors = sample_cmap(len(args.subjects))
+color_avg = (100/255, 100/255, 100/255)
+
+# Format the significance for plotting
+sig = np.empty((len(times)), dtype=np.float32)
+sig[:] = np.nan
+sig[sig_decoding] = 79
 
 # Create the figure
 fig = plt.figure(figsize=(20, 6))
@@ -423,10 +411,18 @@ fig = plt.figure(figsize=(20, 6))
 plt.plot([0, 0], [100, -100], 'k--', [3, 3], [100, -100], 'k--',
     [-10, 10], [50, 50], 'k--', linewidth=2, alpha=.25, label='_nolegend_')
 
-# Plot the decoding results of each subject
+# Plot the decoding results of individual subjects
 for s, sub in enumerate(args.subjects):
     plt.plot(times, decoding[s], color=colors[s], linewidth=2, alpha=1,
         label=sub)
+
+# Plot the subject-average decoding results
+plt.plot(times, np.mean(decoding, 0), color=color_avg, linewidth=4, alpha=1,
+    label='Average')
+plt.fill_between(times, ci_decoding[0], ci_decoding[1], color=color_avg,
+    alpha=.3)
+plt.plot(times, sig, 'o', color=color_avg, markersize=5, alpha=1,
+    label='_nolegend_')
 
 # x-axis parameters
 plt.xlabel('Time (s)', fontsize=fontsize)

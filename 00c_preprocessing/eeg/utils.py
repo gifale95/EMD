@@ -52,8 +52,7 @@ def preprocess_eeg(args, session):
         # Load the raw EEG data
         raw = mne.io.read_raw_brainvision(eeg_files[f], preload=True)
         # Filter the data
-        if args.highpass != None and args.lowpass != None:
-            raw = raw.copy().filter(l_freq=args.highpass, h_freq=args.lowpass)
+        raw = raw.copy().filter(l_freq=args.highpass, h_freq=args.lowpass)
 
         ### Automatic ICA eyeblink removal ###
         # Fit on highpass-filtered copy
